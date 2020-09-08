@@ -1,0 +1,1645 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+%Vectorize Compuer Modern so that it does not look "Grey"
+\usepackage[T1]{fontenc}
+\usepackage{ae,aecompl}
+
+% Define Color
+%\definecolor{red}{RGB}{206, 17, 38}
+%\definecolor{blue}{RGB}{8, 64, 129} %RFF Blue is 8-64-129.
+
+% Hide Link Square
+%\hypersetup{hidelinks=true}
+%\hypersetup{colorlinks=true,citecolor=red}
+%\hypersetup{colorlinks=true,linkcolor=red}
+%\hypersetup{colorlinks=true,urlcolor=red}
+
+% Biblio Style
+%\usepackage{apacite}
+%\usepackage{chicago}
+%\usepackage{astron}
+%\usepackage{harvard}
+\usepackage[authoryear]{natbib}
+%\bibliographystyle{mychicago}
+%\providecommand{\NOOP}[1]{} 
+\newcommand{\NOOP}[1]{}
+\setlength{\bibsep}{1pt plus 0ex} %plus 0.5ex
+\bibpunct{(}{)}{;}{a}{}{;}  % Remove punctuation into no-comma
+%\setcitestyle{notesep={;},round,aysep={},yysep={;}}
+%\def\bibfont{\footnotesize}
+%\def\bibfont{\scriptsize} 
+\def\bibfont{\small} 
+
+
+% Avoid widows, orphanes, hyphens
+\widowpenalty=10000
+\clubpenalty=10000
+\hyphenpenalty=10000 
+\pretolerance=10000
+
+
+% Squzze Length
+\setlength{\abovedisplayskip}{1pt}  % before math
+\setlength{\belowdisplayskip}{1pt}
+\setlength{\parskip}{7pt}
+
+
+% Squzze Section Title
+\usepackage[compact]{titlesec}
+\titlespacing{\section}{0pt}{1.7ex plus 0ex minus 0ex}{-0.3ex plus 0.3ex minus 0.3ex}
+\titlespacing{\subsection}{0pt}{1.7ex plus 0ex minus 0ex}{-0.3ex plus 0.3ex minus 0.3ex}
+\titlespacing{\subsubsection}{0pt}{1.7ex plus 0ex minus 0ex}{-0.3ex plus 0.3ex minus 0.3ex}
+
+
+% Sqeeze List-items in the Appendix
+\usepackage{mdwlist}
+
+\usepackage{changepage}
+\end_preamble
+\use_default_options true
+\begin_modules
+theorems-ams
+theorems-ams-extended
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "lmodern" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures false
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\float_placement h
+\paperfontsize 12
+\spacing onehalf
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine natbib
+\cite_engine_type authoryear
+\biblio_style plainnat
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\branch Archive
+\selected 0
+\filename_suffix 0
+\color #faf0e6
+\end_branch
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1in
+\topmargin 1in
+\rightmargin 1in
+\bottommargin 1in
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes true
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\author 265970829 "leard"
+\end_header
+
+\begin_body
+
+\begin_layout Title
+
+\size larger
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vspace{-0.75in}
+\end_layout
+
+\end_inset
+
+Equilibrium Land Use Model
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vspace{0.1in}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Author
+
+\size normal
+\begin_inset Tabular
+<lyxtabular version="3" rows="4" columns="2">
+<features tabularvalignment="middle">
+<column alignment="left" valignment="top">
+<column alignment="left" valignment="top">
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Catherine Kling
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Cornell University
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Benjamin Leard
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Resources for the Future
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Weilun Shi
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Cornell University
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Matthew Wibbenmeyer
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Resources for the Future
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Date
+
+\size normal
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vspace{-0.1in}
+\end_layout
+
+\end_inset
+
+November 2019
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vspace{-0.1in}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+Currently human use directly affects more than 70 percent of global ice-free
+ land area (
+\begin_inset CommandInset citation
+LatexCommand citealt
+key "ipcc2017"
+literal "false"
+
+\end_inset
+
+).
+ How this land is used has profound consequences for a variety of ecosystem
+ services, including carbon storage, water quantity and quality, biodiversity,
+ air quality, and more.
+ Yet individual land owners frequently do not have explicit incentives to
+ manage land in ways that maximize its social benefits.
+ For example, while as much as one-third of the climate mitigation needed
+ by 2030 to stabilize global warming to 2 degrees C could be provided cost-effec
+tively through land management actions 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "griscom2017"
+literal "false"
+
+\end_inset
+
+, land owners typically do not consider these social benefits of their land
+ management.
+ 
+\end_layout
+
+\begin_layout Standard
+Policy can be used to encourage land owners to manage land in socially beneficia
+l ways, but in order to design policy effectively, policymakers need to
+ understand how land owners will respond to policy incentives.
+ For example, programs can be implemented that tax or subsidize forest conversio
+n.
+ To understand how effective a subsidy program will be, it is critical to
+ understand how responsive land conversion is to changes in the returns
+ from various land uses, and the degree to which policies alter land use
+ decisions or merely reward choices that would have been made despite the
+ policy.
+ 
+\end_layout
+
+\begin_layout Standard
+Within the U.S., some of the best evidence regarding the potential effects
+ of land use policy comes from studies that use of the National Resource
+ Inventory (NRI), a survey of land use and natural resource conditions on
+ non-federal lands throughout the contiguous U.S.
+ 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "lubowski2006"
+literal "false"
+
+\end_inset
+
+ use the NRI, combined with a national dataset describing county-level returns
+ to various land uses, to estimate a series of land-use choice elasticities.
+ They use those elasticities within a policy simulation to predict the costs
+ of a policy to incentivize carbon storage in forest.
+ Other papers have made use of NRI data to assess consequences of federal
+ farm policy (e.g.
+ 
+\begin_inset CommandInset citation
+LatexCommand citealt
+key "claassen2016"
+literal "false"
+
+\end_inset
+
+), conservation outcomes (e.g.
+ 
+\begin_inset CommandInset citation
+LatexCommand citealt
+key "lewisplantinga"
+literal "false"
+
+\end_inset
+
+,
+\begin_inset CommandInset citation
+LatexCommand citealt
+key "lewis2011"
+literal "false"
+
+\end_inset
+
+,
+\begin_inset CommandInset citation
+LatexCommand citealt
+key "lawler2014"
+literal "false"
+
+\end_inset
+
+), and the effects of local land use laws on urban development (e.g.
+ 
+\begin_inset CommandInset citation
+LatexCommand citealt
+key "wucho"
+literal "false"
+
+\end_inset
+
+).
+ 
+\end_layout
+
+\begin_layout Standard
+Existing studies have found that land use conversion decisions are inelastic
+ with respect to changes in net returns.
+ Elasticity estimates vary across studies and land use type conversion pairs,
+ but 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "lubowski2006"
+literal "false"
+
+\end_inset
+
+ estimate, for example, that the probability of converting from forest to
+ cropland increases by 0.30 percentage points when returns to cropland increase
+ by 1 percent.
+ 
+\end_layout
+
+\begin_layout Standard
+While 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "lubowski2006"
+literal "false"
+
+\end_inset
+
+ and other studies allow for endogenous adjustments in land use returns
+ within policy simulations, they do not typically account for price endogeneity
+ in estimates of land conversion elasticities.
+ As 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "robertsschlenker"
+literal "false"
+
+\end_inset
+
+show, not accounting for price endogeneity can bias agricultural supply
+ elasticities toward zero.
+ Price endogeneity can arise due to both cross-sectional and variation in
+ unobserved factors affecting land use returns.
+ For example, counties may vary in unobserved ways that affect the suitability
+ of average parcels for particular land uses.
+ Factors that favor a particular land use are expected to be negatively
+ correlated with returns to that land use.
+ Therefore, we expect omitting these unobserved factors should bias elasticity
+ estimates downward.
+ Similarly, unobserved land supply shocks (e.g.
+ due to changes in production technology) over time are expected to be negativel
+y correlated with net returns, driving elasticity estimates downward.
+ Accounting for price endogeneity is particularly important in national
+ land use models that make use of county-level NRI and land use returns
+ data because most of these studies rely on NRI data in which parcels have
+ been anonymized at the county level, which constrains measurement of parcel-lev
+el returns.
+ Price endogeneity may explain why 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "lubowski2006"
+literal "false"
+
+\end_inset
+
+ found 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+citet{lubowski2006}
+\end_layout
+
+\end_inset
+
+ several negative land conversion elasticities, in which more land is converted
+ to a particular use when relative returns from that use decrease.
+ These elasticity estimates drive results from policy simulations, therefore
+ better accounting for price endogeneity may improve the accuracy of predicted
+ policy outcomes.
+ 
+\end_layout
+
+\begin_layout Standard
+We build on this body of literature by incorporating features of modern
+ discrete choice methods that account for price endogeneity.
+ First, we will define county-land condition class groups and estimate the
+ share of parcels within each group undergoing each conversion type.
+ Because for some land use conversion types, many counties may not experience
+ any land use conversions in a given year, we use a Poisson regression.
+ We include county-year-conversion type fixed effects and in the second
+ step, we estimate the fixed effects as a function of county-year returns.
+ Because county level returns are endogenous, we will instrument for them
+ using a Hausman instrument.
+ 
+\end_layout
+
+\begin_layout Standard
+We expect this work will yield new insights into the potential for climate
+ policy that incorporates the land use sector.
+ Because existing estimates of land conversion elasticities have not taken
+ into account price endogeneity, we expect they may under-estimate the cost-savi
+ngs associated with mitigating climate change through the land use sector.
+ We next discuss a series of applications for the model.
+ 
+\end_layout
+
+\begin_layout Section
+Land Use Transition Choice Model
+\end_layout
+
+\begin_layout Standard
+Landowners maximize net returns by choosing to transition their land to
+ one of six broad land use types in the NRI: crops, pasture, range, forests,
+ urban, and CRP.
+ Owner of parcel 
+\begin_inset Formula $i$
+\end_inset
+
+ obtains returns 
+\begin_inset Formula $V_{ijkt}$
+\end_inset
+
+ by choosing to transition its land parcel from use 
+\begin_inset Formula $j$
+\end_inset
+
+ to use 
+\begin_inset Formula $k$
+\end_inset
+
+ in year 
+\begin_inset Formula $t$
+\end_inset
+
+.
+ Owner of parcel 
+\begin_inset Formula $i$
+\end_inset
+
+ obtains a net return of 
+\begin_inset Formula $V_{ijjt}$
+\end_inset
+
+ if it decides to keep the land parcel in use 
+\begin_inset Formula $j$
+\end_inset
+
+.
+ Net returns are defined by
+\begin_inset Formula 
+\begin{equation}
+V_{ijkt}=U_{ijkt}+\varepsilon_{ijkt}=\alpha_{jkt}LCC_{it}+\beta_{jkt}LCC_{it}R_{kct}+\delta_{jkct}+\varepsilon_{ijkt}.\label{eq:utility1}
+\end{equation}
+
+\end_inset
+
+The term 
+\begin_inset Formula $LCC_{it}$
+\end_inset
+
+ represents parcel 
+\begin_inset Formula $i$
+\end_inset
+
+'s land capability class (LCC) in year 
+\begin_inset Formula $t$
+\end_inset
+
+.
+ The lower the class number, the fewer restrictions the land has for crops.
+ The term 
+\begin_inset Formula $R_{kct}$
+\end_inset
+
+ denotes the revenue from converting a parcel to land use type 
+\begin_inset Formula $k$
+\end_inset
+
+ in county 
+\begin_inset Formula $c$
+\end_inset
+
+ in year 
+\begin_inset Formula $t$
+\end_inset
+
+.
+ Parameter 
+\begin_inset Formula $\alpha_{jkt}$
+\end_inset
+
+ measures the average net return of transitioning a land parcel that shares
+ the LCC of parcel 
+\begin_inset Formula $i$
+\end_inset
+
+ from use 
+\begin_inset Formula $j$
+\end_inset
+
+ to use 
+\begin_inset Formula $k$
+\end_inset
+
+ in year 
+\begin_inset Formula $t$
+\end_inset
+
+.
+ We expect values of 
+\begin_inset Formula $\alpha_{jkt}$
+\end_inset
+
+ to be smaller for converting land from crops to forest for land that has
+ a low LCC.
+ Parameter 
+\begin_inset Formula $\beta_{jkt}$
+\end_inset
+
+ measures the relationship between revenue and net returns of transitioning
+ a land parcel that shares the LCC of parcel 
+\begin_inset Formula $i$
+\end_inset
+
+ from use 
+\begin_inset Formula $j$
+\end_inset
+
+ to use 
+\begin_inset Formula $k$
+\end_inset
+
+ in year 
+\begin_inset Formula $t$
+\end_inset
+
+.
+ We expect values of 
+\begin_inset Formula $\beta_{jkt}$
+\end_inset
+
+ to be larger for converting land from crops to forest for land that has
+ more marginal, perhaps in the middle of the range of LCC.
+ The term 
+\begin_inset Formula $\varepsilon_{ijkt}$
+\end_inset
+
+ is parcel 
+\begin_inset Formula $i$
+\end_inset
+
+'s unobserved net return for converting from use 
+\begin_inset Formula $j$
+\end_inset
+
+ to use 
+\begin_inset Formula $k$
+\end_inset
+
+ that is unexplained by the observed attributes.
+\end_layout
+
+\begin_layout Standard
+The term
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+ 
+\begin_inset Formula $\delta_{jkct}$
+\end_inset
+
+ measures the average net return from converting a parcel of land in county
+ 
+\begin_inset Formula $c$
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\xout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+ from use 
+\begin_inset Formula $j$
+\end_inset
+
+ to use 
+\begin_inset Formula $k$
+\end_inset
+
+ in year 
+\begin_inset Formula $t$
+\end_inset
+
+.
+ We express this as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\delta_{jkct}=\overline{\alpha}_{jkt}+\overline{\beta}R_{kct}+\xi_{jkct}.
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The term 
+\begin_inset Formula $\overline{\alpha}_{jkt}$
+\end_inset
+
+ represents the average net return 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+from converting a parcel of land
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\xout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+ from use 
+\begin_inset Formula $j$
+\end_inset
+
+ to use 
+\begin_inset Formula $k$
+\end_inset
+
+ in year 
+\begin_inset Formula $t$
+\end_inset
+
+.
+ The term 
+\begin_inset Formula $\overline{\beta}$
+\end_inset
+
+ represents the average response of net returns to changes in revenues earned
+ by use 
+\begin_inset Formula $k$
+\end_inset
+
+ in county 
+\begin_inset Formula $c$
+\end_inset
+
+ and year 
+\begin_inset Formula $t$
+\end_inset
+
+.
+ The term 
+\begin_inset Formula $\xi_{jkct}$
+\end_inset
+
+ includes all unobserved net returns at the county level for converting
+ from use 
+\begin_inset Formula $j$
+\end_inset
+
+ to use 
+\begin_inset Formula $k$
+\end_inset
+
+ that is unexplained by the county-level characteristics.
+\end_layout
+
+\begin_layout Standard
+Under the assumption that the error term 
+\begin_inset Formula $\varepsilon_{ijkt}$
+\end_inset
+
+ has a type 1 extreme value distribution, the probability that parcel 
+\begin_inset Formula $i$
+\end_inset
+
+ in use 
+\begin_inset Formula $j$
+\end_inset
+
+ is converted to use 
+\begin_inset Formula $k$
+\end_inset
+
+ in year 
+\begin_inset Formula $t$
+\end_inset
+
+ is
+\begin_inset Formula 
+\begin{equation}
+Pr_{ijkt}=\frac{e^{U_{ijkt}}}{\sum\limits _{m}e^{U_{ijmt}}}.\label{eq:prob1}
+\end{equation}
+
+\end_inset
+
+We assign parcels to distinct groups differentiated by LCC, county, and
+ initial land use.
+ We denote a group differentiated by LCC and county by 
+\begin_inset Formula $g$
+\end_inset
+
+.
+ For each parcel group, we assign as the outside option the decision to
+ keep the parcel in the same land use, and we normalize the net return from
+ this option to zero, so that 
+\begin_inset Formula $U_{gjjt}=0$
+\end_inset
+
+ for all 
+\begin_inset Formula $g,j,t$
+\end_inset
+
+.
+ Based on this assumption, Equation (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:prob1"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) can be converted to a linear equation linking observed transition shares
+ and components of net returns:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\ln(s_{gjkt})-\ln(s_{gjjt})=\alpha_{jkt}LCC_{it}+\beta_{jkt}LCC_{it}R_{kct}+\delta_{jkct}.\label{eq:logshare2}
+\end{equation}
+
+\end_inset
+
+The left-hand side of Equation (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:logshare2"
+
+\end_inset
+
+) is the difference between the log share of parcel group 
+\begin_inset Formula $g$
+\end_inset
+
+ conversions of initial land use 
+\begin_inset Formula $j$
+\end_inset
+
+ to use 
+\begin_inset Formula $k$
+\end_inset
+
+ in year 
+\begin_inset Formula $t$
+\end_inset
+
+ and the log share of parcel group 
+\begin_inset Formula $g$
+\end_inset
+
+ initial land use 
+\begin_inset Formula $j$
+\end_inset
+
+ remaining in land use 
+\begin_inset Formula $j$
+\end_inset
+
+ in year 
+\begin_inset Formula $t$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+A concern for estimating the parameters of the model is that the shares
+ could be zero for some of the transition categories.
+ To circumvent this issue, we convert Equation (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:logshare2"
+
+\end_inset
+
+) to a Poisson regression.
+ Combining the terms on the left-hand-side, cancelling like terms, and exponenti
+ating both sides yields
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\frac{COUNT_{gjkt}}{COUNT_{gjjt}}=exp(\alpha_{jkt}LCC_{it}+\beta_{jkt}LCC_{it}R_{kct}+\delta_{jkct}).\label{eq:logshare2-1}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The 
+\begin_inset Formula $COUNT$
+\end_inset
+
+ terms represent counts of the conversions.
+ This equation is defined as long as 
+\begin_inset Formula $COUNT_{gjjt}$
+\end_inset
+
+ is not zero.
+ For our setting, this is likely to be the case since parcel transitions
+ are relatively uncommon.
+ This equation can be estimated with a fixed effects Poisson regression.
+ The fixed effects are 
+\begin_inset Formula $\delta_{jkct}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+The fixed effects are obtained post-estimation and are used as the dependent
+ variable in a second stage regression:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\widehat{\delta}_{jkct}=\overline{\alpha}_{jkst}+\overline{\beta}R_{kct}+\xi_{jkct}.\label{eq: second stage}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The per-acre revenue variable 
+\begin_inset Formula $R_{kct}$
+\end_inset
+
+ is equal to the per-acre equivalent equilibrium price, 
+\begin_inset Formula $P_{kct},$
+\end_inset
+
+of the commodity associated with each land use category.
+ Prices are endogenously determined in equilibrium by supply and demand
+ of each commodity.
+ We assume that demand is defined as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+D_{kct}=d_{kt}+\delta(P_{kct})+\varepsilon_{kct}^{D}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The term 
+\begin_inset Formula $d_{kt}$
+\end_inset
+
+ represents a commodity demand shock common to all counties in year 
+\begin_inset Formula $t$
+\end_inset
+
+.
+ This term represents changes in the demand for the commodity over time,
+ such as changes in consumer preferences for meat products or wood furniture.
+ The function 
+\begin_inset Formula $\delta$
+\end_inset
+
+ defines the demand price sensitivity.
+ The third term, 
+\begin_inset Formula $\varepsilon_{kct}^{D}$
+\end_inset
+
+, is a demand shock that is specific to land category 
+\begin_inset Formula $k$
+\end_inset
+
+ in county 
+\begin_inset Formula $c$
+\end_inset
+
+ in year 
+\begin_inset Formula $t$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The equilibrium price 
+\begin_inset Formula $P_{kct}$
+\end_inset
+
+ is defined by the intersection of supply and demand.
+ Given our definitions of demand and supply, we can express equilibrium
+ returns and prices as 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+R_{kct}=P_{kct}=f(\Omega,d_{kt},\varepsilon_{kct}^{D},\xi_{jkct}),\label{eq:price}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where 
+\begin_inset Formula $\Omega$
+\end_inset
+
+ contains all supply and demand parameters besides 
+\begin_inset Formula $d_{kt}$
+\end_inset
+
+ (such as 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $\overline{\alpha}_{jkt}$
+\end_inset
+
+ and 
+\begin_inset Formula $\overline{\beta}$
+\end_inset
+
+).
+ We assume that the functional form for 
+\begin_inset Formula $f()$
+\end_inset
+
+ is approximated as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+R_{kct}=P_{kct}=d_{kt}+\widetilde{f}(\Omega)+\varepsilon_{kct}^{p}(\varepsilon_{kct}^{D},\xi_{jkct}).\label{eq: approximated price}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We assume that the parametrized error term 
+\begin_inset Formula $\varepsilon_{kct}^{p}(\varepsilon_{kct}^{D},\xi_{jkct})$
+\end_inset
+
+, which represents shocks to demand or supply, is idependent across counties.
+ From equation (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq: approximated price"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+), we see that
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+ returns and the error term, 
+\begin_inset Formula $\xi_{jkct},$
+\end_inset
+
+ are correlated.
+ Therefore, estimating equation (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq: second stage"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) with ordinary least squares will lead to biased estimates for 
+\begin_inset Formula $\overline{\beta}$
+\end_inset
+
+.
+ 
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\xout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+Our assumptions imply that prices for commodity type 
+\begin_inset Formula $k$
+\end_inset
+
+ in year 
+\begin_inset Formula $t$
+\end_inset
+
+ are correlated only due to the common demand shock 
+\begin_inset Formula $d_{kt}$
+\end_inset
+
+.
+ Therefore, average prices of the same commodity and time period in different
+ counties can be used as an instrument for returns.
+ Formally, we construct an instrument for land use 
+\begin_inset Formula $k$
+\end_inset
+
+ returns in county 
+\begin_inset Formula $c$
+\end_inset
+
+ in year 
+\begin_inset Formula $t$
+\end_inset
+
+ as 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+R_{kct}^{IV}=\frac{1}{N_{cs}-1}\sum_{c'}R_{kc't},
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where 
+\begin_inset Formula $N_{cs}$
+\end_inset
+
+ is the number of counties in state 
+\begin_inset Formula $s$
+\end_inset
+
+ where county 
+\begin_inset Formula $c$
+\end_inset
+
+ is located and where 
+\begin_inset Formula $c'$
+\end_inset
+
+ denotes counties in state 
+\begin_inset Formula $s$
+\end_inset
+
+ besides county 
+\begin_inset Formula $c$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+This identification approach is a well-known strategy in the industrial
+ organization literature for dealing with price endogeniety (
+\begin_inset CommandInset citation
+LatexCommand citealt
+key "hausman1994"
+literal "false"
+
+\end_inset
+
+, 
+\begin_inset CommandInset citation
+LatexCommand citealt
+key "hausman1996"
+literal "false"
+
+\end_inset
+
+, 
+\begin_inset CommandInset citation
+LatexCommand citealt
+key "nevo2000"
+literal "false"
+
+\end_inset
+
+).
+ It also is well understood that the assumptions underlying this strategy
+ could be violated in some circumstances.
+ For example, suppose there is a national supply shock, such as the discovery
+ of a technology that increases crop yields per unit of input.
+ This discovery would lower production costs per unit of crops, shifting
+ out the crop supply curve in all counties.
+ This would violate the assumption that the error terms 
+\begin_inset Formula $\varepsilon_{kct}^{p}$
+\end_inset
+
+ are independent across counties.
+ We attempt to control for this possibility by including a rich set of fixed
+ effects, including 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $\overline{\alpha}_{jkst}$
+\end_inset
+
+, which absorb all unobserved supply shocks that are common to transitions
+ from land use 
+\begin_inset Formula $j$
+\end_inset
+
+ to land use 
+\begin_inset Formula $k$
+\end_inset
+
+ in state 
+\begin_inset Formula $m$
+\end_inset
+
+ in year 
+\begin_inset Formula $t$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Section
+Commodity Equilibrium Model
+\end_layout
+
+\begin_layout Standard
+We integrate land use transition choices in an equilibrium of commodity
+ supply and demand.
+ We extend the approach taken in 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "lubowski2006"
+literal "false"
+
+\end_inset
+
+ by allowing commodity prices to be endogenously determined by supply and
+ demand factors.
+ Following 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "lubowski2006"
+literal "false"
+
+\end_inset
+
+ , we convert land use transitions to changes in corresponding commodities.
+ The corresponding commodities include timber from forests, raw, non-meat
+ food inputs from crops, housing from urban, beef, chicken, and pork from
+ range and pasture.
+ In contrast to 
+\begin_inset CommandInset citation
+LatexCommand citeauthor
+key "lubowski2006"
+literal "false"
+
+\end_inset
+
+, we assume that commodities of all land use types besides CRP have prices
+ that are endogenously determined.
+ We aggregate beef, chicken, and pork into a single meat market.
+ In summary, we model endogenous prices and quantities for timber, non-meat
+ food inputs, meat, and housing.
+ 
+\end_layout
+
+\begin_layout Standard
+We calibrate demand curves for each of the commodities.
+ Following 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "lubowski2006"
+literal "false"
+
+\end_inset
+
+, we use demand elasticities for seven timber production regions — Pacific
+ Northwest (-0.300), Pacific Southwest (-0.497), Rocky Mountains (-0.054),
+ North Central (-0.141), Northeast (-0.029), South Central (-0.193), Southeast
+ (-0.285).
+ We assume a national market for non-meat food inputs and assume a demand
+ elasticity equal to -0.661.
+ We assume a national market for meat and assume an aggregate elasticity
+ of demand equal to -0.71 (Gallet 2010).
+ We calibrate separate housing demand curves for each county assuming a
+ demand elasticity of -0.8 (Albouy et al.
+ 2016).
+\end_layout
+
+\begin_layout Standard
+With supply and demand for each commodity specified, we are able to solve
+ for equilibrium prices of each commodity and region that equates supply
+ and demand in each region.
+ Since supply and demand are non-linear functions of all commodity prices,
+ we use root-finding methods (such as Newton's method) to obtain an equilibrium.
+\end_layout
+
+\begin_layout Section
+Research Interests
+\end_layout
+
+\begin_layout Subsection
+
+\change_inserted 265970829 1574791753
+Carbon sequestration 
+\change_deleted 265970829 1574791717
+S
+\change_inserted 265970829 1574791717
+s
+\change_unchanged
+ubsidy policies and asymmetric information
+\end_layout
+
+\begin_layout Standard
+Reducing greenhouse gas emissions through land use change often involves
+ a subsidy payment to landowners.
+ Carbon offset programs, such as those in the California AB 32 program,
+ the Regional Greenhouse Gas program, and the proposed offset provision
+ as part of the Waxman-Markey federal cap and trade program, are designed
+ in this manner.
+ A common concern with these programs is that the payments are for activities
+ that would have been done without the subsidy.
+ This problem of 
+\begin_inset Quotes eld
+\end_inset
+
+additionality
+\begin_inset Quotes erd
+\end_inset
+
+ has significant distributional and efficiency implications for policy design
+ (Bento et al.
+ 2015).
+ Additionality arises because of asymmetric information between landowners
+ and policy makers: landowners know more about their future decisions than
+ policy makers.
+ This leads to adverse selection: landowners that would have reduced carbon
+ emissions anyway are more likely to opt in to the voluntary program than
+ landowners that have to experience a costly transition to obtain the subsidy.
+ At worst, a subsidy program could be transferring significant rents from
+ capped to uncapped sectors with little to no emissions reductions taking
+ place.
+ 
+\end_layout
+
+\begin_layout Standard
+Our model is well-suited to quantify these issues for carbon mitigation
+ programs in the US.
+ We model the decision of landowners based on observed and unobserved characteri
+stics.
+ The unobserved characteristics, which are represented by landowner-specific
+ error terms, represent asymmetric information (Mason and Plantinga 2013).
+ Therefore, with our model, we will be able to quantify the distribution
+ of additional versus non-additional emissions reductions are being credited
+ by a subsidy program, and how this distribution is affected by changing
+ subsidy amounts and altering other policy design features.
+ With our model, we will be able to quantify the efficiency and distributional
+ costs of alternative policy options that address additionality, including
+ setting stringent baselines, discounting, and limiting the use of offsets.
+
+\change_deleted 265970829 1574791722
+ 
+\change_inserted 265970829 1574791722
+
+\end_layout
+
+\begin_layout Subsection
+
+\change_inserted 265970829 1574791951
+Evaluating changes to the Conservation Reserve Program
+\end_layout
+
+\begin_layout Standard
+
+\change_inserted 265970829 1574793155
+The Conservation Reserve Program (CRP) is a subsidy for landowners to transition
+ their land out of crops to improve soil, water quality, and provide other
+ environmental benefits.
+ Subsidy payments are based on the productivity of soils within a county
+ and average returns to cropland.
+ The 2018 Farm Bill limits the amount of payments available for landowners
+ to 85 percent of the average county rental rate and 90 percent of that
+ estimated rate for continuous enrollments.
+\end_layout
+
+\begin_layout Standard
+
+\change_inserted 265970829 1574793775
+The CRP faces similar concerns to carbon offset programs, in that landowners
+ have private information about their land.
+ In theory, this creates adverse selction, where landowners that would have
+ transitioned their land out of crops without a payment are more likely
+ to opt in to the program.
+ The CRP addresses this issue in several ways, including basing the subsidy
+ on county-level characteristics and limiting the total amount of subsidy
+ paid.
+ Evaluating the cost-effectiveness of the CRP, therefore, requires accounting
+ for adverse selection.
+ Our model is capable of accounting for adverse selection by incorporating
+ landowner decisions that are a function of a private error term for each
+ land use type.
+ Landowners that have a low value for their crop error term would have transitio
+ned their land out of crops with only a small subsidy payment.
+ These transitions represent 
+\begin_inset Quotes eld
+\end_inset
+
+non-additional
+\begin_inset Quotes erd
+\end_inset
+
+ transitions and do not create environmental benefits.
+\end_layout
+
+\begin_layout Standard
+
+\change_inserted 265970829 1574793834
+Prior work has also shown that the CRP causes leakage or 
+\begin_inset Quotes eld
+\end_inset
+
+Slippage
+\begin_inset Quotes erd
+\end_inset
+
+ due to adjustments in land use prices (Wu 2000).
+ When landowners transition their land out of crops, this shifts in the
+ supply curve for food, which raises the price of food.
+ Other landowners have an incentive to transition their land to crops, which
+ offsets the benefits of the CRP.
+ Since we model endogenous prices of land-based commodities, we are able
+ to estimate leakage from the CRP.
+\end_layout
+
+\begin_layout Subsection
+Ecosystem services
+\end_layout
+
+\begin_layout Standard
+Land use choices impact a variety of ecosystem services in addition to carbon
+ storage, but the extent of these impacts frequently depend critically upon
+ where within counties conversions take place.
+ To better understand the consequences of county-level land conversion rates
+ on ecosystem services, historical county-level conversions observed within
+ the NRI can be paired with NLCD satellite data to predict portions of counties
+ in which probability of each land conversion type is highest.
+ Using policy simulations to predict county land conversion rates, within-county
+ conversion probabilities can then be used in combination with a spatial
+ ecosystem services model (such as InVEST) to estimate changes to ecosystem
+ services.
+ This approach differs from Lawler et al.
+ 2014 in that it makes use of NLCD data to estimate spatially-explicit within-co
+unty conversion probabilities based on overall county-level conversion probabili
+ties.
+ 
+\end_layout
+
+\begin_layout Subsection
+Integration with forest sector models 
+\end_layout
+
+\begin_layout Standard
+RFF Senior Non-resident Fellow Dave Wear has proposed a line of research
+ improving on models of US forestry sector.
+ Such a model could be integrated with a land use model to provide predictions
+ of how exogenous shocks to forest product demand translate to forest and
+ land use change.
+ 
+\end_layout
+
+\begin_layout Subsection
+Policy analysis for states 
+\end_layout
+
+\begin_layout Standard
+In addition to the academic value of this research, we believe this research
+ will be of significant interest to the climate policy community.
+ Resources for the Future’s connections to this community will help it make
+ an impact.
+ In 2019, Resources for the Future was engaged by US Climate Alliance, a
+ bipartisan coalition of governors in 25 US states, to assess member states’
+ progress in achieving goals of the 2015 Paris Agreement.
+ RFF is now in discussions with the State of New York to assist in policy
+ analysis that would help state agencies meet targets set under New York’s
+ Climate Leadership and Community Protection Act, passed in 2019.
+ While these policymakers recognize the importance of the land use and land
+ use change sector in meeting climate goals, they need better projections
+ regarding how land use is expected to change in their states, how this
+ will affect emissions, and how they can craft policy to improve outcomes.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintCited"
+bibfiles "bibliography"
+options "apalike"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
