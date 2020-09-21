@@ -23,7 +23,7 @@ foreach v of local vars {
 twoway (connected crop_nr_mean year, sort color(orange)) ///
 	(connected forest_nr_mean year, sort color(green)) ///
 	(connected urban_nr_mean year, sort color(purple) yaxis(2))
-graph export processing_output\net_returns\sumstats\mean_year_scatter.png, replace
+graph export results\initial_descriptives\net_returns\mean_year_scatter.png, replace
 window manage close graph
 
 **********
@@ -54,7 +54,7 @@ foreach v of local vars {
 local vars crop_nr forest_nr urban_nr
 foreach v of local vars {
 	estpost summarize `v'*
-	esttab using "processing_output\net_returns\sumstats\\`v'.rtf", cells("count(fmt(%12.0fc)) mean(fmt(%12.1fc)) sd(fmt(%12.1fc)) min(fmt(%12.1fc)) max(fmt(%12.1fc))") replace	
+	esttab using "results\initial_descriptives\net_returns\\`v'.rtf", cells("count(fmt(%12.0fc)) mean(fmt(%12.1fc)) sd(fmt(%12.1fc)) min(fmt(%12.1fc)) max(fmt(%12.1fc))") replace	
 	}
 	
 **********
@@ -143,7 +143,7 @@ foreach v of local vars {
 	gr_edit legend.Edit, style(labelstyle(size(vsmall)))
 	
 	cd $dir
-	cd processing_output\net_returns\sumstats
+	cd results\initial_descriptives\net_returns
 	graph export `v'_maps.png, replace
 	}
 window manage close graph
