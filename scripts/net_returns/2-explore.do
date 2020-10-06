@@ -162,17 +162,6 @@ ssc install shp2dta
 maptile_install using "http://files.michaelstepner.com/geo_county2010.zip"
 capture net install grc1leg2.pkg
 
-* generate state fips
-tostring county, gen(fipsstring)
-gen statefips = substr(fipsstring, 1, 2)
-replace statefips = substr(fipsstring, 1, 1) if length(fipsstring)==4
-destring statefips, replace
-merge m:1 statefips using processing_output\stateFips
-assert statefips == 11 if _merge == 1
-drop if _merge == 2
-drop _merge
-replace stateName = "District of Columbia" if statefips == 11
-replace stateAbbrev = "DC" if statefips == 11
 * tag western states
 gen western_us = stateAbbrev == "NV" | stateAbbrev == "MT" | stateAbbrev == "WY" ///
 				| stateAbbrev == "CO" | stateAbbrev == "NM"| stateAbbrev == "ID" ///
