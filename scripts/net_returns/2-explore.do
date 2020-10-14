@@ -119,7 +119,7 @@ foreach v of local vars {
 	foreach l of local levels {
 		maptile `v' if year == `l', geo(county2010) cutp(`v'_nq6breaks) fcolor(``v'_colors')
 		gr_edit subtitle.text.Arrpush "`l'"
-		graph save "`v'_`l'", replace
+		graph save "processing\net_returns\graphs_temp/`v'_`l'", replace
 	}
 maptile `v'_display if year == 2012, geo(county2010) cutp(`v'_nq6breaks) fcolor(``v'_colors') // mean county-level value map for legend
 graph save "processing\net_returns\graphs_temp/`v'", replace
