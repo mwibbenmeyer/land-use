@@ -9,19 +9,15 @@ Objective: transform raw NRI data into panel format
 set more off
 clear
 
-* source data dir (dropbox)
-global user = "thompson"
-global sourcedir "C:\Users\\$user\Dropbox\NRI 2015\data"
-
-* processing data dir
-global workingdir "M:\GitRepos\land-use\processing\NRI"
+* working dir
+global workingdir "M:\GitRepos\land-use"
+cd $workingdir
 
 ********************************************************************************
 ***********IMPORT, SAVE RAW DATASETS*************
 ********************************************************************************
 * load dataset, save version with reduced n variables (reduced size from ~1,500 MB to ~ 200 MB)
-
-import delimited "$sourcedir\nri15_cty_082019.csv", clear
+import delimited raw_data\NRI\nri15_cty_082019.csv, clear
 keep state county fips lcc* xfact crp9* crp0* crp1* broad* landu* riad_id // keep vars of interest
 order riad_id
 * rename variables with years from 2 digits to 4 to facilitate reshape
@@ -33,35 +29,38 @@ capture rename `var'8* `var'198*
 rename `var'9* `var'199*
 rename `var'0* `var'200*
 }
-save "$workingdir\nri15_reduced.dta", replace
-
-* import, save, trim classification table
-import delimited "$sourcedir\replicated table\processed\classification.csv", clear
-replace class2 = "UrbanLand" if class2 == "Urban land"
-replace class2 = trim(class2)
-save "$workingdir\classification.dta", replace
-
-********************************************************************************
-*************RESHAPE NRI DATA**********************
-********************************************************************************
-* load, reduce/manage dataset for land use, all years
-use "$workingdir\nri15_reduced.dta", clear
 gen acres = xfact * 100
 gen acresk = acres / 1000
 drop acres xfact
 * keep only 48 contiguous US states
 drop if state == 72 // PR
 drop if state == 15 // HI
+save processing\NRI\nri15_reduced.dta, replace
 
+* import, save, trim classification table
+import delimited raw_data\NRI\classification.csv, clear
+replace class2 = "UrbanLand" if class2 == "Urban land"
+replace class2 = trim(class2)
+save processing\NRI\classification.dta, replace
+
+********************************************************************************
+*************RESHAPE NRI LAND USE DATA**********************
+********************************************************************************
+* some area exploration to get a sense of prevalence of landu measurements
+use processing\NRI\nri15_reduced.dta, clear
+	* overall
+	gen landu = landu1982 != . | landu1987 != . | landu1992 != . | landu1997 != . | landu2002 != . | landu2007 != . | landu2012 != . // tag if any landu data
+	assert landu == 1 // check that all points have landu data at least 1 year
+
+* manage landu variables
+use processing\NRI\nri15_reduced.dta, clear
 keep state county fips riad_id acresk landu* // keep vars of interest
-
 collapse(sum) acresk, by(landu* state county fips) // collapse by fips
-
 * merge with land use classification table, quality check that only classes intentionally omitted are omitted
 foreach landuvar of varlist landu* {
 rename `landuvar' landu
 replace landu = 0 if landu == . // in 1979, missing data are missing, not zero. replace with zero for consistency.
-merge m:1 landu using "$workingdir\classification.dta"
+merge m:1 landu using processing\NRI\classification.dta
 
 /* assert that unmatched from NRI data are those exluded from Lubowski et al. 2003 (Determinants of Land-Use Change in the United States 1982-1997) (RFF):
 "We exclude from our analysis lands under rural roads and transportation as these land uses are likely to change through a
@@ -84,7 +83,7 @@ gen omittedtag = landu == 401 | (landu >= 611 & landu <= 620) | landu == 640 | /
 
 * check that only omitted land uses are unmerged
 assert omittedtag == 1 if _merge == 1
-* replace with missing
+* replace with "Other"
 replace class2 = "Other" if omittedtag == 1 & _merge == 1
 
 drop if _merge == 2
@@ -120,14 +119,14 @@ keep if year == 1982 | year == 1987 | year == 1992 | year == 1997 | year == 2002
 compress
 
 ********************************************************************************
-*************CALCULATE ADDITIONAL VARIABLES AND FINALIZE**********************
+*************CALCULATE ADDITIONAL LAND USE VARIABLES **********************
 ********************************************************************************
 * generate state fips
 tostring fips, gen(fipsstring)
 gen statefips = substr(fipsstring, 1, 2)
 replace statefips = substr(fipsstring, 1, 1) if length(fipsstring)==4
 destring statefips, replace
-merge m:1 statefips using processing_output\stateFips
+merge m:1 statefips using raw_data\stateFips
 assert statefips == 11 if _merge == 1
 drop if _merge == 2
 drop _merge
@@ -138,17 +137,17 @@ drop fipsstring
 * calculate county totals
 	* total
 	egen fipstotal_acresk = rowtotal(*_acresk)
-	label variable fipstotal_acresk "NRI total acres (thousands), including N/A and Other"
+	label variable fipstotal_acresk "NRI total landu ac. (thousands), including N/A and Other"
 	* without N/A
 	rename NA_acresk NA_acTEMPresk
 	rename fipstotal_acresk fipstotal_acTEMPresk
 	egen fipsnomi_acresk = rowtotal(*_acresk)
-	label variable fipsnomi_acresk "NRI total acres (thousands), excl. N/A, incl. Other"
+	label variable fipsnomi_acresk "NRI total landu ac. (thousands), excl. N/A, incl. Other"
 	* without N/A and without Other
 	rename Other_acresk Other_acTEMPresk
 	rename fipsnomi_acresk fipsnomi_acTEMPresk
 	egen fips_acresk = rowtotal(*_acresk)
-	label variable fips_acresk "NRI total acres (thousands), excl. N/A and Other"
+	label variable fips_acresk "NRI total landu ac. (thousands), excl. N/A and Other"
 	
 	rename *TEMP* **
 
@@ -165,12 +164,82 @@ drop test
 
 order state* fips year
 compress
-save "$workingdir\nri15_cleanpanel", replace
+save processing\NRI\nri15_landuvars, replace
 
 ********************************************************************************
 *************TOTAL AREA CALCULATION**********************
 ********************************************************************************
-use "$workingdir\nri15_cleanpanel", clear
+use processing\NRI\nri15_landuvars, clear
 collapse(sum) fips*acresk, by(year)
-
 * for qaqc, compare to results from adaptation of another programmer's code, "replicate_weilun_acres.do"
+
+********************************************************************************
+*************LCC VARIABLES **********************
+********************************************************************************
+* some area exploration to get a sense of LCC measurement prevalence
+use processing\NRI\nri15_reduced.dta, clear
+	* overall
+	gen lcc = lcc1982 != "" | lcc1987 != "" | lcc1992 != "" | lcc1997 != "" | lcc2002 != "" | lcc2007 != "" | lcc2012 != "" // tag if any LCC data
+	ta lcc // n points with any LCC data
+	bysort lcc: egen sumlccacresk = sum(acresk) // calculcate area with and without LCC data
+	ta sumlccacresk if lcc == 1 // total area with LCC data
+	ta sumlccacresk if lcc == 0 // total area without LCC data
+	* by county
+	bysort fips: egen sumacresk = sum(acresk) // total fips area
+	bysort lcc fips: egen sumlccfipsacresk = sum(acresk)
+	keep lcc fips sumlccfipsacresk sumacresk
+	duplicates drop
+	gen pcntarealcc = sumlccfipsacresk/sumacresk * 100
+	su pcntarealcc if lcc == 1 // percent of county area with LCC data
+	hist pcntarealcc, freq title(Percent of County Area with LCC Data) subtitle (In Any Year)
+	
+******	
+* manage LCC variables (reshape to panel)
+use processing\NRI\nri15_reduced.dta, clear
+keep state county fips riad_id acresk lcc* // keep vars of interest
+collapse(sum) acresk, by(lcc* state county fips) // collapse by fips
+
+* split lcc ("Land Capability Class & Subclass - source: current linked soil mapunit/component (The first character is the soil suitability rating for agriculture, between 1 and 8 - class 1 soil has few restrictions that limit its use, class 8 soil has limitations that nearly preclude its use for commercial crop production. The second character is the chief limitation of the soil: Blank = Not applicable, E = Erosion, W = Water, S = Shallow, drought, or stony, C = Climate))
+foreach var of varlist lcc* {
+gen `var'A = substr(`var', 1, 1)
+drop `var'
+rename `var'A `var'
+destring `var', replace
+	forvalues x = 1/8 {
+	gen lccL`x'_`var' = acresk if `var' == `x'
+	}
+drop `var'
+}
+
+collapse(sum) lcc*, by(state county fips)
+
+reshape long lccL1_lcc lccL2_lcc lccL3_lcc lccL4_lcc lccL5_lcc lccL6_lcc lccL7_lcc lccL8_lcc, i(fips) j(year)
+ren lccL*_lcc lccL*_acresk
+
+egen fipstotallcc_acresk = rowtotal(*_acresk)
+label variable fipstotallcc_acresk "NRI total LCC ac. (thousands), excl. no data"
+
+* % county area in each lcc (using total area with lcc data)
+foreach var of varlist lcc* {
+gen `var'_pcnt = `var' / fipstotallcc_acresk * 100
+}
+rename lcc*_acresk_pcnt lcc*_pcnt
+
+save processing\NRI\nri15_lccvars, replace
+
+********************************************************************************
+*************MERGE LAND USE AND LCC VARIABLES **********************
+********************************************************************************
+use processing\NRI\nri15_landuvars, clear
+merge 1:1 fips year using processing\NRI\nri15_lccvars
+drop if _merge == 2 & year == 2015
+assert _merge == 3
+drop _merge
+
+order state* county fips year fips*acresk*
+
+* how different are the LCC total areas and FIPS total areas?
+gen pcntareadiff = abs(fipstotallcc_acresk-fipstotal_acresk)/((fipstotallcc_acresk+fipstotal_acresk)/2)*100
+
+save processing\NRI\nri15_cleanpanel, replace
+use processing\NRI\nri15_cleanpanel, clear

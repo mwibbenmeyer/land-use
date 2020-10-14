@@ -9,13 +9,14 @@ Objective: initial exploration of cleaned NRI data
 set more off
 clear
 
-* processing data dir
+* working dir
 global workingdir "M:\GitRepos\land-use"
+cd $workingdir
 
 ********************************************************************************
 ************TIME TREND GRAPH************
 ********************************************************************************
-use "$workingdir\processing\NRI\nri15_cleanpanel", clear
+use processing\NRI\nri15_cleanpanel, clear
 
 collapse(mean) *pcnt* *acresk*, by(year)
 drop fips*acresk
@@ -30,7 +31,7 @@ twoway (connected CRP_pcnt year, sort color(lavender)) ///
 	(connected Other_pcnt year, sort color(stone))
 gr_edit title.text.Arrpush Mean % of County by Year
 gr_edit yaxis1.title.text.Arrpush %
-graph export "$workingdir\results\initial_descriptives\NRI\meanpcnt_year_scatter.png", replace
+graph export results\initial_descriptives\NRI\meanpcnt_year_scatter.png, replace
 window manage close graph
 
 * acres
@@ -43,5 +44,5 @@ twoway (connected CRP_acresk year, sort color(lavender)) ///
 	(connected Other_acresk year, sort color(stone))
 gr_edit title.text.Arrpush Mean Acres by Year
 gr_edit yaxis1.title.text.Arrpush Acres (thousands)
-graph export "$workingdir\results\initial_descriptives\NRI\meanacresk_year_scatter.png", replace
+graph export results\initial_descriptives\NRI\meanacresk_year_scatter.png, replace
 window manage close graph
