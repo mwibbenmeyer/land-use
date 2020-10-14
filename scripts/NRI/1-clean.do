@@ -191,7 +191,7 @@ use processing\NRI\nri15_reduced.dta, clear
 	duplicates drop
 	gen pcntarealcc = sumlccfipsacresk/sumacresk * 100
 	su pcntarealcc if lcc == 1 // percent of county area with LCC data
-	hist pcntarealcc, freq title(Percent of County Area with LCC Data) subtitle (In Any Year)
+	hist pcntarealcc if lcc == 1, freq title(Percent of County Area with LCC Data) subtitle (In Any Year)
 	
 ******	
 * manage LCC variables (reshape to panel)
