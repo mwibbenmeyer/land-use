@@ -1,5 +1,5 @@
 /* Programmer: Alexandra Thompson
-Date: October 5, 2020
+Start Date: October 5, 2020
 Objective: transform raw NRI data into panel format
 */
 
@@ -39,7 +39,8 @@ save processing\NRI\nri15_reduced.dta, replace
 
 * import, save, trim classification table
 import delimited raw_data\NRI\classification.csv, clear
-replace class2 = "UrbanLand" if class2 == "Urban land"
+replace class2 = "Urbanland" if class2 == "Urban land"
+replace class2 = "CRPland" if class2 == "CRP"
 replace class2 = trim(class2)
 save processing\NRI\classification.dta, replace
 
@@ -84,7 +85,7 @@ gen omittedtag = landu == 401 | (landu >= 611 & landu <= 620) | landu == 640 | /
 * check that only omitted land uses are unmerged
 assert omittedtag == 1 if _merge == 1
 * replace with "Other"
-replace class2 = "Other" if omittedtag == 1 & _merge == 1
+replace class2 = "Otherland" if omittedtag == 1 & _merge == 1
 
 drop if _merge == 2
 
@@ -111,11 +112,15 @@ drop `landuvar'
 collapse(sum) _*, by (fips) // collapse
 
 * reshape
-reshape long _CRP_landu _Cropland_landu _Forestland_landu _NA_landu _Pastureland_landu _Rangeland_landu _UrbanLand_landu _Other_landu, i(fips) j(year)
+reshape long _CRPland_landu _Cropland_landu _Forestland_landu _NA_landu _Pastureland_landu _Rangeland_landu _Urbanland_landu _Otherland_landu, i(fips) j(year)
 rename _*_landu *_acresk
 
 * keep only years with data ["1982, 1987, 1992, 1997, and annually from 2000 through 2017" (https://www.nrcs.usda.gov/wps/portal/nrcs/main/national/technical/nra/nri/)]
 keep if year == 1982 | year == 1987 | year == 1992 | year == 1997 | year == 2002 | year == 2007 | year == 2012
+
+* CRP wasn't established until 1985. replace values prior to then with zero.
+replace CRPland_acresk = 0 if year < 1985
+
 compress
 
 ********************************************************************************
@@ -136,25 +141,25 @@ drop fipsstring
 
 * calculate county totals
 	* total
-	egen fipstotal_acresk = rowtotal(*_acresk)
-	label variable fipstotal_acresk "NRI total landu ac. (thousands), including N/A and Other"
+	egen fipsacresk_nri = rowtotal(*_acresk)
+	label variable fipsacresk_nri "NRI total landu ac. (thousands), including N/A and Other"
 	* without N/A
 	rename NA_acresk NA_acTEMPresk
-	rename fipstotal_acresk fipstotal_acTEMPresk
-	egen fipsnomi_acresk = rowtotal(*_acresk)
-	label variable fipsnomi_acresk "NRI total landu ac. (thousands), excl. N/A, incl. Other"
+	rename fipsacresk_nri fipsacresk_TEMPnri
+	egen fipsacresk_landunomi = rowtotal(*_acresk)
+	label variable fipsacresk_landunomi "NRI total landu ac. (thousands), excl. N/A, incl. Other"
 	* without N/A and without Other
-	rename Other_acresk Other_acTEMPresk
-	rename fipsnomi_acresk fipsnomi_acTEMPresk
-	egen fips_acresk = rowtotal(*_acresk)
-	label variable fips_acresk "NRI total landu ac. (thousands), excl. N/A and Other"
+	rename Otherland_acresk Otherland_acTEMPresk
+	rename fipsacresk_landunomi fipsacresk_TEMPlandunomi
+	egen fipsacresk_landunooth = rowtotal(*_acresk)
+	label variable fipsacresk_landunooth "NRI total landu ac. (thousands), excl. N/A and Other"
 	
 	rename *TEMP* **
 
 * % county area in each land use (using total area excluding N/A)
-local vars CRP Cropland Forestland Pastureland Rangeland UrbanLand Other
+local vars CRPland Cropland Forestland Pastureland Rangeland Urbanland Otherland
 foreach var of local vars {
-gen `var'_pcnt = `var'_acresk / fipsnomi_acresk * 100
+gen `var'_pcnt = `var'_acresk / fipsacresk_landunomi * 100
 }
 
 * check percents add up to 100
@@ -170,7 +175,7 @@ save processing\NRI\nri15_landuvars, replace
 *************TOTAL AREA CALCULATION**********************
 ********************************************************************************
 use processing\NRI\nri15_landuvars, clear
-collapse(sum) fips*acresk, by(year)
+collapse(sum) fipsacresk*, by(year)
 * for qaqc, compare to results from adaptation of another programmer's code, "replicate_weilun_acres.do"
 
 ********************************************************************************
@@ -192,6 +197,7 @@ use processing\NRI\nri15_reduced.dta, clear
 	gen pcntarealcc = sumlccfipsacresk/sumacresk * 100
 	su pcntarealcc if lcc == 1 // percent of county area with LCC data
 	hist pcntarealcc if lcc == 1, freq title(Percent of County Area with LCC Data) subtitle (In Any Year)
+	window manage close graph
 	
 ******	
 * manage LCC variables (reshape to panel)
@@ -216,12 +222,12 @@ collapse(sum) lcc*, by(state county fips)
 reshape long lccL1_lcc lccL2_lcc lccL3_lcc lccL4_lcc lccL5_lcc lccL6_lcc lccL7_lcc lccL8_lcc, i(fips) j(year)
 ren lccL*_lcc lccL*_acresk
 
-egen fipstotallcc_acresk = rowtotal(*_acresk)
-label variable fipstotallcc_acresk "NRI total LCC ac. (thousands), excl. no data"
+egen fipsacresk_lcc = rowtotal(*_acresk)
+label variable fipsacresk_lcc "NRI total LCC ac. (thousands), excl. no data"
 
 * % county area in each lcc (using total area with lcc data)
 foreach var of varlist lcc* {
-gen `var'_pcnt = `var' / fipstotallcc_acresk * 100
+gen `var'_pcnt = `var' / fipsacresk_lcc * 100
 }
 rename lcc*_acresk_pcnt lcc*_pcnt
 
@@ -237,9 +243,6 @@ assert _merge == 3
 drop _merge
 
 order state* county fips year fips*acresk*
-
-* how different are the LCC total areas and FIPS total areas?
-gen pcntareadiff = abs(fipstotallcc_acresk-fipstotal_acresk)/((fipstotallcc_acresk+fipstotal_acresk)/2)*100
 
 save processing\NRI\nri15_cleanpanel, replace
 use processing\NRI\nri15_cleanpanel, clear

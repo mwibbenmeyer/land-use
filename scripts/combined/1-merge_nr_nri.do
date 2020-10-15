@@ -1,5 +1,5 @@
 /* Programmer: Alexandra Thompson
-Date: October 5, 2020
+Start Date: October 5, 2020
 Objective: Merge cleaned net_returns and NRI county-year panel datasets
 */
 
@@ -61,7 +61,7 @@ drop _merge note
 
 * merge
 merge 1:1 fips year using processing\net_returns\clean
-rename _merge merge
+rename _merge merge1
 * drop years not in nri data
 gen tag = year == 1982 | year == 1987 | year == 1992 | year == 1997 | year == 2002 ///
 	| year == 2007 | year == 2012
@@ -75,10 +75,11 @@ drop if note == "nr drop, no counterpart"
 drop if note == "nr drop"
 drop _merge note
 
-ta merge
-assert merge != 2 // check no unmatched from net returns. only unmatched should be years in NRI data.
-drop merge
+ta merge1
+assert merge1 != 2 // check no unmatched from net returns. only unmatched should be years in NRI data.
+drop merge1
 
 * save
 compress
-save processing\NRI\nri_nr, replace
+save processing\combined\nri_nr, replace
+use processing\combined\nri_nr, clear
