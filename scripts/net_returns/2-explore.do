@@ -4,13 +4,14 @@ Date: September 21, 2020
 Purpose: Initial Summary Statistics of Net Returns Values
 Input data source(s): Dave Lewis and Chris Mihiar (Oregon State)
 */ 
-global dir = "M:\GitRepos\land-use"
-cd $dir
+
+* working dir
+global workingdir "M:\GitRepos\land-use"
+cd $workingdir
 
 **********
 ********** 1: YEAR-LEVEL MEANS **************
 **********
-cd $dir
 use processing\net_returns\clean, clear
 
 * generate year-level means
@@ -29,7 +30,6 @@ window manage close graph
 **********
 *********** 2: YEARS OF INTEREST SUMMARY STATISTICS ***********
 **********
-cd $dir
 use processing\net_returns\clean, clear
 
 * keep only years of interest for sum stat tables / maps
@@ -68,7 +68,6 @@ code help:
 	maptile_geolist // list of installed geographies
 */
 
-cd $dir
 use processing\net_returns\clean, clear
 
 * mapping setup
@@ -109,13 +108,10 @@ replace `v'_display = `v'_max if `v'_display == `v'_max_2012 & year == 2012
 drop *max* *min*
 
 * generate, save individual graphs
-cd $dir
-cd processing\net_returns\graphs_temp
-
 * colors
-local crop_nr_colors = "Oranges"
-local forest_nr_colors = "Greens"
-local urban_nr_colors = "Purples"
+	local crop_nr_colors = "Oranges"
+	local forest_nr_colors = "Greens"
+	local urban_nr_colors = "Purples"
 
 local vars crop_nr forest_nr urban_nr
 levelsof year, local(levels)
@@ -123,18 +119,16 @@ foreach v of local vars {
 	foreach l of local levels {
 		maptile `v' if year == `l', geo(county2010) cutp(`v'_nq6breaks) fcolor(``v'_colors')
 		gr_edit subtitle.text.Arrpush "`l'"
-		graph save "`v'_`l'", replace
+		graph save "processing\net_returns\graphs_temp/`v'_`l'", replace
 	}
 maptile `v'_display if year == 2012, geo(county2010) cutp(`v'_nq6breaks) fcolor(``v'_colors') // mean county-level value map for legend
-graph save "`v'", replace
+graph save "processing\net_returns\graphs_temp/`v'", replace
 }
 
 * combine, save graphs
 local vars crop_nr forest_nr urban_nr
 foreach v of local vars {
-	cd $dir
-	cd processing\net_returns\graphs_temp
-	
+	cd "$workingdir\processing\net_returns\graphs_temp"
 	grc1leg2 `v'_1987.gph `v'_1992.gph `v'_1997.gph `v'_2002.gph `v'_2007.gph `v'_2012.gph `v'.gph, legendfrom(`v'.gph)
 	gr_edit title.text.Arrpush "`v'"
 	gr_edit plotregion1.graph7.draw_view.setstyle, style(no) // hide map created for legend only
@@ -142,16 +136,14 @@ foreach v of local vars {
 	gr_edit style.editstyle boxstyle(linestyle(color(white))) editcopy
 	gr_edit legend.Edit, style(labelstyle(size(vsmall)))
 	
-	cd $dir
-	cd results\initial_descriptives\net_returns
-	graph export `v'_maps.png, replace
+	cd $workingdir
+	graph export "results\initial_descriptives\net_returns/`v'_maps.png", replace
 	}
 window manage close graph
 
 **********
 *********** 4: YEARS OF INTEREST MAPS OF URBAN_NR IN WESTERN STATES ***********
 **********
-cd $dir
 use processing\net_returns\clean, clear
 
 * mapping setup
@@ -194,84 +186,72 @@ replace urban_nr_display = urban_nr_max if urban_nr_display == urban_nr_max_2012
 drop *max* *min*
 
 * generate, save individual graphs
-cd $dir
-cd processing\net_returns\graphs_temp
-
 * colors
-local urban_nr_colors = "Purples"
+	local urban_nr_colors = "Purples"
 
 levelsof year, local(levels)
 foreach l of local levels {
 	maptile urban_nr if year == `l', geo(county2010) cutp(urban_nr_nq9breaks) fcolor(`urban_nr_colors')
 	gr_edit subtitle.text.Arrpush "`l'"
-	graph save "urban_nr_western_`l'", replace
+	graph save "processing\net_returns\graphs_temp/urban_nr_western_`l'", replace
 }
 maptile urban_nr_display if year == 2012, geo(county2010) cutp(urban_nr_nq9breaks) fcolor(`urban_nr_colors') // mean county-level value map for legend
-graph save "urban_nr_western", replace
+graph save "processing\net_returns\graphs_temp/urban_nr_western", replace
 
 * combine, save graphs
-
 * 1997-2000
-cd $dir
-cd processing\net_returns\graphs_temp
-grc1leg2 urban_nr_western_1997.gph ///
-		urban_nr_western_1998.gph ///
-		urban_nr_western_1999.gph ///
-		urban_nr_western_2000.gph ///
-		urban_nr_western.gph, legendfrom(urban_nr_western.gph)
-gr_edit title.text.Arrpush "urban_nr West 1997-2000"
-gr_edit plotregion1.graph5.draw_view.setstyle, style(no) // hide map created for legend only
-gr_edit style.editstyle boxstyle(shadestyle(color(white))) editcopy
-gr_edit style.editstyle boxstyle(linestyle(color(white))) editcopy
-gr_edit legend.Edit, style(labelstyle(size(vsmall)))
-gr_edit legend.Edit , style(cols(2)) style(rows(0)) keepstyles 
-cd $dir
-cd results\initial_descriptives\net_returns
-graph export urban_nr_western_maps_1997-2000.png, replace
-window manage close graph
-
+	cd "$workingdir\processing\net_returns\graphs_temp"
+	grc1leg2 urban_nr_western_1997.gph ///
+			urban_nr_western_1998.gph ///
+			urban_nr_western_1999.gph ///
+			urban_nr_western_2000.gph ///
+			urban_nr_western.gph, legendfrom(urban_nr_western.gph)
+	gr_edit title.text.Arrpush "urban_nr West 1997-2000"
+	gr_edit plotregion1.graph5.draw_view.setstyle, style(no) // hide map created for legend only
+	gr_edit style.editstyle boxstyle(shadestyle(color(white))) editcopy
+	gr_edit style.editstyle boxstyle(linestyle(color(white))) editcopy
+	gr_edit legend.Edit, style(labelstyle(size(vsmall)))
+	gr_edit legend.Edit , style(cols(2)) style(rows(0)) keepstyles 
+	cd $workingdir
+	graph export results\initial_descriptives\net_returns\urban_nr_western_maps_1997-2000.png, replace
+	window manage close graph
 * 2001-2007
-cd $dir
-cd processing\net_returns\graphs_temp
-grc1leg2 urban_nr_western_2001.gph ///
-		urban_nr_western_2002.gph ///
-		urban_nr_western_2003.gph ///
-		urban_nr_western_2004.gph ///
-		urban_nr_western_2005.gph ///
-		urban_nr_western_2006.gph ///
-		urban_nr_western_2007.gph ///
-		urban_nr_western.gph, legendfrom(urban_nr_western.gph)
-gr_edit title.text.Arrpush "urban_nr West 2001-2007"
-gr_edit plotregion1.graph8.draw_view.setstyle, style(no) // hide map created for legend only
-gr_edit style.editstyle boxstyle(shadestyle(color(white))) editcopy
-gr_edit style.editstyle boxstyle(linestyle(color(white))) editcopy
-gr_edit legend.Edit, style(labelstyle(size(vsmall)))
-gr_edit legend.Edit , style(cols(2)) style(rows(0)) keepstyles 
-cd $dir
-cd results\initial_descriptives\net_returns
-graph export urban_nr_western_maps_2001-2007.png, replace
-window manage close graph
-
+	cd "$workingdir\processing\net_returns\graphs_temp"
+	grc1leg2 urban_nr_western_2001.gph ///
+			urban_nr_western_2002.gph ///
+			urban_nr_western_2003.gph ///
+			urban_nr_western_2004.gph ///
+			urban_nr_western_2005.gph ///
+			urban_nr_western_2006.gph ///
+			urban_nr_western_2007.gph ///
+			urban_nr_western.gph, legendfrom(urban_nr_western.gph)
+	gr_edit title.text.Arrpush "urban_nr West 2001-2007"
+	gr_edit plotregion1.graph8.draw_view.setstyle, style(no) // hide map created for legend only
+	gr_edit style.editstyle boxstyle(shadestyle(color(white))) editcopy
+	gr_edit style.editstyle boxstyle(linestyle(color(white))) editcopy
+	gr_edit legend.Edit, style(labelstyle(size(vsmall)))
+	gr_edit legend.Edit , style(cols(2)) style(rows(0)) keepstyles 
+	cd $workingdir
+	graph export results\initial_descriptives\net_returns\urban_nr_western_maps_2001-2007.png, replace
+	window manage close graph
 * 2008-2013
-cd $dir
-cd processing\net_returns\graphs_temp
-grc1leg2 urban_nr_western_2008.gph ///
-		urban_nr_western_2009.gph ///
-		urban_nr_western_2010.gph ///
-		urban_nr_western_2011.gph ///
-		urban_nr_western_2012.gph ///
-		urban_nr_western_2013.gph ///
-		urban_nr_western.gph, legendfrom(urban_nr_western.gph)
-gr_edit title.text.Arrpush "urban_nr West 2008-2013"
-gr_edit plotregion1.graph7.draw_view.setstyle, style(no) // hide map created for legend only
-gr_edit style.editstyle boxstyle(shadestyle(color(white))) editcopy
-gr_edit style.editstyle boxstyle(linestyle(color(white))) editcopy
-gr_edit legend.Edit, style(labelstyle(size(vsmall)))
-gr_edit legend.Edit , style(cols(2)) style(rows(0)) keepstyles 
-cd $dir
-cd results\initial_descriptives\net_returns
-graph export urban_nr_western_maps_2008-2013.png, replace
-window manage close graph
+	cd "$workingdir\processing\net_returns\graphs_temp"
+	grc1leg2 urban_nr_western_2008.gph ///
+			urban_nr_western_2009.gph ///
+			urban_nr_western_2010.gph ///
+			urban_nr_western_2011.gph ///
+			urban_nr_western_2012.gph ///
+			urban_nr_western_2013.gph ///
+			urban_nr_western.gph, legendfrom(urban_nr_western.gph)
+	gr_edit title.text.Arrpush "urban_nr West 2008-2013"
+	gr_edit plotregion1.graph7.draw_view.setstyle, style(no) // hide map created for legend only
+	gr_edit style.editstyle boxstyle(shadestyle(color(white))) editcopy
+	gr_edit style.editstyle boxstyle(linestyle(color(white))) editcopy
+	gr_edit legend.Edit, style(labelstyle(size(vsmall)))
+	gr_edit legend.Edit , style(cols(2)) style(rows(0)) keepstyles 
+	cd $workingdir
+	graph export results\initial_descriptives\net_returns\urban_nr_western_maps_2008-2013.png, replace
+	window manage close graph
 
 
 
