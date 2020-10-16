@@ -86,4 +86,7 @@ cd $workingdir
 	order _varname
 	export excel using results\initial_descriptives\combined\sumtable_countymeans_weighted.xlsx, replace
 
-
+* LAND USE SUMMARY
+	use processing\combined\nri_nr, clear
+	collapse(sum) *_acresk, by (year)
+	export excel using results\initial_descriptives\combined\landu_lcc_totalarea.xlsx, replace
