@@ -43,39 +43,39 @@ cd $workingdir
 		foreach var in `vars' {
 			foreach y of local years {
 			di `y'
-			su `var'land_pcnt [w=`var'land_acresk] if year == `y'
+			su `var'land_pcnt [w=fipsacresk_landunomi] if year == `y'
 			}
 		}
 		* su LCC, weighed by measured LCC area 
-		forvalues x = 1/8 {
+		foreach var of varlist lcc*pcnt {
 		levelsof year, local(years)
 			foreach y of local years {
 			di `y'
-			su lccL`x'_pcnt [w=lccL`x'_acresk] if year == `y'
+			su `var' [w=fipsacresk_lcc] if year == `y'
 			}
 		}
 		* net returns, weighed by county acreage in each land use
 		levelsof year, local(years)
 		foreach y of local years {
 		di `y'
-		su crop_nr [w=Cropland_acresk] if year == `y'
-		su forest_nr [w=Forestland_acresk] if year == `y'
-		su urban_nr [w=Urbanland_acresk] if year == `y'
+		su crop_nr [w=fipsacresk_landunomi] if year == `y'
+		su forest_nr [w=fipsacresk_landunomi] if year == `y'
+		su urban_nr [w=fipsacresk_landunomi] if year == `y'
 		}
 	* generate weighted means
 		* landu
 		local vars Crop Forest Pasture Range Other CRP Urban
 		foreach var in `vars' {
-		egen wtmean_`var'land_pcnt = wtmean(`var'land_pcnt), weight(`var'land_acresk) by(year)
+		egen wtmean_`var'land_pcnt = wtmean(`var'land_pcnt), weight(fipsacresk_landunomi) by(year)
 		}
 		* LCC
-		forvalues x = 1/8 {
-		egen wtmean_lccL`x'_pcnt = wtmean(lccL`x'_pcnt), weight(lccL`x'_acresk) by(year)
+		foreach var of varlist lcc*pcnt {
+		egen wtmean_`var' = wtmean(`var'), weight(fipsacresk_lcc) by(year)
 		}
 		* net returns
-		egen wtmean_crop_nr = wtmean(crop_nr), weight(Cropland_acresk) by(year)
-		egen wtmean_forest_nr = wtmean(forest_nr), weight(Forestland_acresk) by(year)
-		egen wtmean_urban_nr = wtmean(urban_nr), weight(Urbanland_acresk) by(year)
+		egen wtmean_crop_nr = wtmean(crop_nr), weight(fipsacresk_landunomi) by(year)
+		egen wtmean_forest_nr = wtmean(forest_nr), weight(fipsacresk_landunomi) by(year)
+		egen wtmean_urban_nr = wtmean(urban_nr), weight(fipsacresk_landunomi) by(year)
 	* create table
 	keep year wtmean*
 	duplicates drop

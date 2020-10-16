@@ -225,6 +225,12 @@ ren lccL*_lcc lccL*_acresk
 egen fipsacresk_lcc = rowtotal(*_acresk)
 label variable fipsacresk_lcc "NRI total LCC ac. (thousands), excl. no data"
 
+* generate combined LCC (as in Lubowski 2006)
+gen lccL12_acresk = lccL1_acresk + lccL2_acresk
+gen lccL34_acresk = lccL3_acresk + lccL4_acresk
+gen lccL56_acresk = lccL5_acresk + lccL6_acresk
+gen lccL78_acresk = lccL7_acresk + lccL8_acresk
+
 * % county area in each lcc (using total area with lcc data)
 foreach var of varlist lcc* {
 gen `var'_pcnt = `var' / fipsacresk_lcc * 100
