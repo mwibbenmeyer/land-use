@@ -157,15 +157,15 @@ drop fipsstring
 	rename *TEMP* **
 
 * % county area in each land use (using total area excluding N/A)
-local vars CRPland Cropland Forestland Pastureland Rangeland Urbanland Otherland
+local vars CRPland Cropland Forestland Pastureland Rangeland Urbanland /*Otherland*/
 foreach var of local vars {
-gen `var'_pcnt = `var'_acresk / fipsacresk_landunomi * 100
+gen `var'_pcnt = `var'_acresk / fipsacresk_landunooth * 100
 }
 
-* check percents add up to 100
-egen test = rowtotal(*_pcnt) 
+* check percents add up to 100 - COMMENTED OUT AFTER REMOVING 'OTHERLAND' FROM PERCENT CALCULATION. 14 rows are entirely missing or otherland and have zero 'test' values.
+/*egen test = rowtotal(*_pcnt) 
 assert test >= 99.9 & test <= 100.1
-drop test
+drop test */
 
 order state* fips year
 compress

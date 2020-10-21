@@ -19,29 +19,30 @@ cd $workingdir
 use processing\NRI\nri15_cleanpanel, clear
 
 collapse(mean) *pcnt* *acresk*, by(year)
-drop fips*acresk
+drop fipsacresk*
 
 * percents
-twoway (connected CRP_pcnt year, sort color(lavender)) ///
+twoway (connected CRPland_pcnt year, sort color(lavender)) ///
 	(connected Cropland_pcnt year, sort color(orange)) ///
 	(connected Forestland_pcnt year, sort color(green)) ///
 	(connected Pastureland_pcnt year, sort color(lime)) ///
 	(connected Rangeland_pcnt year, sort color(olive_teal)) ///
-	(connected UrbanLand_pcnt year, sort color(purple)) ///
-	(connected Other_pcnt year, sort color(stone))
+	(connected Urbanland_pcnt year, sort color(purple))
+	* (connected Other_pcnt year, sort color(stone))
 gr_edit title.text.Arrpush Mean % of County by Year
 gr_edit yaxis1.title.text.Arrpush %
 graph export results\initial_descriptives\NRI\meanpcnt_year_scatter.png, replace
 window manage close graph
 
 * acres
-twoway (connected CRP_acresk year, sort color(lavender)) ///
+twoway (connected CRPland_acresk year, sort color(lavender)) ///
 	(connected Cropland_acresk year, sort color(orange)) ///
 	(connected Forestland_acresk year, sort color(green)) ///
 	(connected Pastureland_acresk year, sort color(lime)) ///
 	(connected Rangeland_acresk year, sort color(olive_teal)) ///
-	(connected UrbanLand_acresk year, sort color(purple)) ///
-	(connected Other_acresk year, sort color(stone))
+	(connected Urbanland_acresk year, sort color(purple)) ///
+	(connected Otherland_acresk year, sort color(stone))
+	* (connected NA_acresk year, sort color (black))
 gr_edit title.text.Arrpush Mean Acres by Year
 gr_edit yaxis1.title.text.Arrpush Acres (thousands)
 graph export results\initial_descriptives\NRI\meanacresk_year_scatter.png, replace

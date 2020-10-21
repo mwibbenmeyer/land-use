@@ -29,7 +29,7 @@ cd $workingdir
 	* create table
 	collapse(mean) *pcnt* *_nr, by(year)
 	sort year 
-	order year Cropland* CRPland* Forestland* Otherland* Pastureland* Rangeland* Urbanland* lccL* *nr
+	order year Cropland* CRPland* Forestland* Pastureland* Rangeland* Urbanland* lccL* *nr
 	xpose, varname clear
 	order _varname
 	export excel using results\initial_descriptives\combined\sumtable_countymeans.xlsx, replace
@@ -38,12 +38,12 @@ cd $workingdir
 	use processing\combined\nri_nr, clear
 	* summarize 
 		* su landu, weighed by measured land use area
-		local vars Crop Forest Pasture Range Other CRP
+		local vars Crop Forest Pasture Range CRP
 		levelsof year, local(years)
 		foreach var in `vars' {
 			foreach y of local years {
 			di `y'
-			su `var'land_pcnt [w=fipsacresk_landunomi] if year == `y'
+			su `var'land_pcnt [w=fipsacresk_landunooth] if year == `y'
 			}
 		}
 		* su LCC, weighed by measured LCC area 
@@ -58,30 +58,30 @@ cd $workingdir
 		levelsof year, local(years)
 		foreach y of local years {
 		di `y'
-		su crop_nr [w=fipsacresk_landunomi] if year == `y'
-		su forest_nr [w=fipsacresk_landunomi] if year == `y'
-		su urban_nr [w=fipsacresk_landunomi] if year == `y'
+		su crop_nr [w=fipsacresk_landunooth] if year == `y'
+		su forest_nr [w=fipsacresk_landunooth] if year == `y'
+		su urban_nr [w=fipsacresk_landunooth] if year == `y'
 		}
 	* generate weighted means
 		* landu
-		local vars Crop Forest Pasture Range Other CRP Urban
+		local vars Crop Forest Pasture Range CRP Urban
 		foreach var in `vars' {
-		egen wtmean_`var'land_pcnt = wtmean(`var'land_pcnt), weight(fipsacresk_landunomi) by(year)
+		egen wtmean_`var'land_pcnt = wtmean(`var'land_pcnt), weight(fipsacresk_landunooth) by(year)
 		}
 		* LCC
 		foreach var of varlist lcc*pcnt {
 		egen wtmean_`var' = wtmean(`var'), weight(fipsacresk_lcc) by(year)
 		}
 		* net returns
-		egen wtmean_crop_nr = wtmean(crop_nr), weight(fipsacresk_landunomi) by(year)
-		egen wtmean_forest_nr = wtmean(forest_nr), weight(fipsacresk_landunomi) by(year)
-		egen wtmean_urban_nr = wtmean(urban_nr), weight(fipsacresk_landunomi) by(year)
+		egen wtmean_crop_nr = wtmean(crop_nr), weight(fipsacresk_landunooth) by(year)
+		egen wtmean_forest_nr = wtmean(forest_nr), weight(fipsacresk_landunooth) by(year)
+		egen wtmean_urban_nr = wtmean(urban_nr), weight(fipsacresk_landunooth) by(year)
 	* create table
 	keep year wtmean*
 	duplicates drop
 	rename wtmean_* *
 	sort year 
-	order year Cropland* CRPland* Forestland* Otherland* Pastureland* Rangeland* Urbanland* lccL* *nr
+	order year Cropland* CRPland* Forestland* Pastureland* Rangeland* Urbanland* lccL* *nr
 	xpose, varname clear
 	order _varname
 	export excel using results\initial_descriptives\combined\sumtable_countymeans_weighted.xlsx, replace
@@ -89,4 +89,4 @@ cd $workingdir
 * LAND USE SUMMARY
 	use processing\combined\nri_nr, clear
 	collapse(sum) *_acresk, by (year)
-	export excel using results\initial_descriptives\combined\landu_lcc_totalarea.xlsx, replace
+	export excel using results\initial_descriptives\combined\landu_lcc_totalarea.xlsx, firstrow(variables) replace
