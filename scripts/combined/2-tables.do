@@ -1,6 +1,6 @@
 /* Programmer: Alexandra Thompson
 Start Date: October 15, 2020
-Objective: 
+Objective: Generate summary tables
 */
 
 ********************************************************************************
@@ -8,14 +8,11 @@ Objective:
 ********************************************************************************
 set more off
 clear
-ssc inst _gwtmean
 
 * working dir
 global workingdir "M:\GitRepos\land-use"
 cd $workingdir
 
-********************************************************************************
-************GENERATE SUMMARY TABLES************
 *******mean percent county area & mean net return value*****************************
 * by year
 	use processing\combined\nri_nr, clear
@@ -35,6 +32,7 @@ cd $workingdir
 	export excel using results\initial_descriptives\combined\sumtable_countymeans.xlsx, replace
 	
 * weighed by measured county area, by year
+ssc inst _gwtmean
 	use processing\combined\nri_nr, clear
 	* summarize 
 		* su landu, weighed by measured land use area
@@ -86,7 +84,7 @@ cd $workingdir
 	order _varname
 	export excel using results\initial_descriptives\combined\sumtable_countymeans_weighted.xlsx, replace
 
-* LAND USE SUMMARY
-	use processing\combined\nri_nr, clear
-	collapse(sum) *_acresk, by (year)
-	export excel using results\initial_descriptives\combined\landu_lcc_totalarea.xlsx, firstrow(variables) replace
+*******LAND USE SUMMARY TABLE*****************************
+use processing\combined\nri_nr, clear
+collapse(sum) *_acresk, by (year)
+export excel using results\initial_descriptives\combined\landu_lcc_totalarea.xlsx, firstrow(variables) replace

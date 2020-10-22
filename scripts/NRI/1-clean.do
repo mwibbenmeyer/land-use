@@ -36,6 +36,9 @@ drop acres xfact
 drop if state == 72 // PR
 drop if state == 15 // HI
 save processing\NRI\nri15_reduced.dta, replace
+* create a riad-state-county-fips crosswalk
+keep riad_id state county fips
+save processing\NRI\nri15_pointcounty_crosswalk, replace
 
 * import, save, trim classification table
 import delimited raw_data\NRI\classification.csv, clear
@@ -45,18 +48,39 @@ replace class2 = trim(class2)
 save processing\NRI\classification.dta, replace
 
 ********************************************************************************
-*************RESHAPE NRI LAND USE DATA**********************
+*************INITIAL DATA EXPLORATION TO GET SENSE OF MEASUREMENT PREVALENCE****
 ********************************************************************************
-* some area exploration to get a sense of prevalence of landu measurements
+* LANDU
 use processing\NRI\nri15_reduced.dta, clear
 	* overall
 	gen landu = landu1982 != . | landu1987 != . | landu1992 != . | landu1997 != . | landu2002 != . | landu2007 != . | landu2012 != . // tag if any landu data
 	assert landu == 1 // check that all points have landu data at least 1 year
 
+* LCC
+use processing\NRI\nri15_reduced.dta, clear
+	* overall
+	gen lcc = lcc1982 != "" | lcc1987 != "" | lcc1992 != "" | lcc1997 != "" | lcc2002 != "" | lcc2007 != "" | lcc2012 != "" // tag if any LCC data
+	ta lcc // n points with any LCC data
+	bysort lcc: egen sumlccacresk = sum(acresk) // calculcate area with and without LCC data
+	ta sumlccacresk if lcc == 1 // total area with LCC data
+	ta sumlccacresk if lcc == 0 // total area without LCC data
+	* by county
+	bysort fips: egen sumacresk = sum(acresk) // total fips area
+	bysort lcc fips: egen sumlccfipsacresk = sum(acresk)
+	keep lcc fips sumlccfipsacresk sumacresk
+	duplicates drop
+	gen pcntarealcc = sumlccfipsacresk/sumacresk * 100
+	su pcntarealcc if lcc == 1 // percent of county area with LCC data
+	hist pcntarealcc if lcc == 1, freq title(Percent of County Area with LCC Data) subtitle (In Any Year)
+	window manage close graph
+
+********************************************************************************
+*************CREATE POINT-LEVEL PANEL OF LAND USE AND LAND COVER CLASS DATA*****
+********************************************************************************
 * manage landu variables
 use processing\NRI\nri15_reduced.dta, clear
-keep state county fips riad_id acresk landu* // keep vars of interest
-collapse(sum) acresk, by(landu* state county fips) // collapse by fips
+keep state county fips riad_id acresk landu* lcc* // keep vars of interest
+
 * merge with land use classification table, quality check that only classes intentionally omitted are omitted
 foreach landuvar of varlist landu* {
 rename `landuvar' landu
@@ -87,45 +111,73 @@ assert omittedtag == 1 if _merge == 1
 * replace with "Other"
 replace class2 = "Otherland" if omittedtag == 1 & _merge == 1
 
+replace class2 = "NAland" if class2 == "NA"
+
 drop if _merge == 2
 
 drop _merge omittedtag landu
 rename class2 `landuvar'
 }
-collapse(sum) acresk, by (fips landu*) // collapse by fips
 
-* generate variable for each land use (using 1997 classes)
-levelsof landu1997, local(levels)
-foreach l of local levels {
-	gen lu_landu_`l' = .
+* collapse lu & lcc
+collapse(sum) acresk, by (state county fips landu* lcc* riad_id)
+
+* manage lcc variables
+	* split lcc ("Land Capability Class & Subclass - source: current linked soil mapunit/component (The first character is the soil suitability rating for agriculture, between 1 and 8 - class 1 soil has few restrictions that limit its use, class 8 soil has limitations that nearly preclude its use for commercial crop production. The second character is the chief limitation of the soil: Blank = Not applicable, E = Erosion, W = Water, S = Shallow, drought, or stony, C = Climate))
+	foreach var of varlist lcc* {
+	replace `var' = "0" if `var' == ""
+	gen `var'A = substr(`var', 1, 1)
+	drop `var'
+	rename `var'A `var'
+	destring `var', replace
+		forvalues x = 0/8 {
+		gen lccL`x'_`var' = 0
+		replace lccL`x'_`var' = acresk if `var' == `x'
+		}
+	drop `var'
 	}
 
-* generate variables for total acresk for each landuse-year combo
-foreach landuvar of varlist landu* {
-levelsof `landuvar', local(levels)
-	foreach l of local levels{
-	gen _`l'_`landuvar' = acresk if `landuvar' == "`l'"
+* manage lu variables
+	* generate variable for each land use (using 1997 classes)
+	levelsof landu1997, local(levels)
+	foreach l of local levels {
+		gen lu_landu_`l' = .
+		}
+	* generate variables for total acresk for each landuse-year combo
+	foreach landuvar of varlist landu* {
+	levelsof `landuvar', local(levels)
+		foreach l of local levels{
+		gen _`l'_`landuvar' = 0
+		replace _`l'_`landuvar' = acresk if `landuvar' == "`l'"
+		}
+	drop `landuvar'
 	}
-drop `landuvar'
-}
-
-collapse(sum) _*, by (fips) // collapse
+	drop lu*
 
 * reshape
-reshape long _CRPland_landu _Cropland_landu _Forestland_landu _NA_landu _Pastureland_landu _Rangeland_landu _Urbanland_landu _Otherland_landu, i(fips) j(year)
-rename _*_landu *_acresk
-
+reshape long _CRPland_landu _Cropland_landu _Forestland_landu _NAland_landu _Pastureland_landu _Rangeland_landu _Urbanland_landu _Otherland_landu lccL0_lcc lccL1_lcc lccL2_lcc lccL3_lcc lccL4_lcc lccL5_lcc lccL6_lcc lccL7_lcc lccL8_lcc, i(riad_id) j(year)
 * keep only years with data ["1982, 1987, 1992, 1997, and annually from 2000 through 2017" (https://www.nrcs.usda.gov/wps/portal/nrcs/main/national/technical/nra/nri/)]
 keep if year == 1982 | year == 1987 | year == 1992 | year == 1997 | year == 2002 | year == 2007 | year == 2012
-
-* CRP wasn't established until 1985. replace values prior to then with zero.
-replace CRPland_acresk = 0 if year < 1985
-
 compress
 
-********************************************************************************
-*************CALCULATE ADDITIONAL LAND USE VARIABLES **********************
-********************************************************************************
+ren lccL*_lcc lccL*_acresk
+ren _*_landu *_acresk
+ren lccL0_acresk lccNA_acresk
+
+* CRP wasn't established until 1985. replace missing values prior to then with zero.
+* replace CRPland_acresk = 0 if year < 1985
+
+* generate combined LCC (as in Lubowski 2006)
+gen lccL12_acresk = lccL1_acresk + lccL2_acresk
+gen lccL34_acresk = lccL3_acresk + lccL4_acresk
+gen lccL56_acresk = lccL5_acresk + lccL6_acresk
+gen lccL78_acresk = lccL7_acresk + lccL8_acresk
+
+* merge to state-fips crosswalk
+merge m:1 riad_id using processing\NRI\nri15_pointcounty_crosswalk
+assert _merge == 3
+drop _merge
+
 * generate state fips
 tostring fips, gen(fipsstring)
 gen statefips = substr(fipsstring, 1, 2)
@@ -139,12 +191,25 @@ replace stateName = "District of Columbia" if statefips == 11
 replace stateAbbrev = "DC" if statefips == 11
 drop fipsstring 
 
-* calculate county totals
+* save
+order state* fips county riad* acresk year lcc* *land*
+sort riad* year
+compress
+save processing\NRI\nri15_point_panel, replace
+use processing\NRI\nri15_point_panel, clear
+
+********************************************************************************
+*************CREATE COUNTY-LEVEL PANEL OF LAND USE AND LAND COVER CLASS DATA*****
+********************************************************************************
+use processing\NRI\nri15_point_panel, clear
+collapse(sum) *acresk, by (state* county fips year)
+
+* landuse-based area variables
 	* total
 	egen fipsacresk_nri = rowtotal(*_acresk)
 	label variable fipsacresk_nri "NRI total landu ac. (thousands), including N/A and Other"
 	* without N/A
-	rename NA_acresk NA_acTEMPresk
+	rename NAland_acresk NA_acTEMPresk
 	rename fipsacresk_nri fipsacresk_TEMPnri
 	egen fipsacresk_landunomi = rowtotal(*_acresk)
 	label variable fipsacresk_landunomi "NRI total landu ac. (thousands), excl. N/A, incl. Other"
@@ -156,99 +221,33 @@ drop fipsstring
 	
 	rename *TEMP* **
 
-* % county area in each land use (using total area excluding N/A)
-local vars CRPland Cropland Forestland Pastureland Rangeland Urbanland /*Otherland*/
-foreach var of local vars {
-gen `var'_pcnt = `var'_acresk / fipsacresk_landunooth * 100
-}
+	* % county area in each land use (using total area excluding N/A)
+	local vars CRPland Cropland Forestland Pastureland Rangeland Urbanland /*Otherland*/
+	foreach var of local vars {
+	gen `var'_pcnt = `var'_acresk / fipsacresk_landunooth * 100
+	}
+	* check percents add up to 100 - COMMENTED OUT AFTER REMOVING 'OTHERLAND' FROM PERCENT CALCULATION. 14 rows are entirely missing or otherland and have zero 'test' values.
+	/*egen test = rowtotal(*_pcnt) 
+	assert test >= 99.9 & test <= 100.1
+	drop test */
 
-* check percents add up to 100 - COMMENTED OUT AFTER REMOVING 'OTHERLAND' FROM PERCENT CALCULATION. 14 rows are entirely missing or otherland and have zero 'test' values.
-/*egen test = rowtotal(*_pcnt) 
-assert test >= 99.9 & test <= 100.1
-drop test */
+* lcc-based area variables
+	egen fipsacresk_lcc = rowtotal(lcc*_acresk)
+	label variable fipsacresk_lcc "NRI total LCC ac. (thousands), excl. no data"
+	* % county area in each lcc (using total area with lcc data)
+	foreach var of varlist lcc* {
+	gen `var'_pcnt = `var' / fipsacresk_lcc * 100
+	}
+	rename lcc*_acresk_pcnt lcc*_pcnt
 
-order state* fips year
 compress
-save processing\NRI\nri15_landuvars, replace
+order state* fips county acresk fipsacres* year lcc* *land*
+save processing\NRI\nri15_county_panel, replace
 
 ********************************************************************************
 *************TOTAL AREA CALCULATION**********************
 ********************************************************************************
-use processing\NRI\nri15_landuvars, clear
+use processing\NRI\nri15_county_panel, clear
 collapse(sum) fipsacresk*, by(year)
 * for qaqc, compare to results from adaptation of another programmer's code, "replicate_weilun_acres.do"
 
-********************************************************************************
-*************LCC VARIABLES **********************
-********************************************************************************
-* some area exploration to get a sense of LCC measurement prevalence
-use processing\NRI\nri15_reduced.dta, clear
-	* overall
-	gen lcc = lcc1982 != "" | lcc1987 != "" | lcc1992 != "" | lcc1997 != "" | lcc2002 != "" | lcc2007 != "" | lcc2012 != "" // tag if any LCC data
-	ta lcc // n points with any LCC data
-	bysort lcc: egen sumlccacresk = sum(acresk) // calculcate area with and without LCC data
-	ta sumlccacresk if lcc == 1 // total area with LCC data
-	ta sumlccacresk if lcc == 0 // total area without LCC data
-	* by county
-	bysort fips: egen sumacresk = sum(acresk) // total fips area
-	bysort lcc fips: egen sumlccfipsacresk = sum(acresk)
-	keep lcc fips sumlccfipsacresk sumacresk
-	duplicates drop
-	gen pcntarealcc = sumlccfipsacresk/sumacresk * 100
-	su pcntarealcc if lcc == 1 // percent of county area with LCC data
-	hist pcntarealcc if lcc == 1, freq title(Percent of County Area with LCC Data) subtitle (In Any Year)
-	window manage close graph
-	
-******	
-* manage LCC variables (reshape to panel)
-use processing\NRI\nri15_reduced.dta, clear
-keep state county fips riad_id acresk lcc* // keep vars of interest
-collapse(sum) acresk, by(lcc* state county fips) // collapse by fips
-
-* split lcc ("Land Capability Class & Subclass - source: current linked soil mapunit/component (The first character is the soil suitability rating for agriculture, between 1 and 8 - class 1 soil has few restrictions that limit its use, class 8 soil has limitations that nearly preclude its use for commercial crop production. The second character is the chief limitation of the soil: Blank = Not applicable, E = Erosion, W = Water, S = Shallow, drought, or stony, C = Climate))
-foreach var of varlist lcc* {
-gen `var'A = substr(`var', 1, 1)
-drop `var'
-rename `var'A `var'
-destring `var', replace
-	forvalues x = 1/8 {
-	gen lccL`x'_`var' = acresk if `var' == `x'
-	}
-drop `var'
-}
-
-collapse(sum) lcc*, by(state county fips)
-
-reshape long lccL1_lcc lccL2_lcc lccL3_lcc lccL4_lcc lccL5_lcc lccL6_lcc lccL7_lcc lccL8_lcc, i(fips) j(year)
-ren lccL*_lcc lccL*_acresk
-
-egen fipsacresk_lcc = rowtotal(*_acresk)
-label variable fipsacresk_lcc "NRI total LCC ac. (thousands), excl. no data"
-
-* generate combined LCC (as in Lubowski 2006)
-gen lccL12_acresk = lccL1_acresk + lccL2_acresk
-gen lccL34_acresk = lccL3_acresk + lccL4_acresk
-gen lccL56_acresk = lccL5_acresk + lccL6_acresk
-gen lccL78_acresk = lccL7_acresk + lccL8_acresk
-
-* % county area in each lcc (using total area with lcc data)
-foreach var of varlist lcc* {
-gen `var'_pcnt = `var' / fipsacresk_lcc * 100
-}
-rename lcc*_acresk_pcnt lcc*_pcnt
-
-save processing\NRI\nri15_lccvars, replace
-
-********************************************************************************
-*************MERGE LAND USE AND LCC VARIABLES **********************
-********************************************************************************
-use processing\NRI\nri15_landuvars, clear
-merge 1:1 fips year using processing\NRI\nri15_lccvars
-drop if _merge == 2 & year == 2015
-assert _merge == 3
-drop _merge
-
-order state* county fips year fips*acresk*
-
-save processing\NRI\nri15_cleanpanel, replace
-use processing\NRI\nri15_cleanpanel, clear
