@@ -192,11 +192,10 @@ replace stateAbbrev = "DC" if statefips == 11
 drop fipsstring 
 
 * save
-order state* fips county riad* acresk year lcc* *land*
+order state* fips county riad* acresk year *land* lcc*
 sort riad* year
 compress
 save processing\NRI\nri15_point_panel, replace
-use processing\NRI\nri15_point_panel, clear
 
 ********************************************************************************
 *************CREATE COUNTY-LEVEL PANEL OF LAND USE AND LAND COVER CLASS DATA*****
@@ -206,25 +205,24 @@ collapse(sum) *acresk, by (state* county fips year)
 
 * landuse-based area variables
 	* total
-	egen fipsacresk_nri = rowtotal(*_acresk)
+	egen fipsacresk_nri = rowtotal(*land_acresk)
 	label variable fipsacresk_nri "NRI total landu ac. (thousands), including N/A and Other"
 	* without N/A
-	rename NAland_acresk NA_acTEMPresk
+	rename NAland_acresk NAland_acTEMPresk
 	rename fipsacresk_nri fipsacresk_TEMPnri
-	egen fipsacresk_landunomi = rowtotal(*_acresk)
+	egen fipsacresk_landunomi = rowtotal(*land_acresk)
 	label variable fipsacresk_landunomi "NRI total landu ac. (thousands), excl. N/A, incl. Other"
 	* without N/A and without Other
 	rename Otherland_acresk Otherland_acTEMPresk
 	rename fipsacresk_landunomi fipsacresk_TEMPlandunomi
-	egen fipsacresk_landunooth = rowtotal(*_acresk)
+	egen fipsacresk_landunooth = rowtotal(*land_acresk)
 	label variable fipsacresk_landunooth "NRI total landu ac. (thousands), excl. N/A and Other"
-	
 	rename *TEMP* **
-
 	* % county area in each land use (using total area excluding N/A)
 	local vars CRPland Cropland Forestland Pastureland Rangeland Urbanland /*Otherland*/
 	foreach var of local vars {
 	gen `var'_pcnt = `var'_acresk / fipsacresk_landunooth * 100
+	label variable `var'_pcnt "landu acres / total landu measured acres (no N/A, no other)"
 	}
 	* check percents add up to 100 - COMMENTED OUT AFTER REMOVING 'OTHERLAND' FROM PERCENT CALCULATION. 14 rows are entirely missing or otherland and have zero 'test' values.
 	/*egen test = rowtotal(*_pcnt) 
@@ -232,16 +230,28 @@ collapse(sum) *acresk, by (state* county fips year)
 	drop test */
 
 * lcc-based area variables
+	* omit combined variables from calculations
+	ren lccL12_acresk lcTEMPcL12_acresk 
+	ren lccL34_acresk lcTEMPcL34_acresk
+	ren lccL56_acresk lcTEMPcL56_acresk
+	ren lccL78_acresk lcTEMPcL78_acresk
+	* total
 	egen fipsacresk_lcc = rowtotal(lcc*_acresk)
-	label variable fipsacresk_lcc "NRI total LCC ac. (thousands), excl. no data"
+	label variable fipsacresk_lcc "NRI total LCC ac. (thousands), incl. no data"
+	* without N/A
+	ren lccNA_acresk lcTEMPcNA_acresk
+	egen fipsacresk_lccnomi = rowtotal(lcc*_acresk)
+	label variable fipsacresk_lccnomi "NRI total LCC ac. (thousands), excl. no data"
+	ren *TEMP* **
 	* % county area in each lcc (using total area with lcc data)
 	foreach var of varlist lcc* {
-	gen `var'_pcnt = `var' / fipsacresk_lcc * 100
+	gen `var'_pcnt = `var' / fipsacresk_lccnomi * 100
+	label variable `var'_pcnt "LCC level acres / total LCC measured acres (no N/A)"
 	}
 	rename lcc*_acresk_pcnt lcc*_pcnt
 
 compress
-order state* fips county acresk fipsacres* year lcc* *land*
+order state* fips county acresk fipsacres* year *land* lcc* 
 save processing\NRI\nri15_county_panel, replace
 
 ********************************************************************************

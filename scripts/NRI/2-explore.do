@@ -16,7 +16,7 @@ cd $workingdir
 ********************************************************************************
 ************TIME TREND GRAPH************
 ********************************************************************************
-use processing\NRI\nri15_cleanpanel, clear
+use processing\NRI\nri15_county_panel, clear
 
 collapse(mean) *pcnt* *acresk*, by(year)
 drop fipsacresk*

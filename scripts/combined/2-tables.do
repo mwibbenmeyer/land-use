@@ -15,7 +15,7 @@ cd $workingdir
 
 *******mean percent county area & mean net return value*****************************
 * by year
-	use processing\combined\nri_nr, clear
+	use processing\combined\nri_nr_county_panel, clear
 	* summarize
 		* su landu
 		su *land_pcnt
@@ -33,7 +33,7 @@ cd $workingdir
 	
 * weighed by measured county area, by year
 ssc inst _gwtmean
-	use processing\combined\nri_nr, clear
+	use processing\combined\nri_nr_county_panel, clear
 	* summarize 
 		* su landu, weighed by measured land use area
 		local vars Crop Forest Pasture Range CRP
@@ -49,7 +49,7 @@ ssc inst _gwtmean
 		levelsof year, local(years)
 			foreach y of local years {
 			di `y'
-			su `var' [w=fipsacresk_lcc] if year == `y'
+			su `var' [w=fipsacresk_lccnomi] if year == `y'
 			}
 		}
 		* net returns, weighed by county acreage in each land use
@@ -68,7 +68,7 @@ ssc inst _gwtmean
 		}
 		* LCC
 		foreach var of varlist lcc*pcnt {
-		egen wtmean_`var' = wtmean(`var'), weight(fipsacresk_lcc) by(year)
+		egen wtmean_`var' = wtmean(`var'), weight(fipsacresk_lccnomi) by(year)
 		}
 		* net returns
 		egen wtmean_crop_nr = wtmean(crop_nr), weight(fipsacresk_landunooth) by(year)
@@ -85,6 +85,6 @@ ssc inst _gwtmean
 	export excel using results\initial_descriptives\combined\sumtable_countymeans_weighted.xlsx, replace
 
 *******LAND USE SUMMARY TABLE*****************************
-use processing\combined\nri_nr, clear
+use processing\combined\nri_nr_county_panel, clear
 collapse(sum) *_acresk, by (year)
 export excel using results\initial_descriptives\combined\landu_lcc_totalarea.xlsx, firstrow(variables) replace
