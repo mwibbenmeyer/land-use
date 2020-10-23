@@ -165,7 +165,7 @@ ren _*_landu *_acresk
 ren lccL0_acresk lccNA_acresk
 
 * CRP wasn't established until 1985. replace missing values prior to then with zero.
-* replace CRPland_acresk = 0 if year < 1985
+replace CRPland_acresk = 0 if year < 1985
 
 * generate combined LCC (as in Lubowski 2006)
 gen lccL12_acresk = lccL1_acresk + lccL2_acresk

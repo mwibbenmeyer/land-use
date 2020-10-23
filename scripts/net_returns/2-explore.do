@@ -253,11 +253,24 @@ graph save "processing\net_returns\graphs_temp/urban_nr_western", replace
 	graph export results\initial_descriptives\net_returns\urban_nr_western_maps_2008-2013.png, replace
 	window manage close graph
 
-
-
-
-
-
+**********
+*********** 5: COUNTIES WITH ALL 3 NR VALUES EVERY YEAR 02, 07, 12***********
+**********
+use processing\net_returns\clean, clear
+* keep years of interest
+keep if year == 2002 | year == 2007 | year == 2012
+* tag counties with data
+gen crop_nr_tag = crop_nr != .
+gen forest_nr_tag = forest_nr != .
+gen urban_nr_tag = urban_nr != .
+* summarize
+collapse(sum) *tag, by(fips)
+gen all3values3years = crop_nr_tag == 3 & forest_nr_tag == 3 & urban_nr_tag == 3
+keep fips all*
+* map
+ren fips county
+maptile all3values3years , geo(county2010) fcolor(Purples)
+graph export results\initial_descriptives\net_returns\countiesall3values_020712.png, replace
 
 
 
