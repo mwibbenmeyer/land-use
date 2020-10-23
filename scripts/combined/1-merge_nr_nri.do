@@ -20,7 +20,7 @@ cd $workingdir
 * resources: 
 	* https://www.nrcs.usda.gov/wps/portal/nrcs/detail/national/technical/nra/nri/results/?cid=nrcs143_013710
 	* https://www.ddorn.net/data/FIPS_County_Code_Changes.pdf
-use processing\NRI\nri15_cleanpanel, clear
+use processing\NRI\nri15_county_panel, clear
 keep fips state*
 duplicates drop
 merge 1:m fips using processing\net_returns\clean
@@ -52,7 +52,7 @@ save processing\NRI\nri_nr_mergenotes, replace
 ************IMPLEMENT MERGE************
 ********************************************************************************
 * make changes to NRI data
-use processing\NRI\nri15_cleanpanel, clear
+use processing\NRI\nri15_county_panel, clear
 merge m:1 fips using processing\NRI\nri_nr_mergenotes
 drop if note == "NRI drop, no counterpart"
 drop if note == "NRI drop, merged with adjacent"
@@ -81,5 +81,5 @@ drop merge1
 
 * save
 compress
-save processing\combined\nri_nr, replace
-use processing\combined\nri_nr, clear
+save processing\combined\nri_nr_county_panel, replace
+use processing\combined\nri_nr_county_panel, clear
