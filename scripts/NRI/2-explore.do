@@ -19,7 +19,6 @@ cd $workingdir
 use processing\NRI\nri15_county_panel, clear
 
 collapse(mean) *pcnt* *acresk*, by(year)
-drop fipsacresk*
 
 * percents
 twoway (connected CRPland_pcnt year, sort color(lavender)) ///
@@ -28,7 +27,6 @@ twoway (connected CRPland_pcnt year, sort color(lavender)) ///
 	(connected Pastureland_pcnt year, sort color(lime)) ///
 	(connected Rangeland_pcnt year, sort color(olive_teal)) ///
 	(connected Urbanland_pcnt year, sort color(purple))
-	* (connected Other_pcnt year, sort color(stone))
 gr_edit title.text.Arrpush Mean % of County by Year
 gr_edit yaxis1.title.text.Arrpush %
 graph export results\initial_descriptives\NRI\meanpcnt_year_scatter.png, replace
@@ -41,8 +39,9 @@ twoway (connected CRPland_acresk year, sort color(lavender)) ///
 	(connected Pastureland_acresk year, sort color(lime)) ///
 	(connected Rangeland_acresk year, sort color(olive_teal)) ///
 	(connected Urbanland_acresk year, sort color(purple)) ///
-	(connected Otherland_acresk year, sort color(stone))
-	* (connected NA_acresk year, sort color (black))
+	(connected Federalland_acresk year, sort color(stone)) ///
+	(connected Waterland_acresk year, sort color(blue)) ///
+	(connected Ruralland_acresk year, sort color(pink))
 gr_edit title.text.Arrpush Mean Acres by Year
 gr_edit yaxis1.title.text.Arrpush Acres (thousands)
 graph export results\initial_descriptives\NRI\meanacresk_year_scatter.png, replace
