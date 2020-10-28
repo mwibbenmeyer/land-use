@@ -26,7 +26,7 @@ cd $workingdir
 	* create table
 	collapse(mean) *pcnt* *_nr, by(year)
 	sort year 
-	order year Cropland* CRPland* Forestland* Pastureland* Rangeland* Urbanland* lccL* *nr
+	order year Cropland* CRPland* Forestland* Pastureland* Rangeland* Urbanland* lccNA* lccL* *nr
 	xpose, varname clear
 	order _varname
 	export excel using results\initial_descriptives\combined\sumtable_countymeans.xlsx, replace
@@ -36,12 +36,12 @@ ssc inst _gwtmean
 	use processing\combined\nri_nr_county_panel, clear
 	* summarize 
 		* su landu, weighed by measured land use area
-		local vars Crop Forest Pasture Range CRP
+		local vars Crop Forest Pasture Range CRP Urban
 		levelsof year, local(years)
 		foreach var in `vars' {
 			foreach y of local years {
 			di `y'
-			su `var'land_pcnt [w=fipsacresk_landunooth] if year == `y'
+			su `var'land_pcnt [w=acresk_6classes] if year == `y'
 			}
 		}
 		* su LCC, weighed by measured LCC area 
@@ -49,37 +49,37 @@ ssc inst _gwtmean
 		levelsof year, local(years)
 			foreach y of local years {
 			di `y'
-			su `var' [w=fipsacresk_lccnomi] if year == `y'
+			su `var' [w=acresk_6classes] if year == `y'
 			}
 		}
 		* net returns, weighed by county acreage in each land use
 		levelsof year, local(years)
 		foreach y of local years {
 		di `y'
-		su crop_nr [w=fipsacresk_landunooth] if year == `y'
-		su forest_nr [w=fipsacresk_landunooth] if year == `y'
-		su urban_nr [w=fipsacresk_landunooth] if year == `y'
+		su crop_nr [w=Cropland_acresk] if year == `y'
+		su forest_nr [w=Forestland_acresk] if year == `y'
+		su urban_nr [w=Urbanland_acresk] if year == `y'
 		}
 	* generate weighted means
 		* landu
 		local vars Crop Forest Pasture Range CRP Urban
 		foreach var in `vars' {
-		egen wtmean_`var'land_pcnt = wtmean(`var'land_pcnt), weight(fipsacresk_landunooth) by(year)
+		egen wtmean_`var'land_pcnt = wtmean(`var'land_pcnt), weight(acresk_6classes) by(year)
 		}
 		* LCC
 		foreach var of varlist lcc*pcnt {
-		egen wtmean_`var' = wtmean(`var'), weight(fipsacresk_lccnomi) by(year)
+		egen wtmean_`var' = wtmean(`var'), weight(acresk_6classes) by(year)
 		}
 		* net returns
-		egen wtmean_crop_nr = wtmean(crop_nr), weight(fipsacresk_landunooth) by(year)
-		egen wtmean_forest_nr = wtmean(forest_nr), weight(fipsacresk_landunooth) by(year)
-		egen wtmean_urban_nr = wtmean(urban_nr), weight(fipsacresk_landunooth) by(year)
+		egen wtmean_crop_nr = wtmean(crop_nr), weight(acresk_6classes) by(year)
+		egen wtmean_forest_nr = wtmean(forest_nr), weight(acresk_6classes) by(year)
+		egen wtmean_urban_nr = wtmean(urban_nr), weight(acresk_6classes) by(year)
 	* create table
 	keep year wtmean*
 	duplicates drop
 	rename wtmean_* *
 	sort year 
-	order year Cropland* CRPland* Forestland* Pastureland* Rangeland* Urbanland* lccL* *nr
+	order year Cropland* CRPland* Forestland* Pastureland* Rangeland* Urbanland* lccNA* lccL* *nr
 	xpose, varname clear
 	order _varname
 	export excel using results\initial_descriptives\combined\sumtable_countymeans_weighted.xlsx, replace
@@ -101,6 +101,7 @@ forvalues x = 0/8 {
 gen lccL`x' = lccL`x'_acresk > 0
 }
 drop lccL*_acresk
+compress
 * calculate total landu acres by LCC level
 * pseudocode/debugging:
 	* bysort lccL1 year: egen Cropland_lccL1_acres = sum(Cropland_acresk)
@@ -117,6 +118,7 @@ foreach landuvar of varlist *land* {
 		drop `landuvar'_lccL`x'
 	}
 }
+compress
 * drop vars & duplicates
 foreach landuvar of varlist *land_acresk {
 drop `landuvar'
@@ -130,13 +132,13 @@ duplicates drop
 collapse(sum) *pcnt, by (year)
 * reshape
 ren *land_lcc*_pcnt *land_*
-reshape long Cropland_L CRPland_L Forestland_L NAland_L Otherland_L Pastureland_L Rangeland_L Urbanland_L, i(year) j(lccL)
+reshape long Cropland_L CRPland_L Forestland_L Pastureland_L Rangeland_L Urbanland_L Waterland_L Federalland_L Ruralland_L, i(year) j(lccL)
 ren *land_L *land
 ren lccL LCC
 tostring LCC, replace
 replace LCC = "N/A" if LCC == "0"
 * finalize
-order year LCC Range* Forest* Crop* Other* Pasture* Urban* CRP* NA*
+order year LCC Range* Forest* Crop* Pasture* Urban* CRP* Federal* Rural* Water*
 sort year LCC*
 compress
 save processing\NRI\nri15_point_landu_lcc_pcnt, replace
