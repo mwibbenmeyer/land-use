@@ -38,3 +38,4 @@ drop if stateAbbrev == "HI"
 * save
 compress
 save processing\net_returns\clean, replace
+use processing\net_returns\clean, clear
