@@ -18,6 +18,7 @@ cd $workingdir
 ********************************************************************************
 * load dataset, save version with reduced n variables (reduced size from ~1,500 MB to ~ 200 MB)
 import delimited raw_data\NRI\nri15_cty_082019.csv, clear
+format %10.0g riad_id
 keep state county fips lcc* xfact crp9* crp0* crp1* broad* landu* riad_id // keep vars of interest
 order riad_id
 * rename variables with years from 2 digits to 4 to facilitate reshape
@@ -193,6 +194,7 @@ collapse(sum) *acresk, by (state* county fips year)
 	local vars CRPland Cropland Forestland Pastureland Rangeland Urbanland 
 	foreach var of local vars {
 	gen `var'_pcnt = `var'_acresk / acresk_6classes  * 100
+	replace `var'_pcnt = 0 if `var'_pcnt == . & acresk_6classes  == 0
 	label variable `var'_pcnt "landu acres / county acres in 6 classes of interest"
 	}
 	* check percents add up to 100 - COMMENTED OUT AFTER REMOVING 'OTHERLAND' FROM PERCENT CALCULATION. 14 rows are entirely missing or otherland and have zero 'test' values.

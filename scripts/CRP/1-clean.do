@@ -20,7 +20,7 @@ cd $workingdir
 	ren y CRPacres
 	gen CRPacresk = CRPacres/1000
 	drop CRPacres
-	label variable CRPacresk "Thousand acres in CRP (USDA Statistics)"
+	label variable CRPacresk "Thousand acres in CRP (USDA County Stats)"
 	compress
 	save processing\CRP\acres, replace
 
@@ -28,7 +28,7 @@ cd $workingdir
 	import excel raw_data\CRP\HistoryCounty86-19.xlsx, sheet("RENT") cellrange(A2:AJ3083) firstrow allstring clear
 	do scripts\CRP\1-clean_sub1.do
 	ren y CRPrent
-	label variable CRPrent "CRP Contract-based FY rental payments (not actuals) (USDA Statistics)"
+	label variable CRPrent "CRP Contract-based FY rental payments (not actuals) (USDA County Stats)"
 	compress
 	save processing\CRP\rent, replace
 
@@ -36,7 +36,7 @@ cd $workingdir
 	import excel raw_data\CRP\HistoryCounty86-19.xlsx, sheet("AVERAGE") cellrange(A2:AK3083) firstrow allstring clear
 	do scripts\CRP\1-clean_sub1.do
 	ren y CRP_nr
-	label variable CRP_nr "avg per-CRPacre contract-based FY rent payments (not actuals) (USDA Statistics)"
+	label variable CRP_nr "avg per-CRPacre contract-based FY rent payments (not actuals) (USDA County Stats)"
 	save processing\CRP\avg, replace
 
 * MERGE

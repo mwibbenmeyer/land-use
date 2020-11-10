@@ -1,6 +1,6 @@
 /* Programmer: Alexandra Thompson
 Start Date: October 5, 2020
-Objective: Merge cleaned net_returns and NRI county-year panel datasets
+Objective: Merge cleaned net_returns, NRI, and CRP county-level data to create panel
 */
 
 ********************************************************************************
@@ -39,8 +39,8 @@ replace NRI_nr_mergenote = "NRI leave, addressed in nr" if fips == 12025 & _merg
 * unmatched from using
 replace NRI_nr_mergenote = "nr replace 12086 with 12025 to match NRI" if fips == 12086  & _merge == 2 // 12025 (Dade County) renamed as 12086 (Miami-Dade), rev. to match NRI data
 replace NRI_nr_mergenote = "nr drop, no counterpart in NRI" if fips == 8014 & _merge == 2 // Broomfield county created in 2001, doesn't exist in NRI data
-replace NRI_nr_mergenote = "nr drop, no counterpart" if fips == 8031 & _merge == 2 // Denver county, small so not in NRI
-replace NRI_nr_mergenote = "nr drop, no counterpart" if fips == 29510 & _merge == 2 // 29510 was collapsed into 29189 in NRI
+replace NRI_nr_mergenote = "nr drop, no counterpart in NRI" if fips == 8031 & _merge == 2 // Denver county, small so not in NRI
+replace NRI_nr_mergenote = "nr drop, no counterpart in NRI" if fips == 29510 & _merge == 2 // 29510 was collapsed into 29189 in NRI
 replace NRI_nr_mergenote = "nr drop, DC not in NRI" if stateAbbrev == "DC"
 assert stateAbbrev != "VA" if _merge == 1 // check no potential Virginia counterparts in NRI data
 replace NRI_nr_mergenote = "nr drop, Virginia, no counterpart in NRI" if stateAbbrev == "VA" & _merge == 2
@@ -62,12 +62,22 @@ ta NRI_nr_mergenote // list notes
 * implement notes changes ONLY IF INCREASE MERGE RATE, NO DROPS
 	replace fips = 12025 if fips == 12086
 drop NRI_nr_mergenote _merge
-gen NRdata = 1 // tag if NR data (all obs in this dataset)
+/*gen data_NR = 1 // tag if NR data (all obs in this dataset)
+	label variable data_NR "obs has NR data"*/
+* NR components
+local nrvars forest urban crop
+foreach var in `nrvars' {
+	gen data_NR`var' = `var'_nr != .
+	label variable data_NR`var' "obs has NR`var' data"
+	}
 
 * merge to NRI data
 merge 1:1 fips year using processing\NRI\nri15_county_panel
 drop state county
-gen NRIdata = _merge != 1 // tag if NRI data (all obs other than MASTER ONLY)
+gen data_NRI = _merge != 1 // tag if NRI data (all obs other than MASTER ONLY)
+	label variable data_NRI "obs has NRI data"
+gen data_NRI6classes = acresk_6classes != 0 & acresk_6classes != .
+	label variable data_NRI6classes "obs has NRI LU data in 1/6 classes of interest"
 ren _merge NRI2_nr1_merge
 merge m:1 fips using processing\combined\nri_nr_mergenotes
 * drop if notes no longer relevant
@@ -86,7 +96,7 @@ drop _merge
 	drop tag
 
 ta NRI_nr_mergenote // list notes
-replace NRdata = 0 if NRdata == .
+*replace data_NR = 0 if data_NR == .
 * save
 compress
 save processing\combined\nri_nr_county_panel, replace
@@ -110,8 +120,8 @@ gen NRInr_CRP_mergenote = "999"
 * unmatched from master
 replace NRInr_CRP_mergenote = "CRP data explicitly exclude VA cities" if _merge == 1 & stateAbbrev == "VA"
 replace NRInr_CRP_mergenote = "CRP data exclude DC" if _merge == 1 & stateAbbrev == "DC"
-replace NRInr_CRP_mergenote = "nr drop, no counterpart in CRP" if fips == 8014 & _merge == 1 // Broomfield county created in 2001, doesn't exist in NRI data
-replace NRInr_CRP_mergenote = "nr drop, no counterpart in CRP" if fips == 56047 & _merge == 1 // "parts of 56029 & 56039 were used to create 56047" (but both 56029 & 56039 exist in both datasets)
+replace NRInr_CRP_mergenote = "no counterpart in CRP" if fips == 8014 & _merge == 1 // Broomfield county created in 2001, doesn't exist in NRI data
+replace NRInr_CRP_mergenote = "no counterpart in CRP" if fips == 56047 & _merge == 1 // "parts of 56029 & 56039 were used to create 56047" (but both 56029 & 56039 exist in both datasets)
 * unmatched from using (CRP)
 drop if CRPstate == "PUERTO RICO" | CRPstate == "ALASKA" | CRPstate == "HAWAII"
 assert _merge != 2
@@ -125,7 +135,8 @@ save processing\combined\nrinr_crp_mergenotes, replace
 ************IMPLEMENT NR/NRI-CRP MERGE************
 ********************************************************************************
 use processing\CRP\CRPmerged, clear // load CRP panel
-	gen CRPdata = 1 // tag CRP data
+	gen data_CRP = 1 // tag CRP data
+	label variable data_CRP "obs has CRP data (if mi, CRP acres is zero or very low)"
 merge 1:1 fips year using processing\combined\nri_nr_county_panel // merge to NRI/NR panel
 	ren _merge NRInr2_CRP1_merge
 	* drop years/states not in nri data
@@ -145,12 +156,21 @@ merge m:1 fips using  processing\combined\nrinr_crp_mergenotes // merge to merge
 	ta NRInr_CRP_mergenote
 drop CRPstate CRPcounty
 
-* FINALIZE
-local datavars NRdata NRIdata CRPdata
+* data availability vars
+local datavars NRforest NRcrop NRurban NRI NRI6classes CRP
 foreach var in `datavars' {
-	replace `var' = 0 if `var' == .
+	replace data_`var' = 0 if data_`var' == .
+	gen datami_`var' = data_`var' == 0
 	}
-order state* fips year acresk* *data
+gen data_NRNRICRP = data_NRI6classes + data_CRP + data_NRforest + data_NRcrop + data_NRurban == 5
+label variable data_NRNRICRP "obs has NRI(6classes), CRP, and 3 NR data components"
+
+* FINALIZE
+order state* fips year acresk* data*
 compress
 save processing\combined\nri_nr_crp_countypanel, replace
 use processing\combined\nri_nr_crp_countypanel, clear
+
+* clean up
+erase processing\combined\nri_nr_county_panel.dta
+
