@@ -179,5 +179,5 @@ for (year in c(2007,2012,2015)) {
   }
 
 year = 2012
-df12 <- read_sf(sprintf("processing/net_returns/urban/county_valp/%s/county_valp_%s.shp",year,year))
+df <- read_sf(sprintf("processing/net_returns/urban/county_valp/%s/county_valp_%s.shp",year,year))
 ggplot() + geom_sf(data =df12,aes(fill = valp))
