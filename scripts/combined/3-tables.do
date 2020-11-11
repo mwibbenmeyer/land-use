@@ -15,7 +15,7 @@ cd $workingdir
 
 *******mean percent county area & mean net return value*****************************
 * by year
-	use processing\combined\nri_nr_county_panel, clear
+	use processing\combined\nri_nr_crp_countypanel, clear
 	* summarize
 		* su landu
 		su *land_pcnt
@@ -33,7 +33,7 @@ cd $workingdir
 	
 * weighed by measured county area, by year
 ssc inst _gwtmean
-	use processing\combined\nri_nr_county_panel, clear
+	use processing\combined\nri_nr_crp_countypanel, clear
 	* summarize 
 		* su landu, weighed by measured land use area
 		local vars Crop Forest Pasture Range CRP Urban
@@ -59,6 +59,7 @@ ssc inst _gwtmean
 		su crop_nr [w=Cropland_acresk] if year == `y'
 		su forest_nr [w=Forestland_acresk] if year == `y'
 		su urban_nr [w=Urbanland_acresk] if year == `y'
+		su CRP_nr [w=CRPacresk] if year == `y'
 		}
 	* generate weighted means
 		* landu
@@ -74,6 +75,7 @@ ssc inst _gwtmean
 		egen wtmean_crop_nr = wtmean(crop_nr), weight(acresk_6classes) by(year)
 		egen wtmean_forest_nr = wtmean(forest_nr), weight(acresk_6classes) by(year)
 		egen wtmean_urban_nr = wtmean(urban_nr), weight(acresk_6classes) by(year)
+		egen wtmean_CRP_nr = wtmean(CRP_nr), weight(acresk_6classes) by(year)
 	* create table
 	keep year wtmean*
 	duplicates drop
@@ -85,9 +87,9 @@ ssc inst _gwtmean
 	export excel using results\initial_descriptives\combined\sumtable_countymeans_weighted.xlsx, replace
 
 *******LAND USE SUMMARY TABLE*****************************
-use processing\combined\nri_nr_county_panel, clear
+use processing\combined\nri_nr_crp_countypanel, clear
 collapse(sum) *_acresk, by (year)
-export excel using results\initial_descriptives\combined\landu_lcc_totalarea.xlsx, firstrow(variables) replace
+export excel using results\initial_descriptives\NRI\landu_lcc_totalarea.xlsx, firstrow(variables) replace
 
 *******LAND USE BY LCC TABLE*****************************
 use processing\NRI\nri15_point_panel, clear

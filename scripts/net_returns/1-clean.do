@@ -35,6 +35,11 @@ drop fipsstring
 drop if stateAbbrev == "AK"
 drop if stateAbbrev == "HI"
 
+* label
+label variable forest_nr "2010USD annualized net return/acre of bare forestland [L&M]"
+label variable urban_nr "2010USD annualized net return/acre derived from price of recently dev. land[L&M]"
+label variable crop_nr "2010USD annualized net return/acre net income deriving from crop production[L&M]"
+
 * save
 compress
 save processing\net_returns\clean, replace
