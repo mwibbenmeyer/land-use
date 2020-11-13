@@ -12,6 +12,7 @@ cd $workingdir
 	* by year
 		use processing\combined\nri_nr_crp_countypanel, clear
 		keep if data_NRI6classes == 1 // keep if NRIdata w/ any LU other than federal/water/rural
+		drop data_NRI
 		gen n = 1
 		collapse(sum) *data* n, by (year)
 		assert n == data_NRI6classes
@@ -31,8 +32,10 @@ cd $workingdir
 		export excel using results\initial_descriptives\combined\dataObsStats.xlsx, sheet("county-overall") sheetreplace  firstrow(variables)
 
 * point
+	* by year
 		use processing\combined\nri_nr_crp_pointpanel, clear
 		keep if data_NRI6classes == 1 // keep if NRIdata w/ any LU other than federal/water/rural
+		drop data_NRI
 		gen n = 1
 		collapse(sum) *data* n, by (year)
 		assert n == data_NRI6classes
@@ -55,6 +58,7 @@ cd $workingdir
 * var labels
 		use processing\combined\nri_nr_crp_countypanel, clear
 		keep data*
+			drop data_NRI
 		drop datami*
 		gen pcnt = 0
 			label variable pcnt "percent of all observations (data_NRI == 1)"

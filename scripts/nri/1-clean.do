@@ -183,14 +183,14 @@ compress
 save processing\NRI\nri15_point_panel, replace
 
 ********************************************************************************
-*************CREATE COUNTY-LEVEL PANEL OF LAND USE AND LAND COVER CLASS DATA*****
+*************CREATE COUNTY-LEVEL PANEL OF LAND USE AND LAND CAPABILITY CLASS DATA*****
 ********************************************************************************
 use processing\NRI\nri15_point_panel, clear
 collapse(sum) *acresk, by (state* county fips year)
 
 	* % county area in each land use (using total area excluding federal, rural, water)
 	gen acresk_6classes = CRPland_acresk+ Cropland_acresk+ Forestland_acresk+ Pastureland_acresk+ Rangeland_acresk+ Urbanland_acresk
-	label variable acresk_6classes "total acresk in 6 lu classes of interest (CRP,crop,for,pasture,range,urb)"
+		label variable acresk_6classes "total acresk in 6 lu classes of interest (CRP,crop,for,pasture,range,urb)"
 	local vars CRPland Cropland Forestland Pastureland Rangeland Urbanland 
 	foreach var of local vars {
 	gen `var'_pcnt = `var'_acresk / acresk_6classes  * 100
@@ -210,7 +210,7 @@ collapse(sum) *acresk, by (state* county fips year)
 	rename lcc*_acresk_pcnt lcc*_pcnt
 
 compress
-order state* fips county acresk* year *land* lcc* 
+order state* fips county acresk* year *land*
 save processing\NRI\nri15_county_panel, replace
 
 ********************************************************************************

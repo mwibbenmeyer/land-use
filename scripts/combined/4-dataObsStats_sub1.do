@@ -3,10 +3,10 @@ foreach var in `vars' {
 	gen datapcnt_`var' = data_`var' / n * 100
 	gen datamipcnt_`var' = datami_`var' / n * 100
 	}
-gen datapcnt_NRINRCRP = data_NRNRICRP / n * 100
+gen datapcnt_NRNRICRP = data_NRNRICRP / n * 100
 
 * order
-order data_NRNRICRP datapcnt_NRINRCRP ///
+order data_NRNRICRP datapcnt_NRNRICRP ///
 			data_NRI datapcnt_NRI datami_NRI datamipcnt_NRI ///
 			data_NRI* datapcnt_NRI* datami_NRI* datamipcnt_NRI* ///
 			data_NRcrop datapcnt_NRcrop datami_NRcrop datamipcnt_NRcrop ///

@@ -27,3 +27,4 @@ sort stateName fips riad_id year
 * save
 compress
 save processing\combined\nri_nr_crp_pointpanel, replace
+use processing\combined\nri_nr_crp_pointpanel, clear

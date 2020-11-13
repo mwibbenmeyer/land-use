@@ -174,3 +174,11 @@ use processing\combined\nri_nr_crp_countypanel, clear
 * clean up
 erase processing\combined\nri_nr_county_panel.dta
 
+* compare CRP acreage values between NRCS and NRI data
+use processing\combined\nri_nr_crp_countypanel, clear
+ren CRPland_acresk NRICRPacresk
+ren CRPacresk NRCSCRPacresk
+keep year fips NRCSCRPacresk NRICRPacresk
+gen diff = NRICRPacresk- NRCSCRPacresk
+collapse(sum) NRCSCRP* NRICRP*, by (year)
+gen pcntdiff = (abs( NRICRPacresk- NRCSCRPacresk))/(( NRICRPacresk+ NRCSCRPacresk)/2)*100
