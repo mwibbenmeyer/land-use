@@ -196,11 +196,20 @@ collapse(sum) *acresk, by (state* county fips year)
 	gen `var'_pcnt = `var'_acresk / acresk_6classes  * 100
 	replace `var'_pcnt = 0 if `var'_pcnt == . & acresk_6classes  == 0
 	label variable `var'_pcnt "landu acres / county acres in 6 classes of interest"
+	compress
 	}
-	* check percents add up to 100 - COMMENTED OUT AFTER REMOVING 'OTHERLAND' FROM PERCENT CALCULATION. 14 rows are entirely missing or otherland and have zero 'test' values.
-	/*egen test = rowtotal(*_pcnt) 
+	* % county area in each land use (including federal, rural, water)
+	local vars CRPland Cropland Forestland Pastureland Rangeland Urbanland Federalland Waterland Ruralland
+	foreach var of local vars {
+	gen `var'_pcnt2 = `var'_acresk / acresk  * 100
+	replace `var'_pcnt2 = 0 if `var'_pcnt2 == . & acresk  == 0
+	label variable `var'_pcnt2 "landu acres / county acres"
+	compress
+	}
+	* check percents add up to 100
+	egen test = rowtotal(*_pcnt2) 
 	assert test >= 99.9 & test <= 100.1
-	drop test*/
+	drop test
 
 	* % county area in each lcc (using total area with lcc data)
 	foreach var of varlist lcc* {
