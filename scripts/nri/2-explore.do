@@ -33,15 +33,15 @@ graph export results\initial_descriptives\NRI\meanpcnt_6classes_year_scatter.png
 window manage close graph
 
 * percents w/ other
-twoway (connected CRPland_pcnt year, sort color(lavender)) ///
-	(connected Cropland_pcnt year, sort color(orange)) ///
-	(connected Forestland_pcnt year, sort color(green)) ///
-	(connected Pastureland_pcnt year, sort color(lime)) ///
-	(connected Rangeland_pcnt year, sort color(olive_teal)) ///
-	(connected Urbanland_pcnt year, sort color(purple)) ///
-	(connected Federalland_pcnt year, sort color(magenta)) ///
-	(connected Waterland_pcnt year, sort color(blue)) ///
-	(connected Ruralland_pcnt year, sort color(cyan))
+twoway (connected CRPland_pcnt2 year, sort color(lavender)) ///
+	(connected Cropland_pcnt2 year, sort color(orange)) ///
+	(connected Forestland_pcnt2 year, sort color(green)) ///
+	(connected Pastureland_pcnt2 year, sort color(lime)) ///
+	(connected Rangeland_pcnt2 year, sort color(olive_teal)) ///
+	(connected Urbanland_pcnt2 year, sort color(purple)) ///
+	(connected Federalland_pcnt2 year, sort color(magenta)) ///
+	(connected Waterland_pcnt2 year, sort color(blue)) ///
+	(connected Ruralland_pcnt2 year, sort color(cyan))
 gr_edit title.text.Arrpush Mean % of County by Year (all classes)
 gr_edit yaxis1.title.text.Arrpush %
 graph export results\initial_descriptives\NRI\meanpcnt_allclasses_year_scatter.png, replace
