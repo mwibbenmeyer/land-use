@@ -19,6 +19,7 @@ cd $workingdir
 * globals
 global luvars Crop Urban Pasture Range Forest CRP Federal Rural Water
 global nrvars urban crop forest CRP
+global years 1982 1987 1992 1997 2002 2007 2012
 
 ********************************************************************************
 ************GRAPHS************
@@ -36,59 +37,79 @@ twoway (kdensity missing, lcolor(red)) (kdensity nonmissing, lcolor(blue)), ///
 	title(Missing Forest Net Returns)
 */
 
-use processing\combined\nri_nr_crp_countypanel, clear
-levelsof year, local(years)
-foreach y of local years {
+foreach y in $years {
 foreach nr in $nrvars  {
 global graphnames
 foreach lu in $luvars {
 	* load
-	cd $workingdir
 	use processing\combined\nri_nr_crp_countypanel, clear
-	keep if year == `y'
-	keep if data_NRI6classes == 1
+	qui keep if year == `y'
+	qui keep if data_NRI6classes == 1
 	* temporary CRP_nr binary variables
 	gen datami_NRCRP = CRP_nr == .
 	gen data_NRCRP = CRP_nr != .
+	* count n
+	qui count if datami_NR`nr' == 1
 	* generate percent land use vars by data availability
 	gen missing = `lu'land_pcnt2 if datami_NR`nr' == 1
 	gen nonmissing = `lu'land_pcnt2 if data_NR`nr' == 1
 	* graph
 	twoway (kdensity missing if missing!=., lcolor(red)) (kdensity nonmissing if nonmissing != ., lcolor(blue)), ///
-		xtitle(% `lu')
+		subtitle(`y') ///
+		caption(`r(N)' / 3072 missing)
+	gr_edit subtitle.style.editstyle size(medsmall) editcopy
+	gr_edit caption.style.editstyle size(vsmall) editcopy
+	gr_edit xaxis1.title.draw_view.setstyle, style(no)
 	gr_edit xaxis1.style.editstyle majorstyle(tickstyle(textstyle(size(vsmall)))) editcopy
 	gr_edit yaxis1.style.editstyle majorstyle(tickstyle(textstyle(size(vsmall)))) editcopy
 	* pause
 	* save
-	local graphname "kdens_`y'_`nr'nr_`lu'.gph"
-	qui graph save "processing\combined\tempgraphs\\`graphname'", replace
+	qui graph save "processing\combined\tempgraphs\\kdens_`y'_`nr'nr_`lu'.gph", replace
 	qui graph export "processing\combined\tempgraphs\\kdens_`y'_`nr'nr_`lu'.png", replace
-	global graphnames $graphnames `graphname'
 	}
+	}
+	}
+	
 * combine
-count if datami_NR`nr' == 1
+foreach nr in $nrvars {
+* define land use of interest
+	if "`nr'" == "forest" {
+		local lu = "Forest"
+		}
+	if "`nr'" == "crop" {
+		local lu = "Crop"
+		}
+	if "`nr'" == "CRP" {
+		local lu = "CRP"
+		}
+	if "`nr'" == "urban" {
+		local lu = "Urban"
+		}
+	* di "`nr'"
+	* di "`lu'"
+* combine
+qui cd $workingdir
 cd processing\combined\tempgraphs
-grc1leg $graphnames, ///
-	title(Land Use Distributions - counties missing/nonmissing `nr' net returns) ///
-	subtitle(`y') ///
-	caption(`r(N)' / 3072 missing)
-	gr_edit title.style.editstyle size(medium) editcopy
-	gr_edit subtitle.style.editstyle size(medsmall) editcopy
-	gr_edit caption.style.editstyle size(small) editcopy
-	gr_edit legend.Edit, style(labelstyle(size(small)))
-	gr_edit style.editstyle boxstyle(shadestyle(color(white))) editcopy
-	gr_edit style.editstyle boxstyle(linestyle(color(white))) editcopy
-* save
-cd $workingdir
-qui graph export "results\initial_descriptives\combined\graphs_missingNR_by_LU\kdensLU_`nr'nr_`y'.png", replace
-*pause
+grc1leg kdens_1982_`nr'nr_`lu'.gph ///	
+		kdens_1987_`nr'nr_`lu'.gph ///
+		/*kdens_1992_`nr'nr_`lu'.gph ///
+		kdens_1997_`nr'nr_`lu'.gph ///	
+		kdens_2002_`nr'nr_`lu'.gph */ ///	
+		kdens_2007_`nr'nr_`lu'.gph ///	
+		kdens_2012_`nr'nr_`lu'.gph, ///	
+		title(Kernel Density (y) of Percent `lu' Land Use (x)) ///
+		subtitle (In counties missing/nonmissing `nr' net returns)
+		gr_edit title.style.editstyle size(medium) editcopy
+		gr_edit subtitle.style.editstyle size(medsmall) editcopy
+		gr_edit legend.Edit, style(labelstyle(size(small)))
+qui cd $workingdir
+qui graph export "results\initial_descriptives\combined\graphs_missingNR_by_LU\kdensLU_`lu'_`nr'nr.png", replace
+* pause
 }
-}
+	
 
 * CLEANUP (.gph files only)
-use processing\combined\nri_nr_crp_countypanel, clear
-levelsof year, local(years)
-foreach y of local years {
+foreach y in $years {
 foreach nr in $nrvars  {
 foreach lu in $luvars {
 capture erase processing\combined\tempgraphs\kdens_`y'_`nr'nr_`lu'.gph
