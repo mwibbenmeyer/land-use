@@ -58,7 +58,7 @@ foreach lu in $luvars {
 		xtitle(% `lu')
 	gr_edit xaxis1.style.editstyle majorstyle(tickstyle(textstyle(size(vsmall)))) editcopy
 	gr_edit yaxis1.style.editstyle majorstyle(tickstyle(textstyle(size(vsmall)))) editcopy
-	 pause
+	* pause
 	* save
 	local graphname "kdens_`y'_`nr'nr_`lu'.gph"
 	qui graph save "processing\combined\tempgraphs\\`graphname'", replace
@@ -69,7 +69,7 @@ foreach lu in $luvars {
 count if datami_NR`nr' == 1
 cd processing\combined\tempgraphs
 grc1leg $graphnames, ///
-	title(Land Use Distributions - counties missing `nr' net returns) ///
+	title(Land Use Distributions - counties missing/nonmissing `nr' net returns) ///
 	subtitle(`y') ///
 	caption(`r(N)' / 3072 missing)
 	gr_edit title.style.editstyle size(medium) editcopy
@@ -81,6 +81,7 @@ grc1leg $graphnames, ///
 * save
 cd $workingdir
 qui graph export "results\initial_descriptives\combined\graphs_missingNR_by_LU\kdensLU_`nr'nr_`y'.png", replace
+*pause
 }
 }
 
