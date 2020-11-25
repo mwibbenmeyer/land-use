@@ -134,7 +134,6 @@ collapse(mean) *pcnt* *acresk*, by(year fips)
 keep year *_pcnt2 fips
 rename fips county
 
-
 * colors
 	local Crop_colors = "Oranges"
 	local Forest_colors= "Greens"
