@@ -237,10 +237,12 @@ use processing\NASS\pasturerents_all, clear
 	order multistateregion_desc state_fips_code state* asd* fips county* year
 	sort state_fips_code fips year
 	ren pasture_nr0 pasture_nr
+	replace fips = 46113 if fips == 46102 // other data do not reflect this change (2015, Shannon County (46113) was renamed Oglala Lakota (46102))
+	label variable pasture_nr_level "Pasture rents (NASS) data level"
 	* save
 	compress
 	save processing\NASS\pasturerents, replace
-
+	use processing\NASS\pasturerents, clear
 
 
 

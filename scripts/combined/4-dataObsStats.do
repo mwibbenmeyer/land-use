@@ -10,7 +10,8 @@ cd $workingdir
 
 * county
 	* by year
-		use processing\combined\nri_nr_crp_countypanel, clear
+		use processing\combined\countypanel, clear
+		drop data_NRNRICRP
 		keep if data_NRI6classes == 1 // keep if NRIdata w/ any LU other than federal/water/rural
 		drop data_NRI
 		gen n = 1
@@ -33,7 +34,8 @@ cd $workingdir
 
 * point
 	* by year
-		use processing\combined\nri_nr_crp_pointpanel, clear
+		use processing\combined\pointpanel, clear
+		drop data_NRNRICRP
 		keep if data_NRI6classes == 1 // keep if NRIdata w/ any LU other than federal/water/rural
 		drop data_NRI
 		gen n = 1
@@ -56,7 +58,8 @@ cd $workingdir
 
 	
 * var labels
-		use processing\combined\nri_nr_crp_countypanel, clear
+		use processing\combined\countypanel, clear
+		drop data_NRNRICRP
 		keep data*
 			drop data_NRI
 		drop datami*
