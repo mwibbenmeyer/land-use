@@ -240,6 +240,10 @@ use processing\NASS\pasturerents, clear
 drop asd_* county* state* multistate*
 * implement notes changes ONLY IF INCREASE MERGE RATE, NO DROPS
 	replace fips = 12025 if fips == 12086
+* use 2008 as 2007 data. it is substantially more detailed than 2007.
+	drop if year == 2007
+	replace year = 2007 if year == 2008
+	replace pasture_nr_level = pasture_nr_level + "_2008" if year == 2007
 * tag data availability
 	gen data_NRpasture = 1 // tag NASS data
 	replace data_NRpasture = 0 if pasture_nr == .
@@ -297,19 +301,32 @@ label variable countyName "county name"
 label variable statefips "state fips code"
 label variable fips "state+county fips code"
 
-
 * save
+drop *mergenote
 order USDA_region state* *county* fips year acresk* data*
 sort fips year
 compress
 save processing\combined\countypanel, replace
 
+* make a random sample
+use processing\combined\countypanel, clear
+keep fips
+duplicates drop
+sample 1
+sample 25
+merge 1:m fips using processing\combined\countypanel
+keep if _merge == 3
+drop _merge
+compress
+sort fips year
+save processing_output\temp_countypanel_8fipsSample20201208, replace
+use processing_output\temp_countypanel_8fipsSample20201208, clear
 
 ********************************************************************************
 ************APPENDIX************
 ********************************************************************************
 * compare CRP acreage values between NRCS and NRI data
-use processing\combined\nri_nr_crp_countypanel, clear
+use processing\combined\countypanel, clear
 ren CRPland_acresk NRICRPacresk
 ren CRPacresk NRCSCRPacresk
 keep year fips NRCSCRPacresk NRICRPacresk

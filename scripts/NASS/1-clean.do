@@ -233,7 +233,7 @@ use processing\NASS\pasturerents_all, clear
 	replace pasture_nr_level = "multistate" if pasture_nr0 == . & pasture_nr != . & _merge == 3 & pasture_nr_level == "nodata"
 	replace pasture_nr0 = pasture_nr if pasture_nr_level == "multistate"
 	drop pasture_nr _merge
-* finalize
+* manage
 	order multistateregion_desc state_fips_code state* asd* fips county* year
 	sort state_fips_code fips year
 	ren pasture_nr0 pasture_nr
@@ -244,7 +244,18 @@ use processing\NASS\pasturerents_all, clear
 	save processing\NASS\pasturerents, replace
 	use processing\NASS\pasturerents, clear
 
+* inflation adjust (to 2010 dollars)
+import excel raw_data\NASS\CPIinflationFactors.xlsx, sheet("Sheet1") firstrow clear
+merge 1:m year using processing\NASS\pasturerents
+assert _merge != 2
+drop if _merge == 1
+drop _merge
+replace pasture_nr = pasture_nr * Inflation2010Factor
+label variable pasture_nr "2010USD pastureland rent/acre (NASS)"
+drop Inflation2010Factor
 
-
-
-
+* save
+sort fips year
+compress
+save processing\NASS\pasturerents, replace
+use processing\NASS\pasturerents, clear

@@ -57,3 +57,20 @@ ren state CRPstate
 compress
 save processing\CRP\CRPmerged, replace
 use processing\CRP\CRPmerged, clear
+
+* inflation adjustment
+import excel raw_data\NASS\CPIinflationFactors.xlsx, sheet("Sheet1") firstrow clear
+merge 1:m year using processing\CRP\CRPmerged
+drop if _merge == 1
+assert _merge != 2
+drop _merge
+replace CRPrent = CRPrent * Inflation2010Factor
+	label variable CRPrent "2010USD CRP Contract-based FY rent payments (not actuals) (USDA)"
+replace CRP_nr = CRP_nr * Inflation2010Factor
+	label variable CRP_nr "2010USD avg per-CRPacre contract-based FY rent payments (not actuals) (USDA)"
+drop Inflation2010Factor
+
+* save
+compress
+save processing\CRP\CRPmerged, replace
+use processing\CRP\CRPmerged, clear
