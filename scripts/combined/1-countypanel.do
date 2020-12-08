@@ -319,8 +319,8 @@ keep if _merge == 3
 drop _merge
 compress
 sort fips year
-save processing_output\temp_countypanel_8fipsSample20201208, replace
-use processing_output\temp_countypanel_8fipsSample20201208, clear
+save processing_output\temp_countypanel_sample20201208, replace
+use processing_output\temp_countypanel_sample20201208, clear
 
 ********************************************************************************
 ************APPENDIX************
