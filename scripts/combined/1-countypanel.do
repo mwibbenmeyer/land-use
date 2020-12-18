@@ -265,6 +265,11 @@ merge m:1 fips using processing\combined\nass_mergenotes // merge to mergenotes
 	assert NASS_mergenote == "NASS replace 12086 with 12025 to match NRI" if _merge == 2
 	drop _merge
 	ta NASS_mergenote
+	
+* generate rangeland net returns, which are capture in pasture net returns
+gen range_nr = pasture_nr
+label variable range_nr "= pasture_nr"
+	
 * save
 compress
 save processing\combined\nri_nr_crp_nass_countypanel, replace
@@ -301,9 +306,13 @@ label variable countyName "county name"
 label variable statefips "state fips code"
 label variable fips "state+county fips code"
 
+* drop if no NRI data
+drop if data_NRI == 0
+ta year
+
 * save
 drop *mergenote
-order USDA_region state* *county* fips year acresk* data*
+order USDA_region state* *county* fips year acresk* data* *_nr
 sort fips year
 compress
 save processing\combined\countypanel, replace
@@ -319,8 +328,8 @@ keep if _merge == 3
 drop _merge
 compress
 sort fips year
-save processing_output\temp_countypanel_sample20201208, replace
-use processing_output\temp_countypanel_sample20201208, clear
+save processing_output\temp_countypanel_sample20201218, replace
+use processing_output\temp_countypanel_sample20201218, clear
 
 ********************************************************************************
 ************APPENDIX************

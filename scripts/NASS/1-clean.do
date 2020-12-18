@@ -245,7 +245,7 @@ use processing\NASS\pasturerents_all, clear
 	use processing\NASS\pasturerents, clear
 
 * inflation adjust (to 2010 dollars)
-import excel raw_data\NASS\CPIinflationFactors.xlsx, sheet("Sheet1") firstrow clear
+import excel raw_data\CPIinflationFactors.xlsx, sheet("Sheet1") firstrow clear
 merge 1:m year using processing\NASS\pasturerents
 assert _merge != 2
 drop if _merge == 1

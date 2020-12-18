@@ -61,6 +61,7 @@ ssc inst _gwtmean
 		su urban_nr [w=Urbanland_acresk] if year == `y'
 		su CRP_nr [w=CRPacresk] if year == `y'
 		su pasture_nr [w=Pastureland_acresk] if year == `y'
+		su range_nr [w=Rangeland_acresk] if year == `y'
 		}
 	* generate weighted means
 		* landu
@@ -78,6 +79,7 @@ ssc inst _gwtmean
 		egen wtmean_urban_nr = wtmean(urban_nr), weight(acresk_6classes) by(year)
 		egen wtmean_CRP_nr = wtmean(CRP_nr), weight(acresk_6classes) by(year)
 		egen wtmean_pasture_nr = wtmean(pasture_nr), weight(acresk_6classes) by(year)
+		egen wtmean_range_nr = wtmean(range_nr), weight(acresk_6classes) by(year)
 	* create table
 	keep year wtmean*
 	duplicates drop

@@ -59,7 +59,7 @@ save processing\CRP\CRPmerged, replace
 use processing\CRP\CRPmerged, clear
 
 * inflation adjustment
-import excel raw_data\NASS\CPIinflationFactors.xlsx, sheet("Sheet1") firstrow clear
+import excel raw_data\CPIinflationFactors.xlsx, sheet("Sheet1") firstrow clear
 merge 1:m year using processing\CRP\CRPmerged
 drop if _merge == 1
 assert _merge != 2
