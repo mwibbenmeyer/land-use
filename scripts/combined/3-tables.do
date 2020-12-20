@@ -13,6 +13,11 @@ clear
 global workingdir "M:\GitRepos\land-use"
 cd $workingdir
 
+**** pasture rents levels ****
+net install http://www.stata.com/users/kcrow/tab2xl, replace
+tab2xl year pasture_nr_level using results\initial_descriptives\combined\pasturerents_datalevel_crosstab, col(1) row(1)
+
+
 *******mean percent county area & mean net return value*****************************
 * by year
 	use processing\combined\countypanel, clear
