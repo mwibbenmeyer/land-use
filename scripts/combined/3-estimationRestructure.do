@@ -52,6 +52,9 @@ assert final_use != "999"
 drop if year == maxyear
 drop maxyear
 
+label variable initial_use "current land use"
+label variable final_use "land use in t+5"
+
 * LCC var
 gen lcc = "999"
 	replace lcc = "1_2" if lccL12_acresk == point_acresk
@@ -64,6 +67,8 @@ gen tag = initial_use == "Water" | initial_use == "Federal" | initial_use == "Ur
 assert tag == 1 if lcc == "999"
 replace lcc = "0" if lcc == "999"
 drop tag
+
+label variable lcc "Land Capability Class"
 
 * save point-level
 ren point_acresk acresk
