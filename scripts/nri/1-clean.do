@@ -115,12 +115,43 @@ collapse(sum) acresk, by (state county fips broad* lcc* riad_id)
 	drop `var'
 	rename `var'A `var'
 	destring `var', replace
-		forvalues x = 0/8 {
-		gen lccL`x'_`var' = 0
-		replace lccL`x'_`var' = acresk if `var' == `x'
-		}
-	drop `var'
 	}
+	* find max (i.e. nonmissing) lcc value for parcel
+	*gen max
+	gen which_max = "" 
+	gen lccmax = 0 
+	local xvars lcc1982 lcc1987 lcc1992 lcc1997 lcc2002 lcc2007 lcc2012 lcc2015
+	foreach x of local xvars { 
+		replace which_max = "`x'" if `x' > lccmax
+		replace lccmax = `x' if `x' > lccmax
+	}
+	* gen non-zero min
+	gen which_min = ""
+	gen lccmin = 1
+	local xvars lcc1982 lcc1987 lcc1992 lcc1997 lcc2002 lcc2007 lcc2012 lcc2015
+	foreach x of local xvars { 
+		replace which_min = "`x'" if `x' < lccmin
+		replace lccmin = `x' if `x' > lccmin
+	}
+		replace lccmin = lccmax if lccmax == 0 // otherwise lccmin is falsely 1
+	* check that non-zero min is equal to max
+	assert lccmin == lccmax
+	* replace value with max if value is zero
+	local xvars lcc1982 lcc1987 lcc1992 lcc1997 lcc2002 lcc2007 lcc2012 lcc2015
+	foreach x of local xvars { 
+		replace `x' = lccmax if `x' == 0
+		}
+	drop which_max which_min lccmax lccmin
+	* gen individual vars
+	local xvars lcc1982 lcc1987 lcc1992 lcc1997 lcc2002 lcc2007 lcc2012 lcc2015
+	foreach var of local xvars {
+		forvalues x = 0/8 {
+			gen lccL`x'_`var' = 0
+			replace lccL`x'_`var' = acresk if `var' == `x'
+			}
+		*drop `var'
+		}
+drop lcc1982 lcc1987 lcc1992 lcc1997 lcc2002 lcc2007 lcc2012 lcc2015
 
 * manage lu variables
 	* generate variable for each land use (using 1997 classes)
