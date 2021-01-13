@@ -272,8 +272,36 @@ ren fips county
 maptile all3values3years , geo(county2010) fcolor(Purples)
 graph export results\initial_descriptives\net_returns\countiesall3values_020712.png, replace
 
-
-
-
-
-* fin.
+**********
+*********** CLEAN UP ***********
+**********
+cd $workingdir
+cd processing\net_returns\graphs_temp
+erase urban_nr_western.gph
+erase urban_nr_western_1982.gph
+erase urban_nr_western_1987.gph
+erase urban_nr_western_1992.gph
+forvalues y = 1997/2014 {
+erase urban_nr_western_`y'.gph
+}
+erase crop_nr_1987.gph
+erase crop_nr_1992.gph
+erase crop_nr_1997.gph
+erase crop_nr_2002.gph
+erase crop_nr_2007.gph
+erase crop_nr_2012.gph
+erase crop_nr.gph
+erase urban_nr_1987.gph
+erase urban_nr_1992.gph
+erase urban_nr_1997.gph
+erase urban_nr_2002.gph
+erase urban_nr_2007.gph
+erase urban_nr_2012.gph
+erase urban_nr.gph
+erase forest_nr_1987.gph
+erase forest_nr_1992.gph
+erase forest_nr_1997.gph
+erase forest_nr_2002.gph
+erase forest_nr_2007.gph
+erase forest_nr_2012.gph
+erase forest_nr.gph
