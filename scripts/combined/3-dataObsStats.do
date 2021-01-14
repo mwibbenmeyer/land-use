@@ -10,13 +10,14 @@ cd $workingdir
 
 * county
 	* by year
-		use processing\combined\nri_nr_crp_countypanel, clear
+		use processing\combined\countypanel, clear
+		drop data_NRNRICRP
 		keep if data_NRI6classes == 1 // keep if NRIdata w/ any LU other than federal/water/rural
 		drop data_NRI
 		gen n = 1
 		collapse(sum) *data* n, by (year)
 		assert n == data_NRI6classes
-		do scripts\combined\4-dataObsStats_sub1.do
+		do scripts\combined\3-dataObsStats_sub1.do
 		drop n
 		sort year
 		order year
@@ -26,20 +27,21 @@ cd $workingdir
 		drop *pcnt*
 		collapse(sum) data*
 		gen n = data_NRI
-		do scripts\combined\4-dataObsStats_sub1.do
+		do scripts\combined\3-dataObsStats_sub1.do
 		drop n
 		* export
 		export excel using results\initial_descriptives\combined\dataObsStats.xlsx, sheet("county-overall") sheetreplace  firstrow(variables)
 
 * point
 	* by year
-		use processing\combined\nri_nr_crp_pointpanel, clear
+		use processing\combined\pointpanel, clear
+		drop data_NRNRICRP
 		keep if data_NRI6classes == 1 // keep if NRIdata w/ any LU other than federal/water/rural
 		drop data_NRI
 		gen n = 1
 		collapse(sum) *data* n, by (year)
 		assert n == data_NRI6classes
-		do scripts\combined\4-dataObsStats_sub1.do
+		do scripts\combined\3-dataObsStats_sub1.do
 		drop n
 		sort year
 		order year
@@ -49,14 +51,15 @@ cd $workingdir
 		drop *pcnt*
 		collapse(sum) data*
 		gen n = data_NRI
-		do scripts\combined\4-dataObsStats_sub1.do
+		do scripts\combined\3-dataObsStats_sub1.do
 		drop n
 		* export
 		export excel using results\initial_descriptives\combined\dataObsStats.xlsx, sheet("point-overall") sheetreplace  firstrow(variables)
 
 	
 * var labels
-		use processing\combined\nri_nr_crp_countypanel, clear
+		use processing\combined\countypanel, clear
+		drop data_NRNRICRP
 		keep data*
 			drop data_NRI
 		drop datami*

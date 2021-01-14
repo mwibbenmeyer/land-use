@@ -18,14 +18,14 @@ cd $workingdir
 
 * globals
 global luvars Crop Urban Pasture Range Forest CRP Federal Rural Water
-global nrvars urban crop forest CRP
+global nrvars urban crop forest CRP pasture
 global years 1982 1987 1992 1997 2002 2007 2012
 
 ********************************************************************************
 ************GRAPHS************
 ********************************************************************************
 /* forest nr example for debugging:
-*use processing\combined\nri_nr_crp_countypanel, clear
+*use processing\combined\countypanel, clear
 keep if data_NRI6classes == 1
 gen datami_NRCRP = CRP_nr == . // temporary CRP_nr binary variable
 gen missing = Forest if datami_NRforest == 1
@@ -39,10 +39,9 @@ twoway (kdensity missing, lcolor(red)) (kdensity nonmissing, lcolor(blue)), ///
 
 foreach y in $years {
 foreach nr in $nrvars  {
-global graphnames
 foreach lu in $luvars {
 	* load
-	use processing\combined\nri_nr_crp_countypanel, clear
+	use processing\combined\countypanel, clear
 	qui keep if year == `y'
 	qui keep if data_NRI6classes == 1
 	* temporary CRP_nr binary variables
@@ -84,6 +83,9 @@ foreach nr in $nrvars {
 		}
 	if "`nr'" == "urban" {
 		local lu = "Urban"
+		}
+	if "`nr'" == "pasture" {
+		local lu = "Pasture"
 		}
 	* di "`nr'"
 	* di "`lu'"
@@ -129,11 +131,10 @@ maptile_install using "http://files.michaelstepner.com/geo_county2010.zip"
 capture net install grc1leg2.pkg
 
 * load, setup
-use processing\combined\nri_nr_crp_countypanel, clear
+use processing\combined\countypanel, clear
 collapse(mean) *pcnt* *acresk*, by(year fips)
 keep year *_pcnt2 fips
 rename fips county
-
 
 * colors
 	local Crop_colors = "Oranges"
@@ -146,95 +147,88 @@ rename fips county
 	local CRP_colors= "Reds"
 	local Rural_colors= "Reds"
 * generate, save individual graphs
-use processing\combined\nri_nr_crp_countypanel, clear
-local vars Federal CRP Crop Forest Pasture Range Urban Water Rural
-levelsof year, local(levels)
-foreach v of local vars {
-	foreach l of local levels {
-	foreach nr in $nrvars  {
+foreach y in $years {
+	foreach lu in $luvars {
+		foreach nr in $nrvars  {
 		* load
-		use processing\combined\nri_nr_crp_countypanel, clear
+		use processing\combined\countypanel, clear
 		keep if data_NRI6classes == 1
 		* temporary CRP_nr binary variables
 		gen datami_NRCRP = CRP_nr == .
 		gen data_NRCRP = CRP_nr != .
-		qui keep if year == `l'
+		qui keep if year == `y'
 		collapse(mean) *pcnt*, by(fips datami_NR`nr' data_NR`nr')
 		rename fips county
 		* calculate percentile breaks for all values
-		pctile `v'_nq5breaks = `v'land_pcnt2, nq(5)
+		pctile `lu'_nq5breaks = `lu'land_pcnt2, nq(5)
 		* missing
-		maptile `v'land_pcnt2 if datami_NR`nr' == 1, geo(county2010) cutp(`v'_nq5breaks) fcolor(``v'_colors')
+		maptile `lu'land_pcnt2 if datami_NR`nr' == 1, geo(county2010) cutp(`lu'_nq5breaks) fcolor(``lu'_colors')
 		*gr_edit subtitle.text.Arrpush "`nr' net returns missing"
-		gr_edit title.text.Arrpush "Percent `v'"
+		gr_edit title.text.Arrpush "Percent `lu'"
 		gr_edit legend.Edit , style(rows(1)) style(cols(0)) keepstyles 
 		gr_edit legend.Edit, style(labelstyle(size(tiny)))
 		gr_edit legend.style.editstyle box_alignment(south) editcopy
 		* pause
-		graph save "processing\combined\tempgraphs/`v'_pcnt_`nr'nrMiss_`l'", replace
+		graph save "processing\combined\tempgraphs/`lu'_pcnt_`nr'nrMiss_`y'", replace
 		* nonmissing
-		maptile `v'land_pcnt2 if data_NR`nr' == 1, geo(county2010) cutp(`v'_nq5breaks) fcolor(``v'_colors')
+		maptile `lu'land_pcnt2 if data_NR`nr' == 1, geo(county2010) cutp(`lu'_nq5breaks) fcolor(``lu'_colors')
 		*gr_edit subtitle.text.Arrpush "`nr' net returns nonmissing"
-		gr_edit title.text.Arrpush "Percent `v'"
+		gr_edit title.text.Arrpush "Percent `lu'"
 		gr_edit legend.Edit , style(rows(1)) style(cols(0)) keepstyles 
 		gr_edit legend.Edit, style(labelstyle(size(tiny)))
 		gr_edit legend.style.editstyle box_alignment(south) editcopy
 		* pause
-		graph save "processing\combined\tempgraphs/`v'_pcnt_`nr'nrNonmiss_`l'", replace
+		graph save "processing\combined\tempgraphs/`lu'_pcnt_`nr'nrNonmiss_`y'", replace
 	}
 	}
 	}
 
 * combine
 cd $workingdir
-use processing\combined\nri_nr_crp_countypanel, clear
-levelsof year, local(levels)
-foreach l of local levels {
+foreach y in $years {
 foreach nr in $nrvars  {
 graph combine ///
-		processing\combined\tempgraphs\Crop_pcnt_`nr'nrMiss_`l'.gph ///
-		processing\combined\tempgraphs\Urban_pcnt_`nr'nrMiss_`l'.gph ///
-		processing\combined\tempgraphs\Pasture_pcnt_`nr'nrMiss_`l'.gph ///
-		processing\combined\tempgraphs\Range_pcnt_`nr'nrMiss_`l'.gph ///
-		processing\combined\tempgraphs\Forest_pcnt_`nr'nrMiss_`l'.gph ///
-		processing\combined\tempgraphs\CRP_pcnt_`nr'nrMiss_`l'.gph ///
-		processing\combined\tempgraphs\Federal_pcnt_`nr'nrMiss_`l'.gph ///
-		processing\combined\tempgraphs\Rural_pcnt_`nr'nrMiss_`l'.gph ///
-		processing\combined\tempgraphs\Water_pcnt_`nr'nrMiss_`l'.gph, ///
-		subtitle("`l'")
+		processing\combined\tempgraphs\Crop_pcnt_`nr'nrMiss_`y'.gph ///
+		processing\combined\tempgraphs\Urban_pcnt_`nr'nrMiss_`y'.gph ///
+		processing\combined\tempgraphs\Pasture_pcnt_`nr'nrMiss_`y'.gph ///
+		processing\combined\tempgraphs\Range_pcnt_`nr'nrMiss_`y'.gph ///
+		processing\combined\tempgraphs\Forest_pcnt_`nr'nrMiss_`y'.gph ///
+		processing\combined\tempgraphs\CRP_pcnt_`nr'nrMiss_`y'.gph ///
+		processing\combined\tempgraphs\Federal_pcnt_`nr'nrMiss_`y'.gph ///
+		processing\combined\tempgraphs\Rural_pcnt_`nr'nrMiss_`y'.gph ///
+		processing\combined\tempgraphs\Water_pcnt_`nr'nrMiss_`y'.gph, ///
+		subtitle("`y'")
 		gr_edit subtitle.text.Arrpush "`nr' net returns missing"
 		gr_edit style.editstyle boxstyle(shadestyle(color(white))) editcopy
 		gr_edit style.editstyle boxstyle(linestyle(color(white))) editcopy
 		* pause
-		graph export "results\initial_descriptives\combined\maps_missingNR_by_LU\LUpcnt_`l'_`nr'nr_missing.png", replace
+		graph export "results\initial_descriptives\combined\maps_missingNR_by_LU\LUpcnt_`y'_`nr'nr_missing.png", replace
 		
 	graph combine ///
-		processing\combined\tempgraphs\Crop_pcnt_`nr'nrNonmiss_`l'.gph ///
-		processing\combined\tempgraphs\Urban_pcnt_`nr'nrNonmiss_`l'.gph ///
-		processing\combined\tempgraphs\Pasture_pcnt_`nr'nrNonmiss_`l'.gph ///
-		processing\combined\tempgraphs\Range_pcnt_`nr'nrNonmiss_`l'.gph ///
-		processing\combined\tempgraphs\Forest_pcnt_`nr'nrNonmiss_`l'.gph ///
-		processing\combined\tempgraphs\CRP_pcnt_`nr'nrNonmiss_`l'.gph ///
-		processing\combined\tempgraphs\Federal_pcnt_`nr'nrNonmiss_`l'.gph ///
-		processing\combined\tempgraphs\Rural_pcnt_`nr'nrNonmiss_`l'.gph ///
-		processing\combined\tempgraphs\Water_pcnt_`nr'nrNonmiss_`l'.gph, ///
-		subtitle("`l'")
+		processing\combined\tempgraphs\Crop_pcnt_`nr'nrNonmiss_`y'.gph ///
+		processing\combined\tempgraphs\Urban_pcnt_`nr'nrNonmiss_`y'.gph ///
+		processing\combined\tempgraphs\Pasture_pcnt_`nr'nrNonmiss_`y'.gph ///
+		processing\combined\tempgraphs\Range_pcnt_`nr'nrNonmiss_`y'.gph ///
+		processing\combined\tempgraphs\Forest_pcnt_`nr'nrNonmiss_`y'.gph ///
+		processing\combined\tempgraphs\CRP_pcnt_`nr'nrNonmiss_`y'.gph ///
+		processing\combined\tempgraphs\Federal_pcnt_`nr'nrNonmiss_`y'.gph ///
+		processing\combined\tempgraphs\Rural_pcnt_`nr'nrNonmiss_`y'.gph ///
+		processing\combined\tempgraphs\Water_pcnt_`nr'nrNonmiss_`y'.gph, ///
+		subtitle("`y'")
 		gr_edit subtitle.text.Arrpush "`nr' net returns nonmissing"
 		gr_edit style.editstyle boxstyle(shadestyle(color(white))) editcopy
 		gr_edit style.editstyle boxstyle(linestyle(color(white))) editcopy
 		* pause
-		graph export "results\initial_descriptives\combined\maps_missingNR_by_LU\LUpcnt_`l'_`nr'nr_nonmissing.png", replace
+		graph export "results\initial_descriptives\combined\maps_missingNR_by_LU\LUpcnt_`y'_`nr'nr_nonmissing.png", replace
 }
 }
 
 * cleanup
-use processing\combined\nri_nr_crp_countypanel, clear
-local vars Federal CRP Crop Forest Pasture Range Urban Water Rural
-levelsof year, local(levels)
+foreach y in $years {
 foreach nr in $nrvars  {
-foreach lu of $luvars {
-	foreach l of local levels {
-		erase "processing\combined\tempgraphs/`v'_pcnt_`nr'nrMiss_`l'"
-		erase "processing\combined\tempgraphs/`v'_pcnt_`nr'nrNonmiss_`l'""
+foreach lu in $luvars {
+		erase "processing\combined\tempgraphs/`v'_pcnt_`nr'nrMiss_`y'"
+		erase "processing\combined\tempgraphs/`v'_pcnt_`nr'nrNonmiss_`y'""
 		}
 	}
+}
