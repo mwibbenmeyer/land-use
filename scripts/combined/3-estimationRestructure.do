@@ -53,7 +53,7 @@ drop if year == maxyear
 drop maxyear
 
 label variable initial_use "current land use"
-label variable final_use "land use in t+5"
+label variable final_use "land use in t+5 (unless year=2012, then land use in t+3)"
 
 * LCC var
 gen lcc = "999"

@@ -10,7 +10,7 @@ Objective: For each net return variable and year, kernel density of land use per
 set more off
 clear
 pause on
-net install grc1leg.pkg
+*net install grc1leg.pkg
 
 * working dir
 global workingdir "M:\GitRepos\land-use"
@@ -19,7 +19,7 @@ cd $workingdir
 * globals
 global luvars Crop Urban Pasture Range Forest CRP Federal Rural Water
 global nrvars urban crop forest CRP pasture
-global years 1982 1987 1992 1997 2002 2007 2012
+global years 1982 1987 1992 1997 2002 2007 2012 2015
 
 ********************************************************************************
 ************GRAPHS************
@@ -94,11 +94,12 @@ qui cd $workingdir
 cd processing\combined\tempgraphs
 grc1leg kdens_1982_`nr'nr_`lu'.gph ///	
 		kdens_1987_`nr'nr_`lu'.gph ///
-		/*kdens_1992_`nr'nr_`lu'.gph ///
+		kdens_1992_`nr'nr_`lu'.gph ///
 		kdens_1997_`nr'nr_`lu'.gph ///	
-		kdens_2002_`nr'nr_`lu'.gph */ ///	
+		kdens_2002_`nr'nr_`lu'.gph ///	
 		kdens_2007_`nr'nr_`lu'.gph ///	
-		kdens_2012_`nr'nr_`lu'.gph, ///	
+		kdens_2012_`nr'nr_`lu'.gph ///
+		kdens_2015_`nr'nr_`lu'.gph, ///	
 		title(Kernel Density (y) of Percent `lu' Land Use (x)) ///
 		subtitle (In counties missing/nonmissing `nr' net returns)
 		gr_edit title.style.editstyle size(medium) editcopy
@@ -221,14 +222,4 @@ graph combine ///
 		* pause
 		graph export "results\initial_descriptives\combined\maps_missingNR_by_LU\LUpcnt_`y'_`nr'nr_nonmissing.png", replace
 }
-}
-
-* cleanup
-foreach y in $years {
-foreach nr in $nrvars  {
-foreach lu in $luvars {
-		erase "processing\combined\tempgraphs/`v'_pcnt_`nr'nrMiss_`y'"
-		erase "processing\combined\tempgraphs/`v'_pcnt_`nr'nrNonmiss_`y'""
-		}
-	}
 }

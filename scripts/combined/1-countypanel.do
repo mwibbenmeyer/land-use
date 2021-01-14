@@ -130,7 +130,8 @@ drop _merge
 			| year == 1997 ///
 			| year == 2002 ///
 			| year == 2007 ///
-			| year == 2012
+			| year == 2012 ///
+			| year == 2015
 	drop if tag == 0
 	drop tag
 
@@ -186,7 +187,8 @@ merge 1:1 fips year using processing\combined\nri_nr_county_panel // merge to NR
 			| year == 1997 ///
 			| year == 2002 ///
 			| year == 2007 ///
-			| year == 2012
+			| year == 2012 ///
+			| year == 2015
 	drop if tag == 0
 	drop tag
 	drop if CRPstate == "PUERTO RICO" | CRPstate == "ALASKA" | CRPstate == "HAWAII"
@@ -257,7 +259,8 @@ merge 1:1 fips year using processing\combined\nri_nr_crp_countypanel // merge to
 			| year == 1997 ///
 			| year == 2002 ///
 			| year == 2007 ///
-			| year == 2012
+			| year == 2012 ///
+			| year == 2015
 	drop if tag == 0
 	drop tag
 	drop *mergenote

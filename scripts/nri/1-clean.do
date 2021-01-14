@@ -173,7 +173,7 @@ drop lcc1982 lcc1987 lcc1992 lcc1997 lcc2002 lcc2007 lcc2012 lcc2015
 * reshape
 reshape long _CRPland_broad _Cropland_broad _Forestland_broad _Ruralland_broad _Waterland_broad _Pastureland_broad _Rangeland_broad _Urbanland_broad _Federalland_broad lccL0_lcc lccL1_lcc lccL2_lcc lccL3_lcc lccL4_lcc lccL5_lcc lccL6_lcc lccL7_lcc lccL8_lcc, i(riad_id) j(year)
 * keep only years with data ["1982, 1987, 1992, 1997, and annually from 2000 through 2017" (https://www.nrcs.usda.gov/wps/portal/nrcs/main/national/technical/nra/nri/)]
-keep if year == 1982 | year == 1987 | year == 1992 | year == 1997 | year == 2002 | year == 2007 | year == 2012
+keep if year == 1982 | year == 1987 | year == 1992 | year == 1997 | year == 2002 | year == 2007 | year == 2012 | year == 2015
 compress
 
 ren lccL*_lcc lccL*_acresk
