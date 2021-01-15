@@ -1,7 +1,9 @@
 raw_data/nri/**
 raw_data/cdl/**
 raw_data/NASS/**
-raw_data/net_returns/urban/**
+raw_data/net_returns/urban/*
+!raw_data/net_returns/urban/puma_2000
+!raw_data/net_returns/urban/pums_20005pct
 raw_data/net_returns/range/**
 raw_data/net_returns/range/gssurgo/**
 processing/**
