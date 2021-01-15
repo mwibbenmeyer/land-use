@@ -245,7 +245,7 @@ for (year in c(2000, 2007, 2012, 2015)) {
   
   df <- do.call(rbind, lapply(stlist,get_county_valp,year))
   
-  dst = sprintf("processing/net_returns/urban/county_valp/%s/",year)
+  dst = sprintf("processing_outputnet_returns/urban/county_valp/%s/",year)
   dir.create(file.path(dst), showWarnings = TRUE, recursive = TRUE)
   df_poly <- st_collection_extract(df, "POLYGON")
   

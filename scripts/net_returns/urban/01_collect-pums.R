@@ -35,7 +35,7 @@ download_pums_data <- function(year) {
                sprintf("https://www2.census.gov/programs-surveys/acs/data/pums/%s/5-Year/",year),
                sprintf("https://www2.census.gov/programs-surveys/acs/data/pums/%s/3-Year/",year))
   
-  if(year == 2002) {url <- sprintf("https://www2.census.gov/programs-surveys/acs/data/pums/%s/",year)}
+  if(year == 2000) {url <- sprintf("https://www2.census.gov/programs-surveys/acs/data/pums/%s/",year)}
   html <- read_html(url)
   
   links <-html %>% 
@@ -60,5 +60,5 @@ download_pums_data <- function(year) {
 }
 
 ################################################################
-#Loop over years 2002, 2007, 2012, 2015
-lapply(c(2002, 2007,2012,2015), download_pums_data)
+#Loop over years 2000, 2007, 2012, 2015
+lapply(c(2000, 2007,2012,2015), download_pums_data)
