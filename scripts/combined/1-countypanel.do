@@ -315,7 +315,7 @@ ta year
 
 * save
 drop *mergenote
-order USDA_region state* *county* fips year acresk* data* *_nr
+order USDA_region state* *county* fips* year acresk* data* *_nr
 sort fips year
 compress
 save processing\combined\countypanel, replace

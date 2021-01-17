@@ -20,7 +20,8 @@ compress
 save processing\combined\pointpanel_sample, replace
 use processing\combined\pointpanel_sample, clear
 */
-keep riad fips year *acresk fips stateAbbrev countyName
+keep riad fipsstr year *acresk stateAbbrev countyName
+ren fipsstr fips
 sort riad year
 
 drop CRPacresk

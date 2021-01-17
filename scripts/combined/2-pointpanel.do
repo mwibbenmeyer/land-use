@@ -22,11 +22,11 @@ merge 1:m fips year using processing\NRI\nri15_point_panel
 	assert data_NRI == 0 if _merge == 1 // check that unmatched from county panel are only those with no NRI data
 	drop _merge
 ren acresk point_acresk
-order USDA_region state* countyName fips county_acresk riad_id year point_acresk *data*
+order USDA_region state* countyName fips* county_acresk riad_id year point_acresk *data*
 sort stateName fips riad_id year
 label variable riad_id "NRI point unique id"
 drop county state
 * save
 compress
 save processing\combined\pointpanel, replace
-use processing\combined\pointpanel, clear
+*use processing\combined\pointpanel, clear
