@@ -206,6 +206,7 @@ use processing\NRI\nri15_point_landu_lcc_pcnt, clear
 	export excel using results\initial_descriptives\NRI\pcnt_landu_by_lcc.xlsx if year == 2002, sheet("2002") sheetreplace firstrow(variables)
 	export excel using results\initial_descriptives\NRI\pcnt_landu_by_lcc.xlsx if year == 2007, sheet("2007") sheetreplace firstrow(variables)
 	export excel using results\initial_descriptives\NRI\pcnt_landu_by_lcc.xlsx if year == 2012, sheet("2012") sheetreplace firstrow(variables)
+	export excel using results\initial_descriptives\NRI\pcnt_landu_by_lcc.xlsx if year == 2015, sheet("2015") sheetreplace firstrow(variables)
 	* mean
 	collapse(mean) *land, by (LCC)
 	export excel using results\initial_descriptives\NRI\pcnt_landu_by_lcc.xlsx, sheet("mean") sheetreplace firstrow(variables)
