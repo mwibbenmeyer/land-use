@@ -96,3 +96,20 @@ lv_dir <- "processing_output/net_returns/urban/landval/"
 dir.create(lv_dir)
 
 lapply(c(2000, 2007, 2012, 2015), landval_calc)
+
+combine_returns <- function(year) {
+  dat <- read_sf(sprintf("processing_output/net_returns/urban/landval/landval_%s.shp",year)) %>%
+    select(cntyfps, landval) %>%
+    mutate(year = year) %>%
+    rename(county_fips = cntyfps,
+           net_returns = landval) %>%
+    data.frame(.) %>% select(!geometry)
+  
+  return(dat)
+}
+
+
+net_returns_df <- bind_rows(lapply(c(2000,2007,2012,2015), combine_returns))
+
+write_csv(net_returns_df, "processing_output/net_return/urban/landval/countylevel_urban_net_returns.csv")
+
