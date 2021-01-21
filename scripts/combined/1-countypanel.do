@@ -320,20 +320,6 @@ sort fips year
 compress
 save processing\combined\countypanel, replace
 
-* make a random sample
-use processing\combined\countypanel, clear
-keep fips
-duplicates drop
-sample 1
-sample 25
-merge 1:m fips using processing\combined\countypanel
-keep if _merge == 3
-drop _merge
-compress
-sort fips year
-save processing_output\temp_countypanel_sample20201218, replace
-use processing_output\temp_countypanel_sample20201218, clear
-
 ********************************************************************************
 ************APPENDIX************
 ********************************************************************************
