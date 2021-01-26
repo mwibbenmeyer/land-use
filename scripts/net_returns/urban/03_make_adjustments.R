@@ -111,5 +111,11 @@ combine_returns <- function(year) {
 
 net_returns_df <- bind_rows(lapply(c(2000,2007,2012,2015), combine_returns))
 
+# quick and dirty way of fixing county fips issue for year 2000
+for (i in which(nchar(net_returns_df$county_fips) == 7)) {
+  net_returns_df$county_fips[i] <- paste0(substr(netreturns$county_fips[i], 1, 2),
+                                      substr(netreturns$county_fips[i], 4, 6))
+}
+
 write_csv(net_returns_df, "processing_output/net_return/urban/landval/countylevel_urban_net_returns.csv")
 
