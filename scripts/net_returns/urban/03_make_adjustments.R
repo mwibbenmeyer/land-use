@@ -71,7 +71,7 @@ landval_calc <- function(yr) {
   #Calculate CPI value to get 2010$
   index_2010 <- cpi$index[cpi$year == 2010]/cpi$index[cpi$year == yr]
   
-  sf <- read_sf(sprintf("processing_output/net_returns/urban/county_valp/%s/county_valp_%s.shp",yr,yr)) %>%
+  sf <- read_sf(sprintf("processing/net_returns/urban/county_valp/%s/county_valp_%s.shp",yr,yr)) %>%
     mutate(stfips = substr(countyfips,1,2),
            state = fips(stfips, to = "Abbreviation")) %>% 
     #Create Census division column for merge
@@ -88,17 +88,17 @@ landval_calc <- function(yr) {
     #Scale property value by percent that is attributed to land 
     mutate(landval = 0.05*index_2010*pctlotv*valp/lotsize_acres)
   
-  out <- sprintf("processing_output/net_returns/urban/landval/landval_%s.shp", yr)
+  out <- sprintf("processing/net_returns/urban/landval/landval_%s.shp", yr)
   st_write(sf, out, delete_dsn = TRUE)
 }
 
-lv_dir <- "processing_output/net_returns/urban/landval/"
+lv_dir <- "processing/net_returns/urban/landval/"
 dir.create(lv_dir)
 
 lapply(c(2000, 2007, 2012, 2015), landval_calc)
 
 combine_returns <- function(year) {
-  dat <- read_sf(sprintf("processing_output/net_returns/urban/landval/landval_%s.shp",year)) %>%
+  dat <- read_sf(sprintf("processing/net_returns/urban/landval/landval_%s.shp",year)) %>%
     select(cntyfps, landval) %>%
     mutate(year = year) %>%
     rename(county_fips = cntyfps,
@@ -117,5 +117,5 @@ for (i in which(nchar(net_returns_df$county_fips) == 7)) {
                                       substr(netreturns$county_fips[i], 4, 6))
 }
 
-write_csv(net_returns_df, "processing_output/net_return/urban/landval/countylevel_urban_net_returns.csv")
+write_csv(net_returns_df, "processing/net_returns/urban/landval/countylevel_urban_net_returns.csv")
 
