@@ -1,10 +1,6 @@
-raw_data/nri/**
-raw_data/cdl/**
-raw_data/NASS/**
-raw_data/net_returns/urban/**
-raw_data/net_returns/range/**
-raw_data/net_returns/range/gssurgo/**
-processing/**
+raw_data/**
+processing_output/**
+archive/**
 *.RData
 *.Rhistory
 .Rproj.user

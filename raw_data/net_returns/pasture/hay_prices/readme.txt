@@ -1,1 +1,0 @@
-Downloaded from: https://quickstats.nass.usda.gov/results/2810CA8B-D185-39BB-A83F-BE5D492968ED#A0D2D93A-90F4-3E23-8E2F-A4C884B6FA09
