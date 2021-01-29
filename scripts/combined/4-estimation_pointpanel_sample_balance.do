@@ -35,7 +35,7 @@ keep if _merge == 3
 drop _merge
 
 * MERGE TO PARCEL DATA
-merge 1:1 riad_id year initial_use final_use lcc using processing_output\pointpanel_estimation_unb
+merge 1:1 riad_id year initial_use final_use lcc using processing\pointpanel_estimation_unb
 drop if _merge == 2
 replace acresk = 0 if _merge == 1
 drop nr _merge
