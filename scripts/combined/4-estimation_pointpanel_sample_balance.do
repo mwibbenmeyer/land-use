@@ -21,7 +21,7 @@ duplicates drop
 save processing\combined\nr_temp2, replace
 
 * MAKE A SAMPLE OF POINTS
-use processing_output\pointpanel_estimation_unb, clear
+use processing\pointpanel_estimation_unb, clear
 keep riad_id fips
 duplicates drop
 **
