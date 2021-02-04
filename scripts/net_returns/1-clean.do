@@ -20,6 +20,7 @@ replace urban_nr = "." if urban_nr == "NA"
 destring urban_nr, replace
 drop if urban_nr == .
 label variable urban_nr "2010USD annualized net return/acre [RFF]"
+replace year = 2002 if year == 2000
 compress
 duplicates drop
 save processing\net_returns\countylevel_urban_net_returns, replace
