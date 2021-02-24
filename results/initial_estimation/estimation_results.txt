@@ -1,0 +1,16 @@
+		(1)	(2)
+VARIABLES	LABELS	OLS	IV
+			
+nr_h	nr_h	0.000839***	0.00166***
+		(0.000249)	(0.000344)
+_Iyear_2007	year==2007	-0.00118**	-0.00112**
+		(0.000508)	(0.000482)
+_Iyear_2012	year==2012	-0.00144*	-0.00124*
+		(0.000744)	(0.000707)
+Constant	Constant	0.000147	-0.00260**
+		(0.000505)	(0.00111)
+			
+Observations		6,917	6,917
+R-squared		0.003	0.001
+Robust standard errors in parentheses			
+*** p<0.01, ** p<0.05, * p<0.1			
