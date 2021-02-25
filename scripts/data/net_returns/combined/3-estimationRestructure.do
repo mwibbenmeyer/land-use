@@ -116,7 +116,7 @@ ren point_acresk acresk
 keep riad_id year initial_use final_use lcc acresk fips countyName stateAbbrev nr
 order stateAbbrev countyName fips riad_id year acresk initial_use final_use
 compress
-save processing\pointpanel_estimation_unb, replace
+save processing_output\pointpanel_estimation_unb, replace
 erase processing\combined\pointpanel_temp.dta
 	
 * prep for balancing by making lists of all variables
