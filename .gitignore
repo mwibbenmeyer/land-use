@@ -1,5 +1,6 @@
 raw_data/**
 processing_output/**
+processing/**
 archive/**
 *.RData
 *.Rhistory

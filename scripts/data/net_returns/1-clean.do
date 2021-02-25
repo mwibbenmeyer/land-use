@@ -42,5 +42,5 @@ label variable crop_nr "2010USD annualized net return/acre net income deriving f
 
 * save
 compress
-save processing\net_returns\clean, replace
-use processing\net_returns\clean, clear
+save processing\net_returns\combined_returns_panel, replace
+use processing\net_returns\combined_returns_panel, clear
