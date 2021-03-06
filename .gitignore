@@ -2,6 +2,7 @@ raw_data/**
 processing_output/**
 processing/**
 archive/**
+Feb2021structure/**
 *.RData
 *.Rhistory
 .Rproj.user

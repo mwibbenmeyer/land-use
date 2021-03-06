@@ -15,37 +15,37 @@ cd $workingdir
 
 * IMPORT, MANAGE, SAVE
 * acres
-	import excel raw_data\CRP\HistoryCounty86-19.xlsx, sheet("ACRES") cellrange(A2:AK3083) firstrow allstring clear
-	do scripts\CRP\1-clean_sub1.do
+	import excel raw_data\net_returns\crp\HistoryCounty86-19.xlsx, sheet("ACRES") cellrange(A2:AK3083) firstrow allstring clear
+	do scripts\data\net_returns\CRP\1-clean_sub1.do
 	ren y CRPacres
 	gen CRPacresk = CRPacres/1000
 	drop CRPacres
 	label variable CRPacresk "Thousand acres in CRP (USDA County Stats)"
 	compress
-	save processing\CRP\acres, replace
+	save processing\net_returns\CRP\acres, replace
 
 * rent
-	import excel raw_data\CRP\HistoryCounty86-19.xlsx, sheet("RENT") cellrange(A2:AJ3083) firstrow allstring clear
-	do scripts\CRP\1-clean_sub1.do
+	import excel raw_data\net_returns\crp\HistoryCounty86-19.xlsx, sheet("ACRES") cellrange(A2:AK3083) firstrow allstring clear
+	do scripts\data\net_returns\CRP\1-clean_sub1.do
 	ren y CRPrent
 	label variable CRPrent "CRP Contract-based FY rental payments (not actuals) (USDA County Stats)"
 	compress
-	save processing\CRP\rent, replace
+	save processing\net_returns\CRP\rent, replace
 
 * average
-	import excel raw_data\CRP\HistoryCounty86-19.xlsx, sheet("AVERAGE") cellrange(A2:AK3083) firstrow allstring clear
-	do scripts\CRP\1-clean_sub1.do
+	import excel raw_data\net_returns\crp\HistoryCounty86-19.xlsx, sheet("ACRES") cellrange(A2:AK3083) firstrow allstring clear
+	do scripts\data\net_returns\CRP\1-clean_sub1.do
 	ren y CRP_nr
 	label variable CRP_nr "avg per-CRPacre contract-based FY rent payments (not actuals) (USDA County Stats)"
-	save processing\CRP\avg, replace
+	save processing\net_returns\CRP\avg, replace
 
 * MERGE
-use processing\CRP\acres, clear
-merge 1:1 fips year state county using processing\CRP\rent
+use processing\net_returns\CRP\acres, clear
+merge 1:1 fips year state county using processing\net_returns\CRP\rent
 assert _merge != 2 // check no unmatched from rent data
 assert year == 1986 if _merge == 1 // check that only unmatched acres data is from 1986
 drop _merge
-merge 1:1 fips year state county using processing\CRP\avg
+merge 1:1 fips year state county using processing\net_returns\CRP\avg
 assert _merge == 3
 drop _merge
 
@@ -55,12 +55,12 @@ ren state CRPstate
 
 * save
 compress
-save processing\CRP\CRPmerged, replace
-use processing\CRP\CRPmerged, clear
+save processing\net_returns\CRP\CRPmerged, replace
+use processing\net_returns\CRP\CRPmerged, clear
 
 * inflation adjustment
 import excel raw_data\CPIinflationFactors.xlsx, sheet("Sheet1") firstrow clear
-merge 1:m year using processing\CRP\CRPmerged
+merge 1:m year using processing\net_returns\CRP\CRPmerged
 drop if _merge == 1
 assert _merge != 2
 drop _merge
@@ -72,5 +72,5 @@ drop Inflation2010Factor
 
 * save
 compress
-save processing\CRP\CRPmerged, replace
-use processing\CRP\CRPmerged, clear
+save processing\net_returns\CRP\CRPmerged, replace
+use processing\net_returns\CRP\CRPmerged, clear
