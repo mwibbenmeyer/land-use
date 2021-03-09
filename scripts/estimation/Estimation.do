@@ -16,10 +16,10 @@ drop if lcc == "0"
 
 // ======================== Create Variables ================================ //
 
-// Create ratio of acres converted to forest and acres staying in forest
+// Dependent variable: Create ratio of acres converted to forest and acres staying in forest
 gen outside_acres_temp = acresk if initial_use == final_use
 bysort year county: egen outside_acres = max(outside_acres_temp)
-drop if outside_acres ==.
+drop if outside_acres == .
 drop if initial_use == final_use
 gen ratio = acresk/outside_acres
 

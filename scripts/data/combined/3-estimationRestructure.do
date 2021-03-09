@@ -116,26 +116,26 @@ ren point_acresk acresk
 keep riad_id year initial_use final_use lcc acresk fips countyName stateAbbrev nr
 order stateAbbrev countyName fips riad_id year acresk initial_use final_use
 compress
-save processing\pointpanel_estimation_unb, replace
+save processing_output\pointpanel_estimation_unb, replace
 erase processing\combined\pointpanel_temp.dta
 	
 * prep for balancing by making lists of all variables
 	* lcc list
-	use processing\pointpanel_estimation_unb, clear
+	use processing_output\pointpanel_estimation_unb, clear
 	keep lcc
 	duplicates drop
 	sort lcc
 	gen n = _n // 5
 	save processing\combined\temp_lcc, replace
 	* initial use list
-	use processing\pointpanel_estimation_unb, clear
+	use processing_output\pointpanel_estimation_unb, clear
 	keep initial_use
 	duplicates drop
 	sort initial_use
 	gen n = _n // 9
 	save processing\combined\temp_initial, replace
 	* final use list
-	use processing\pointpanel_estimation_unb, clear
+	use processing_output\pointpanel_estimation_unb, clear
 	keep final_use
 	duplicates drop
 	sort final_use
@@ -144,12 +144,12 @@ erase processing\combined\pointpanel_temp.dta
 
 * make county-level dataset
 	* save net returns for merging after balancing
-	use processing\pointpanel_estimation_unb, clear
+	use processing_output\pointpanel_estimation_unb, clear
 	keep fips year final_use nr
 	duplicates drop
 	save processing\combined\temp_nr, replace
 	* collapse by parcels/area
-	use processing\pointpanel_estimation_unb, clear
+	use processing_output\pointpanel_estimation_unb, clear
 	gen parcels = 1
 	collapse(sum) parcels acresk, by (stateAbbrev countyName fips year initial_use final_use lcc)
 	* var management

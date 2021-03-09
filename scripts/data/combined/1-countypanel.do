@@ -64,7 +64,7 @@ save processing\combined\fips_dictionary, replace
 use processing\NRI\nri15_county_panel, clear
 keep fips state*
 duplicates drop
-merge 1:m fips using processing\net_returns\clean
+merge 1:m fips using processing\net_returns\combined_returns_panel
 keep fips _merge state*
 duplicates drop
 keep if _merge != 3
@@ -81,6 +81,8 @@ replace NRI_nr_mergenote = "nr drop, no counterpart in NRI" if fips == 8014 & _m
 replace NRI_nr_mergenote = "nr drop, no counterpart in NRI" if fips == 8031 & _merge == 2 // Denver county, small so not in NRI
 replace NRI_nr_mergenote = "nr drop, no counterpart in NRI" if fips == 29510 & _merge == 2 // 29510 was collapsed into 29189 in NRI
 replace NRI_nr_mergenote = "nr drop, DC not in NRI" if stateAbbrev == "DC"
+replace NRI_nr_mergenote = "NASS drop, no counterpart in NRI" if fips == 32025 & _merge == 2 // tiny city in IA
+replace NRI_nr_mergenote = "NASS drop, no counterpart in NRI" if fips == 36501 & _merge == 2 // new york city, ny
 assert stateAbbrev != "VA" if _merge == 1 // check no potential Virginia counterparts in NRI data
 replace NRI_nr_mergenote = "nr drop, Virginia, no counterpart in NRI" if stateAbbrev == "VA" & _merge == 2
 * check no others
@@ -94,7 +96,7 @@ save processing\combined\nri_nr_mergenotes, replace
 ************IMPLEMENT NR-NRI MERGE************
 ********************************************************************************
 * load and make changes to nr data
-use processing\net_returns\clean, clear
+use processing\net_returns\combined_returns_panel, clear
 merge m:1 fips using processing\combined\nri_nr_mergenotes
 drop if _merge == 2 // drop if notes only relevant to NRI data
 ta NRI_nr_mergenote // list notes
@@ -104,11 +106,14 @@ drop NRI_nr_mergenote _merge
 /*gen data_NR = 1 // tag if NR data (all obs in this dataset)
 	label variable data_NR "obs has NR data"*/
 * NR components
-local nrvars forest urban crop
+local nrvars forest urban crop CRP pasture
 foreach var in `nrvars' {
 	gen data_NR`var' = `var'_nr != .
 	label variable data_NR`var' "obs has NR`var' data"
 	}
+	ren data_NRCRP data_CRP
+	label variable data_CRP "obs has CRP data (if mi, CRP acres is zero or very low)"
+	label variable data_NRpasture "obs has NASS (pasture rents) data"
 
 * merge to NRI data
 merge 1:1 fips year using processing\NRI\nri15_county_panel
@@ -136,152 +141,14 @@ drop _merge
 	drop tag
 
 ta NRI_nr_mergenote // list notes
-*replace data_NR = 0 if data_NR == .
 * save
 compress
 save processing\combined\nri_nr_county_panel, replace
 
 ********************************************************************************
-************ASSESS NR/NRI-CRP MERGE ISSUES************
-********************************************************************************
-use processing\combined\nri_nr_county_panel, clear
-keep fips state* NRI_nr_mergenote
-duplicates drop
-merge 1:m fips using processing\CRP\CRPmerged
-keep fips _merge *state* *county* year NRI_nr_mergenote
-keep if _merge != 3 // only make notes if unmatched from CRP
-drop if year == 1982
-drop year
-duplicates drop
-compress
-sort fips
-* notes
-gen CRP_mergenote = "999"
-* unmatched from master
-replace CRP_mergenote = "CRP data explicitly exclude VA cities" if _merge == 1 & stateAbbrev == "VA"
-replace CRP_mergenote = "CRP data exclude DC" if _merge == 1 & stateAbbrev == "DC"
-replace CRP_mergenote = "no counterpart in CRP" if fips == 8014 & _merge == 1 // Broomfield county created in 2001, doesn't exist in NRI data
-replace CRP_mergenote = "no counterpart in CRP" if fips == 56047 & _merge == 1 // "parts of 56029 & 56039 were used to create 56047" (but both 56029 & 56039 exist in both datasets)
-* unmatched from using (CRP)
-drop if CRPstate == "PUERTO RICO" | CRPstate == "ALASKA" | CRPstate == "HAWAII"
-assert _merge != 2
-* check no others
-assert CRP_mergenote != "999"
-drop _merge
-drop *state* *county*
-compress
-save processing\combined\CRP_mergenotes, replace
-
-********************************************************************************
-************IMPLEMENT NR/NRI-CRP MERGE************
-********************************************************************************
-use processing\CRP\CRPmerged, clear // load CRP panel
-	gen data_CRP = 1 // tag CRP data
-	label variable data_CRP "obs has CRP data (if mi, CRP acres is zero or very low)"
-merge 1:1 fips year using processing\combined\nri_nr_county_panel // merge to NRI/NR panel
-	drop _merge
-	* drop years/states not in nri data
-	gen tag = year == 1982 ///
-			| year == 1987 ///
-			| year == 1992 ///
-			| year == 1997 ///
-			| year == 2002 ///
-			| year == 2007 ///
-			| year == 2012 ///
-			| year == 2015
-	drop if tag == 0
-	drop tag
-	drop if CRPstate == "PUERTO RICO" | CRPstate == "ALASKA" | CRPstate == "HAWAII"
-	drop *mergenote
-merge m:1 fips using  processing\combined\CRP_mergenotes // merge to mergenotes
-	assert _merge != 2
-	drop _merge
-	ta CRP_mergenote
-drop CRPstate CRPcounty
-* save
-order state* fips year acresk* data*
-compress
-save processing\combined\nri_nr_crp_countypanel, replace
-use processing\combined\nri_nr_crp_countypanel, clear
-
-********************************************************************************
-************ASSESS NR/NRI/CRP-NASS MERGE ISSUES************
-********************************************************************************
-use processing\combined\nri_nr_crp_countypanel, clear
-keep fips *mergenote
-duplicates drop
-merge 1:m fips using processing\NASS\pasturerents
-keep if _merge != 3 // only make notes if unmatched from NASS
-keep fips _merge *mergenote
-duplicates drop
-* make mergenote
-gen NASS_mergenote = "999"
-* unmatched from master
-replace NASS_mergenote = "NASS data exclude DC" if _merge == 1 & fips == 11001
-replace NASS_mergenote = "NRI leave, addressed in NASS" if fips == 12025 & _merge == 1 // fips replaced in nr data to match
-replace NASS_mergenote = "NRI drop, no counterpart in nr" if fips == 56047 & _merge == 1 // "parts of 56029 & 56039 were used to create 56047" (but both 56029 & 56039 exist in both datasets)
-* unmatched from using (NASS)
-replace NASS_mergenote = "NASS replace 12086 with 12025 to match NRI" if fips == 12086  & _merge == 2 // 12025 (Dade County) renamed as 12086 (Miami-Dade), rev. to match NRI data
-replace NASS_mergenote = "NASS drop, no counterpart in NRI" if fips == 32025 & _merge == 2 // tiny city in IA
-replace NASS_mergenote = "NASS drop, no counterpart in NRI" if fips == 36501 & _merge == 2 // new york city, ny
-replace NASS_mergenote = "NASS drop, no counterpart in NRI (Virginia City)" if fips == 51123 & _merge == 2 // Virginia city (Nansemond)
-replace NASS_mergenote = "NASS drop, no counterpart in NRI (Virginia City)" if fips == 51515 & _merge == 2 // Virginia city (Bedford City)
-replace NASS_mergenote = "NASS drop, no counterpart in NRI (Virginia City)" if fips == 51560 & _merge == 2 // Virginia city (Clifton Forge City)
-replace NASS_mergenote = "NASS drop, no counterpart in NRI (Virginia City)" if fips == 51780 & _merge == 2 // Virginia city (South BostonCity)
-* check no others
-assert NASS_mergenote != "999"
-drop _merge
-compress
-save processing\combined\nass_mergenotes, replace
-
-********************************************************************************
-************IMPLEMENT NR/NRI/CRP-NASS MERGE************
-********************************************************************************
-use processing\NASS\pasturerents, clear
-* drop unnecessary vars
-drop asd_* county* state* multistate*
-* implement notes changes ONLY IF INCREASE MERGE RATE, NO DROPS
-	replace fips = 12025 if fips == 12086
-* use 2008 as 2007 data. it is substantially more detailed than 2007.
-	drop if year == 2007
-	replace year = 2007 if year == 2008
-	replace pasture_nr_level = pasture_nr_level + "_2008" if year == 2007
-* tag data availability
-	gen data_NRpasture = 1 // tag NASS data
-	replace data_NRpasture = 0 if pasture_nr == .
-	label variable data_NRpasture "obs has NASS (pasture rents) data"
-merge 1:1 fips year using processing\combined\nri_nr_crp_countypanel // merge to NRI/NR/CRP panel
-	drop _merge
-	* drop years/states not in nri data
-	gen tag = year == 1982 ///
-			| year == 1987 ///
-			| year == 1992 ///
-			| year == 1997 ///
-			| year == 2002 ///
-			| year == 2007 ///
-			| year == 2012 ///
-			| year == 2015
-	drop if tag == 0
-	drop tag
-	drop *mergenote
-merge m:1 fips using processing\combined\nass_mergenotes // merge to mergenotes
-	assert NASS_mergenote == "NASS replace 12086 with 12025 to match NRI" if _merge == 2
-	drop _merge
-	ta NASS_mergenote
-	
-* generate rangeland net returns, which are capture in pasture net returns
-gen range_nr = pasture_nr
-label variable range_nr "= pasture_nr"
-	
-* save
-compress
-save processing\combined\nri_nr_crp_nass_countypanel, replace
-use processing\combined\nri_nr_crp_nass_countypanel, clear
-	
-********************************************************************************
 ************FINALIZE************
 ********************************************************************************
-use processing\combined\nri_nr_crp_nass_countypanel, clear
+use processing\combined\nri_nr_county_panel, clear
 
 * data availability vars
 local datavars NRforest NRcrop NRurban NRI NRI6classes CRP NRpasture
@@ -300,6 +167,7 @@ label variable data_NRNRICRPNASS "obs has NRI(6classes), CRP, and 4 NR data comp
 capture drop *state*
 capture drop *county*
 merge m:1 fips using processing\combined\fips_dictionary
+drop if fips == 12086
 assert _merge == 3
 drop _merge
 
@@ -335,9 +203,4 @@ su pcntdiff
 
 * clean up
 erase processing\combined\nri_nr_county_panel.dta
-erase processing\combined\nri_nr_crp_countypanel.dta
-erase processing\combined\nri_nr_crp_nass_countypanel.dta
-
-erase processing\combined\nass_mergenotes.dta
-erase processing\combined\CRP_mergenotes.dta
 erase processing\combined\nri_nr_mergenotes.dta
