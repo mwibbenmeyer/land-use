@@ -106,3 +106,4 @@ cost <- cbind(cost, new_col = new_value) # add new column to data frame
 cotton_cost = select(cost, 1:3, 11:12, 15, 17, 22) # select only relevant columns
 
 write.csv(cotton_cost, "cotton_cost.csv") # write csv
+ 
