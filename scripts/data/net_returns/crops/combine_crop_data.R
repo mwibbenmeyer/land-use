@@ -34,7 +34,6 @@ crop_returns$year <- rep(year, times = 34232) # repeat sequence of years for eac
 # load data
 
 cropf = c("corn", "sorghum", "soybeans", "winter_wheat", "durum_wheat", "spring_wheat", "barley", "oats", "rice", "upland_cotton", "pima_cotton") # list of formatted crops
-# i = "pima_cotton"
 rm(i)
 for(i in cropf) {
 
@@ -95,9 +94,8 @@ for(i in cropf) {
     new_crop_returns <- subset(new_crop_returns, select = c(county_fips, state_fips, frr, crop, year, price, cost, yield, acres)) # trim to only relevant columns
   }
   
-  new_crop_returns[,"cost"] = format(round(as.numeric(new_crop_returns[,"cost"], 3)), nsmall = 3) # round cost to 3 decimals
   crop_returns <- new_crop_returns[, c("county_fips", "state_fips", "frr", "crop", "year", "price", "cost", "yield", "acres")] # trim columns
 
 }
 
-write.csv(crop_returns, "processing/net_returns/crop_returns") # write csv
+write.csv(crop_returns, "processing/net_returns/crop_returns.csv") # write csv
