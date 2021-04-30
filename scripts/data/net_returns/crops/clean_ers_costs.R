@@ -49,6 +49,7 @@ yield <- filter(soybeans, Item == "Yield") # select only yield (bushels/planted 
 new_value <- select(cost, Value)*(1/select(yield, Value)) # multiply to get new cost ($/bushel)
 cost <- cbind(cost, new_col = new_value) # add new column to data frame
 soybeans_cost = select(cost, 1:3, 11:12, 15, 17, 22) # select only relevant columns
+soybeans_cost$`Commodity` <- "soybeans" # rename crop entires to be plural
 
 write.csv(soybeans_cost, sprintf("%s/soybeans_cost.csv", dst)) # write csv
 
@@ -62,7 +63,14 @@ new_value <- select(cost, Value)*(1/select(yield, Value)) # multiply to get new 
 cost <- cbind(cost, new_col = new_value) # add new column to data frame
 wheat_cost = select(cost, 1:3, 11:12, 15, 17, 22) # select only relevant columns
 
-write.csv(wheat_cost, sprintf("%s/wheat_cost.csv", dst)) # write csv
+wheat_cost[wheat_cost=="Wheat"]<-"winter wheat" # create winter wheat version
+write.csv(wheat_cost, sprintf("%s/winter_wheat_cost.csv", dst)) # write csv
+
+wheat_cost[wheat_cost=="winter wheat"]<-"durum wheat" # create durum wheat version
+write.csv(wheat_cost, sprintf("%s/durum_wheat_cost.csv", dst)) # write csv
+
+wheat_cost[wheat_cost=="durum wheat"]<-"spring wheat" # create other spring wheat version
+write.csv(wheat_cost, sprintf("%s/spring_wheat_cost.csv", dst)) # write csv
 
 # barley ---------------------------------
 
@@ -110,4 +118,9 @@ new_value <- select(cost, Value)*(1/select(yield, Value)) # multiply to get new 
 cost <- cbind(cost, new_col = new_value) # add new column to data frame
 cotton_cost = select(cost, 1:3, 11:12, 15, 17, 22) # select only relevant columns
 
-write.csv(cotton_cost, sprintf("%s/cotton_cost.csv", dst)) # write csv
+cotton_cost[cotton_cost=="Cotton"]<-"pima cotton" # create pima cotton version
+write.csv(cotton_cost, sprintf("%s/pima_cotton_cost.csv", dst)) # write csv
+
+cotton_cost[cotton_cost=="pima cotton"]<-"upland cotton" # create upland cotton version
+write.csv(cotton_cost, sprintf("%s/upland_cotton_cost.csv", dst)) # write csv
+
