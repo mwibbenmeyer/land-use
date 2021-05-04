@@ -16,7 +16,7 @@ setwd('../../../..') # relative paths to move directory to the root project dire
 
 # corn ---------------------------------
 
-corn <- read_excel("processing/net_returns/crops/cost/ers_raw/CornCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
+corn <- read_excel("raw_data/net_returns/crops/cost/CornCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
 
 cost <- filter(corn, Item == "Total, costs listed") # select only costs ($/planted acre)
 yield <- filter(corn, Item == "Yield") # select only yield (bushels/planted acre)
@@ -30,7 +30,7 @@ write.csv(corn_cost, sprintf("%s/corn_cost.csv", dst)) # write csv
 
 # sorghum ---------------------------------
 
-sorghum <- read_excel("processing/net_returns/crops/cost/ers_raw/SorghumCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
+sorghum <- read_excel("raw_data/net_returns/crops/cost/SorghumCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
 
 cost <- filter(sorghum, Item == "Total, costs listed") # select only costs ($/planted acre)
 yield <- filter(sorghum, Item == "Yield") # select only yield (bushels/planted acre)
@@ -42,7 +42,7 @@ write.csv(sorghum_cost, sprintf("%s/sorghum_cost.csv", dst)) # write csv
 
 # soybeans ---------------------------------
 
-soybeans <- read_excel("processing/net_returns/crops/cost/ers_raw/SoybeansCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
+soybeans <- read_excel("raw_data/net_returns/crops/cost/SoybeansCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
 
 cost <- filter(soybeans, Item == "Total, costs listed") # select only costs ($/planted acre)
 yield <- filter(soybeans, Item == "Yield") # select only yield (bushels/planted acre)
@@ -55,7 +55,7 @@ write.csv(soybeans_cost, sprintf("%s/soybeans_cost.csv", dst)) # write csv
 
 # wheat ---------------------------------
 
-wheat <- read_excel("processing/net_returns/crops/cost/ers_raw/WheatCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
+wheat <- read_excel("raw_data/net_returns/crops/cost/WheatCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
 
 cost <- filter(wheat, Item == "Total, costs listed") # select only costs ($/planted acre)
 yield <- filter(wheat, Item == "Yield") # select only yield (bushels/planted acre)
@@ -74,7 +74,7 @@ write.csv(wheat_cost, sprintf("%s/spring_wheat_cost.csv", dst)) # write csv
 
 # barley ---------------------------------
 
-barley <- read_excel("processing/net_returns/crops/cost/ers_raw/BarleyCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
+barley <- read_excel("raw_data/net_returns/crops/cost/BarleyCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
 
 cost <- filter(barley, Item == "Total, costs listed") # select only costs ($/planted acre)
 yield <- filter(barley, Item == "Yield") # select only yield (bushels/planted acre)
@@ -86,7 +86,7 @@ write.csv(barley_cost, sprintf("%s/barley_cost.csv", dst)) # write csv
 
 # oats ---------------------------------
 
-oats <- read_excel("processing/net_returns/crops/cost/ers_raw/OatsCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
+oats <- read_excel("raw_data/net_returns/crops/cost/OatsCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
 
 cost <- filter(oats, Item == "Total, costs listed") # select only costs ($/planted acre)
 yield <- filter(oats, Item == "Yield") # select only yield (bushels/planted acre)
@@ -98,7 +98,7 @@ write.csv(oats_cost, sprintf("%s/oats_cost.csv", dst)) # write csv
 
 # rice ---------------------------------
 
-rice <- read_excel("processing/net_returns/crops/cost/ers_raw/RiceCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
+rice <- read_excel("raw_data/net_returns/crops/cost/RiceCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
 
 cost <- filter(rice, Item == "Total, costs listed") # select only costs ($/planted acre)
 yield <- filter(rice, Item == "Yield") # select only yield (bushels/planted acre)
@@ -110,7 +110,7 @@ write.csv(rice_cost, sprintf("%s/rice_cost.csv", dst)) # write csv
 
 # cotton ---------------------------------
 
-cotton <- read_excel("processing/net_returns/crops/cost/ers_raw/CottonCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
+cotton <- read_excel("raw_data/net_returns/crops/cost/CottonCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
 
 cost <- filter(cotton, Item == "Total, costs listed") # select only costs ($/planted acre)
 yield <- filter(cotton, Item == "Yield") # select only yield (bushels/planted acre)
