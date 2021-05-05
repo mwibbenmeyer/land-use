@@ -16,6 +16,8 @@ install.packages("tidycensus")
 library(tidycensus)
 install.packages("tm")
 library(tm)
+library('reshape2')
+
 
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) # sets directory to the current directory
 setwd('../../../..') # relative paths to move directory to the root project directory
@@ -23,6 +25,30 @@ setwd('../../../..') # relative paths to move directory to the root project dire
 world <- ne_countries(scale = "medium", returnclass = "sf") # load world data
 class(world)
 counties <- st_as_sf(map("county", plot = FALSE, fill = TRUE)) # load county data
+
+
+# descriptive statistics of missing data from crop_returns
+
+crop = c("corn", "sorghum", "soybeans", "winter wheat", "durum wheat", "spring wheat", "barley", "oats", "rice", "upland cotton", "pima cotton") # list of crops
+year = c(2002:2020)
+rm(i)
+rm(j)
+for(i in crop) {
+  for(j in year) {
+    c <- crop_returns[crop_returns$year == j & crop_returns$crop == i,]
+    c <- c[, c("county_fips", "price", "cost", "yield", "acres")]
+    c <- melt(c, id.vars = c('county_fips'))  # melt data
+    c <- c[!is.na(c$value), ]                  # remove NA
+    c <- with(c, aggregate(c, by = list(variable), FUN = length )) # compute length by grouping variable
+    
+    ggplot(c, aes( x = Group.1, y = value/3112, fill = Group.1 )) + 
+      geom_bar(stat="identity") + ggtitle(sprintf("Data for crop %s in year %s", i, toString(j))) +
+      xlab("Returns data") + ylab("Portion of total counties with data") + ylim(0,1)
+    
+    ggsave(sprintf("processing/net_returns/crops/exploration/%s_%s.png", i, toString(j)))
+  }
+}
+  
 
 # create FIPS and county ID variables from tidycensus data
 
@@ -46,6 +72,8 @@ new_crop_returns <- new_crop_returns[, c("county_fips", "state_fips", "frr", "cr
 new_counties <- left_join(x = counties, y = new_crop_returns, by = "ID") # join crop returns data to state IDs
 
 counties_2020 = new_counties[new_counties$year == 2020,] # subset to year 2020
+
+# map the data
 
 ggplot(data = world) + # map US counties
   geom_sf() +
