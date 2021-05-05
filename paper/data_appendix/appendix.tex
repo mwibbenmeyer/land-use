@@ -1,0 +1,100 @@
+\documentclass[11pt]{article}
+
+\usepackage{enumitem}
+\usepackage{expdlist}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{bbm}
+\usepackage[english]{babel}
+\usepackage{lipsum}
+\usepackage{multirow}
+\usepackage{fancyhdr,lastpage}
+\usepackage{float}
+\usepackage{changepage}
+\usepackage{hyperref}
+\usepackage{setspace}
+\usepackage[round]{natbib}
+\usepackage{booktabs}
+\usepackage{threeparttable}
+
+\usepackage[letterpaper, top=1in, margin=1in]{geometry}
+
+
+\makeatletter
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%Environments for notes
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%Custom commands relevant to statistics
+\newcommand{\Exp}{\textnormal{E}}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\title{{\bf A dynamic discrete choice model of land use conversion: Data}}
+%\author{David Wear\thanks{Resources for the Future, 1616 P St NW Suite 600, Washington, D.C.\ 20036, \href{mailto:wear@rff.org}{wear@rff.org}} and Matthew Wibbenmeyer\thanks{Resources for the Future, 1616 P St NW Suite 600, Washington, D.C.\ 20036, \href{mailto:wibbenmeyer@rff.org}{wibbenmeyer@rff.org}} }
+
+\setstretch{1.2}
+
+\maketitle
+
+\section{Land use returns}
+
+\subsection{Crop returns}
+
+County-level returns to cropland for NRI years 1982-2012 were provided by Mihiar and Lewis (2019). They assembled these data from Bureau of Economic Analysis data on farm income and expenses. They first calculate county-level net farm income from both crop and livestock production. They then use data on farm cash receipts to measure the share of cash receipts from crop production (as opposed to livestock production), and multiply county-level net farm income by this share to arrive at a measure of total county-level net crop production income. They convert these values to per acre measures using NRI cropland acreage estimates, and adjust these per acre returns measures to 2010 dollars. More detail is provided in Mihiar and Lewis (2019).\footnote{For simulations, base returns measures may not be what we need. In simulations, we may assume that yield is constant over time, but that prices change based on the new market equilibrium under some change in land allocations. In this case, we will want to calculate new returns based on market equilibrium prices and fixed yields.}
+
+\subsection{Pasture returns}
+
+Estimates of pasture rents come from the National Agricultural Statistics Service (NASS), who have provided data on per-acre rents on pasturelands since 1994. The most precise geographic level at which pasture rents are available varies by year, however. For each NRI year, we collected pasture rents at the most precise geographic level available from NASS. As well, we used 2007 pasture rent data in place of 2008 data since the 2007 data were available at a higher geographic resolution. For each year, the primary geographic level over which we collected pasture rents was: 1997 (state), 2002 (state), 2007 (Agricultural Statistical District), 2012 (county), 2015 (state). Agricultural Statistical Districts are generally sub-state geographies defined by NASS as groupings of counties in each state according to geography, climate, and cropping practices, with typically 5--10 districts per state. Pasture rents were sometimes available only for more aggregated geographies than are listed here, and in rare cases pasture rents were available at less aggregated geographies. In all cases, we used the pasture rents for the least aggregated geography available.
+
+\subsection{Conservation Reserve Program returns}
+
+We estimate rents on CRP land based on Conservation Reserve Program statistics reported by the US Department of Agriculture Farm Service Agency (FSA). The FSA provides historical county-level data on CRP enrollment and average rental payments per acre from 1986 to present. We adjust reported average per acre rental payments in NRI years 1987--2015 to 2010 dollars and use these as a measure of rents on CRP land. 
+
+\subsection{Forest returns}
+
+County-level estimates of net returns from forestland for NRI years 2002--2012 were provided by \citet{mihiarlewis}. They construct their measure of forestland returns based on the estimated net present value of a an acre of bare forest land in each county. They collect county-by-species stumpage prices from miscellaneous sources documented in \citet{mihiar2017} and average harvest ages based on USDA Forest Inventory Analysis data. Using these data together with estimated county-by-species timber growth equations, they estimate calculate species-specific one-rotation profits for each county. They then annualize these estimates, convert them to 2010 USD, and construct a weighted average of forest net returns in each county, where weights are based on the share of timber production due to each species. We use this weighted average as our measure of forest net returns. More details on the construction of forest net returns are available in \citet{mihiarlewis}.
+
+\subsection{Rangeland returns}
+
+
+\subsection{Urban returns}
+
+We estimate urban returns by adapting the strategy used by \citet{lubowski2006} and more recently by \citet{mihiarlewis}. From US Census Public Use Microdata Sample (PUMS) data, we collect Public Use Microdata Area (PUMA)-level property value data. Because we are interested in potential rents from converting into urban use, and rents on newly converted land may differ from rents on land that was converted into urban use long ago, we calculate median property values within each PUMA among only properties built in the previous five years. We convert PUMA-level median property values to county-level median property values by assuming that properties are uniformly distributed within Census tracts, and calculating county-level median property values as a weighted average of median property values within each of PUMA intersecting the county, where weights represent the percent of properties in each county estimated to come from a given PUMA. 
+
+We then merge county-level median property values with regional data from the US Census Survey of Construction. The Survey of Construction provides annual data on the number and characteristics of new housing units built in the US, by region. From the Survey of Construction, we collect regional data on average home sale price, lot value, and total lot size. We use lot value and average home sale price to construct region-level ratio of land value to total property value. We multiply county-level median property values by this ratio to obtain an estimate of median land values on newly developed properties. We then multiply this value by average lot size from the Survey of Construction to obtain estimates of median land value per acre on newly developed properties.
+
+\begin{table} \centering
+\begin{threeparttable}[h!]
+\caption{Years for which we have collected returns data for each NRI land use.} 
+\begin{tabular}{lcccccc}
+\toprule 
+ & \multicolumn{6}{c}{Land uses} \\ \cline{2-7}
+Year & Crop & Pasture & CRP & Forest & Range & Urban \\ \midrule
+1982 & X & & & & & \\
+1987 & X & & X & & &  \\
+1992 & X & & X & & & \\
+1997 & X & X & X & & X & \\ 
+2002 & X & X &  X & X& X & X* \\ 
+2007 & X & X & X & X & X & X \\
+2012 & X & X & X & X & X & X\\
+2015 & X & X & X & X &  & X \\ \bottomrule
+\end{tabular}
+\end{threeparttable}
+\end{table}
+
+\bibliographystyle{aer}
+\bibliography{bibliography}
+
+
+\end{document}
