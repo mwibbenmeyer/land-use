@@ -95,7 +95,7 @@ for(j in year) {
     scale_fill_viridis_c() + ggtitle(sprintf("Counties with acres data in %s", toString(j))) + # set color scale and title
     coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE) # set coordinates to continental U.S.
   
-  ggsave(sprintf("results/initial_descriptive/net_returns/crops/maps/map_%s_acres.png", toString(j)), width = 20, height = 12) # save map
+  ggsave(sprintf("results/initial_descriptive/net_returns/crops/maps/map_%s_acres.png", toString(j)), width = 20, height = 12, dpi=96) # save map
 }
 
 # loop through crops and years to map each
