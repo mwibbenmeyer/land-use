@@ -48,7 +48,6 @@ replace vnext = lnsum + gamma
 gen diff = v - vnext
 summ diff
 local maxdiff = `r(max)'
-di "`maxdiff'"
 
 /*Iterate until convergence*/
 while abs(`maxdiff') > 0.00001 {
@@ -56,14 +55,12 @@ while abs(`maxdiff') > 0.00001 {
 	replace v = vnext
 	replace vcond = theta_0*P + theta_q1*P + beta*v
 	drop sum
-	pause
 	egen sum = sum(exp(vcond))
 	replace lnsum = ln(sum)
 	replace vnext = lnsum + gamma
 	replace diff = v - vnext
 	summ diff
 	local maxdiff = `r(max)'
-	di "`maxdiff'"
 
 }
 
