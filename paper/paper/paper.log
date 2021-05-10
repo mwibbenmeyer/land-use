@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/W32TeX) (preloaded format=pdflatex 2020.11.3)  4 MAY 2021 17:46
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/W32TeX) (preloaded format=pdflatex 2020.11.3)  10 MAY 2021 10:36
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -533,48 +533,26 @@ Overfull \hbox (38.54413pt too wide) in paragraph at lines 145--147
 (\OML/cmm/m/it/10.95 l[]; a[]; ![]\OT1/cmr/m/n/10.95 )$
  []
 
-[4]
-
-LaTeX Warning: Reference `eq:estim' on page 5 undefined on input line 177.
-
-
-Overfull \hbox (7.46085pt too wide) in paragraph at lines 177--178
-\OT1/cmr/m/n/10.95 The de-pen-dent vari-able $\OML/cmm/m/it/10.95 Y[]$ \OT1/cmr
-/m/n/10.95 in equa-tion [] is a func-tion of con-di-tional choice prob-a-bil-i-
-ties $\OML/cmm/m/it/10.95 p[]\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 x[]; ![]\O
-T1/cmr/m/n/10.95 )$,
- []
-
-[5] (./paper.bbl) 
+[4] (./paper.bbl) 
 AED: lastpage setting LastPage
-[6]
+[5]
 
 Package natbib Warning: There were undefined citations.
 
 (./paper.aux)
 Package rerunfilecheck Info: File `paper.out' has not changed.
-(rerunfilecheck)             Checksum: 2A7DEAA096BC3A88995B019BCACF38E5;407.
-
-
-LaTeX Warning: There were undefined references.
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
+(rerunfilecheck)             Checksum: A45F024B347B3DFC77E5ACA1412EC1BE;285.
  ) 
 Here is how much of TeX's memory you used:
- 9292 strings out of 479485
- 137140 string characters out of 5875916
- 576997 words of memory out of 5000000
- 26053 multiletter control sequences out of 15000+600000
+ 9283 strings out of 479485
+ 137019 string characters out of 5875916
+ 578959 words of memory out of 5000000
+ 26049 multiletter control sequences out of 15000+600000
  547541 words of font info for 78 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 66i,15n,73p,980b,353s stack positions out of 5000i,500n,10000p,200000b,80000s
-pdfTeX warning (dest): name{equation.1.23} has been referenced but does not e
-xist, replaced by a fixed one
-
-pdfTeX warning (dest): name{Hfootnote.1} has been referenced but does not exist
-, replaced by a fixed one
+ 66i,15n,73p,980b,357s stack positions out of 5000i,500n,10000p,200000b,80000s
+pdfTeX warning (dest): name{Hfootnote.1} has been referenced but does not exi
+st, replaced by a fixed one
 
  <c:/Users/Matt/.texlive2020/texmf-var/fonts/pk/ljfour/public/bbm/bbm10.657pk><
 c:/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb><c:/texliv
@@ -591,10 +569,10 @@ ts/type1/public/amsfonts/cm/cmsy10.pfb><c:/texlive/2020/texmf-dist/fonts/type1/
 public/amsfonts/cm/cmsy6.pfb><c:/texlive/2020/texmf-dist/fonts/type1/public/ams
 fonts/cm/cmsy8.pfb><c:/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/c
 mti10.pfb>
-Output written on paper.pdf (6 pages, 193939 bytes).
+Output written on paper.pdf (5 pages, 189498 bytes).
 PDF statistics:
- 191 PDF objects out of 1000 (max. 8388607)
- 165 compressed objects within 2 object streams
- 41 named destinations out of 1000 (max. 500000)
- 49 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 169 PDF objects out of 1000 (max. 8388607)
+ 144 compressed objects within 2 object streams
+ 36 named destinations out of 1000 (max. 500000)
+ 33 words of extra memory for PDF output out of 10000 (max. 10000000)
 
