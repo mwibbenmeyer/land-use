@@ -9,9 +9,14 @@
 library(tidyverse)
 library("ggplot2")
 theme_set(theme_bw())
+install.packages("sf")
 library("sf")
+install.packages("rnaturalearth")
 library("rnaturalearth")
+install.packages("rnaturalearthdata")
 library("rnaturalearthdata")
+install.packages("maps")
+library("maps")
 install.packages("tidycensus")
 library(tidycensus)
 install.packages("tm")
@@ -45,7 +50,7 @@ for(i in crop) {
       geom_bar(stat="identity") + ggtitle(sprintf("Data for crop %s in year %s", i, toString(j))) +
       xlab("Returns data") + ylab("Portion of total counties with data") + ylim(0,1)
     
-    ggsave(sprintf("processing/net_returns/crops/exploration/%s_%s.png", i, toString(j)))
+    ggsave(sprintf("results/initial_descriptive/net_returns/crops/plots/%s_%s.png", i, toString(j)))
   }
 }
   
@@ -66,21 +71,43 @@ fips_codes <- mutate_all(fips_codes, .funs=tolower)
 # join all data together
 
 rm(new_crop_returns)
+crop_returns <- read_csv("processing/net_returns/crop_returns.csv")
 new_crop_returns <- left_join(x = crop_returns, y = fips_codes, by = "county_fips") # join crop returns data to state IDs
 new_crop_returns <- new_crop_returns[, c("county_fips", "state_fips", "frr", "crop", "year", "price", "cost", "yield", "acres", "ID")] # trim columns
 
 new_counties <- left_join(x = counties, y = new_crop_returns, by = "ID") # join crop returns data to state IDs
 
-counties_2020 = new_counties[new_counties$year == 2020,] # subset to year 2020
+cropf = c("corn", "sorghum", "soybeans", "winter_wheat", "durum_wheat", "spring_wheat", "barley", "oats", "rice", "upland_cotton", "pima_cotton") # list of formatted crops
+rm(i)
+rm(j)
+for(i in cropf) {
+  for(j in year) {
+    counties_subset = new_counties[new_counties$year == j & new_counties$crop == i,] # subset to year and crop
+    
+    ggplot(data = world) + # map US counties
+      geom_sf() +
+      geom_sf(data = counties_subset, aes(fill = acres)) +
+      scale_fill_viridis_c() + ggtitle(sprintf("Acres of %s in %s", i, toString(j))) +
+      coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE)
+    
+    ggsave(sprintf("results/initial_descriptive/net_returns/crops/maps/map_%s_%s_acres.png", i, toString(j)), width = 20, height = 12) # save map
+  }
+}
 
+counties_2020_corn = new_counties[new_counties$year == 2020 & new_counties$crop == "corn",] # subset to 2020 and corn
+counties_2020_corn = new_counties[new_counties$year == 2020 & new_counties$crop == "corn",] # subset to 2020 and corn
+counties_2020_corn = new_counties[new_counties$year == 2020 & new_counties$crop == "corn",] # subset to 2020 and corn
+counties_2020_corn = new_counties[new_counties$year == 2020 & new_counties$crop == "corn",] # subset to 2020 and corn
+counties_2020_corn = new_counties[new_counties$year == 2020 & new_counties$crop == "corn",] # subset to 2020 and corn
+counties_2020_corn = new_counties[new_counties$year == 2020 & new_counties$crop == "corn",] # subset to 2020 and corn
 # map the data
 
 ggplot(data = world) + # map US counties
   geom_sf() +
-  geom_sf(data = counties_2020, aes(fill = yield)) +
-  scale_fill_viridis_c() +
+  geom_sf(data = counties_2020, aes(fill = acres)) +
+  scale_fill_viridis_c() + ggtitle("Acres of any crop in 2020") +
   coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE)
 
-ggsave("processing/net_returns/crops/map.png", width = 20, height = 12) # save map
+ggsave("results/initial_descriptive/net_returns/crops/maps/map_2020_acres.png", width = 20, height = 12) # save map
 
 
