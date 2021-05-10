@@ -1,0 +1,22 @@
+\ifx\undefined\bysame
+\newcommand{\bysame}{\leavevmode\hbox to\leftmargin{\hrulefill\,\,}}
+\fi
+\begin{thebibliography}{xx}
+
+\harvarditem[Lubowski et al.]{Lubowski, Plantinga and
+  Stavins}{2006}{lubowski2006}
+{\bf Lubowski, Ruben~N, Andrew~J Plantinga, and Robert~N Stavins}, ``Land-use
+  change and carbon sinks: econometric estimation of the carbon sequestration
+  supply function,'' {\it Journal of Environmental Economics and Management},
+  2006, {\it 51} (2), 135--152.
+
+\harvarditem[Mihiar and Lewis]{Mihiar and Lewis}{2017}{mihiar2017}
+{\bf Mihiar, Chris and David Lewis}, ``Climate, adaptation, and the value of
+  forestland: A national Ricardian analysis of the United States,'' 2017.
+
+\harvarditem[Mihiar and Lewis]{Mihiar and Lewis}{2019}{mihiarlewis}
+{\bf \bysame{} and \bysame{}}, ``An Econometric Analysis of the Impact of
+  Climate Change on Broad Land-Use Change in the Conterminous United States,''
+  2019.
+
+\end{thebibliography}

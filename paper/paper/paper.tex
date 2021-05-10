@@ -1,0 +1,190 @@
+\documentclass[11pt]{article}
+
+\usepackage{enumitem}
+\usepackage{expdlist}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{bbm}
+\usepackage[english]{babel}
+\usepackage{lipsum}
+\usepackage{multirow}
+\usepackage{fancyhdr,lastpage}
+\usepackage{float}
+\usepackage{changepage}
+\usepackage{hyperref}
+\usepackage{setspace}
+\usepackage[round]{natbib}
+\usepackage{xcolor} % Allows for colored texts, useful for commenting
+
+
+\usepackage[letterpaper, top=1in, margin=1in]{geometry}
+
+
+\makeatletter
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%Environments for notes
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%Custom commands relevant to statistics
+\newcommand{\Exp}{\textnormal{E}}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\title{{\bf A dynamic discrete choice model of land use conversion}}
+%\author{David Wear\thanks{Resources for the Future, 1616 P St NW Suite 600, Washington, D.C.\ 20036, \href{mailto:wear@rff.org}{wear@rff.org}} and Matthew Wibbenmeyer\thanks{Resources for the Future, 1616 P St NW Suite 600, Washington, D.C.\ 20036, \href{mailto:wibbenmeyer@rff.org}{wibbenmeyer@rff.org}} }
+
+\setstretch{1.2}
+
+\maketitle
+
+\section{Theory}
+
+\subsection{The decision problem}
+
+This section adapts the formulation of the dynamic discrete choice problem described in \citet{kalouptsidi2020} to a dynamic discrete choice over land use and land use change. In each period, the landowner chooses whether to keep their land in its current land use or to convert it to a different use, where this decision is made to maximize expected profits over time. 
+
+Profits in each period depend on the state ${\bf s} = \{k_{it},w_{mt},\epsilon_{it},\eta_{mt}\}$, where variables indexed by $i$ vary at the individual parcel level and variables indexed only by $m$ vary at the market-level. We define market $m$ to consist of all parcels of quality $q$ within a given county $c$. The variables $(k_{it},w_{mt})$ are observed by the econometrician, whereas $(\epsilon_{it},\eta_{mt})$ are not. The variable $k_{it}$ denotes the current land use at the beginning of period $t$. While the evolution of $x_{it}$ is controlled by the landowner, $w_{mt}$ contains variables that are observed at the market level and are thus unaffected by landowner choices (assuming the market is sufficiently large); for example, $w_{mt}$ contains input and output prices for commodities produced on land in each use. Observed and unobserved market-level state variables are collected into the vector $\omega_{mt} = (w_{mt},\eta_{mt})$. 
+
+Landowners' profits in each period depend on parcel and market-level state variables, and the choice of land use $j_{it}$ in period $t$, and are written:
+\begin{align}
+\Pi(j_{it},{\bf s}_{imt}) = \bar{\pi}_m(j_{it},k_{it},w_{mt}) + \xi(j_{it},k_{it},\omega_{mt}) + \epsilon_{jimt}.
+\end{align}
+Therefore, landowner profits are the sum of $\bar{\pi}$, a function of observed variables, $\xi$, a function that depends also on unobserved market-level variables, and the  disturbance term $\epsilon_{jimt}$, which we assume follows a Type I extreme value distribution. We define $\pi$ such that $\pi \equiv \bar{\pi} + \xi$, and $\Pi = \pi + \epsilon$.
+
+Consistent with our data and previous literature, we assume that urban use is an absorbing state; owners of land in non-urban uses who develop their land receive a sales price equal to the net present value of urban rents from land perpetuity. \textcolor{red}{Note: This may not be necessary.} We denote urban use as $J$ and specify the observable portion of landowner profits as:
+\begin{align} \label{eq:pidefn}
+\bar{\pi}_m(j_{it},x_{it},w_{mt}) = \left\{\begin{array}{ll} 
+	R_{m}(j_{it},k_{it}, w_{mt}) - C_{mkj} & j\neq J \\
+	\frac{R_{m}(j_{it},k_i{it}, w_{mt})}{1-r} - C_{mkj} & j = J
+	\end{array}\right.
+\end{align}
+where $C_{kJ}$ represents the cost of converting land into urban use, and $r$ is the interest rate.
+
+For land uses $j \neq J$, we follow \citet{lubowski2006} in specifying $R_{j}(w_{mt},q_{i})$ according to:
+\begin{align} \label{eq:rentspec}
+R_{m}(j_{it},k_{it}, w_{mt}) = \theta^0_{jk} P_{jct} + \sum_{\bar{q} = 2}^6 \theta^{\bar{q}}_{jk} (\mathbbm{1}(q_{m} = \bar{q}) \times P_{jct} )
+\end{align}
+where $P_{jct}$ represents the measured return to land use $j$ within county $c$ at time $t$, and $q_{m}$ represents the land condition class, a measure of land quality, of parcels in market $m$. \textcolor{red}{Note: \citet{lubowski2006} include separate values of $\theta_1$ and $\theta_2$ for each starting land use $k$. Why? Also, why are the values of $\theta$ subscripted by $t$? For now, following from this, I've subscripted the $R$ and $C$ functions by $t$, but I'm not totally sure why this makes sense.} Again following \citet{lubowski2006}, we specify conversion costs as: 
+\begin{align} \label{eq:costspec}
+C_{kjt}(q_i) = \eta^0_{kjt} + \sum_{\bar{q} = 2}^6 \eta^{\bar{q}}_{jk} \mathbbm{1}(q_{m} = \bar{q}) 
+\end{align}
+where conversion costs are allowed to vary with parcel quality.
+
+In each period the landowner chooses whether to convert their land into an alternative use based on the profits they would receive from doing so, and the expected implications for profits in future periods. This decision problem can be described recursively using the Bellman equation:
+\begin{align}
+V({\bf s}_{imt}) = \max_{j_{it}} \pi(j_{it},k_{it},\omega_{mt}) + \epsilon_{jimt} + \beta \Exp\Big[V_{t+1}({\bf s}_{imt+1})|j_{it},{\bf s}_{imt}\Big]
+\end{align}
+Because $V$ is a recursive function, estimating its structural parameters is not straightforward. Arriving at the estimating equation requires first writing $V$ in terms of known functions. The next section defines functions that will be useful in doing so.
+
+\subsection{Value functions, choice probabilities, and expectational errors}
+
+First, we define the {\em ex ante} value function $\bar{V}_m(k_{it},\omega_{mt})$ as the expected utility in the current period, prior to the realization of $\epsilon$:
+\begin{align} \label{eq:exante}
+\bar{V}_m(k_{it},\omega_{mt}) \equiv \Exp_\epsilon \big[V(k_{it},\omega_{mt},\epsilon_{it})\big] = \int V(k_{it},\omega_{it},\epsilon_{it}) g(\epsilon_{it}) d\epsilon
+\end{align}
+Next, we define the {\em conditional} value function as the present discounted value (less $\epsilon$) of choosing $j$ given the current state of parcel $i$, $k_{it}$, and market-level state variables $\omega_{mt}$:
+\begin{align} \label{eq:condval}
+v_m(j_{it}, k_{it},\omega_{mt}) = \pi_m(j_{it},k_{it},\omega_{mt}) + \beta \Exp\big[\bar{V}_{mt+1}(k_{it+1}(j_{it}),\omega_{mt+1}) | \omega_{mt})]
+\end{align}
+Using the conditional value function, the probability of choosing land use $j'$---the {\em conditional choice probability} can be written:
+\begin{align} \label{eq:probs}
+p_m(j_{it}|k_{it},\omega_{mt}) = \int \mathbbm{1}\Big\{\argmax_{j'} (v(j',k_{it},\omega_{mt}) + \epsilon(j')) = j_{it} \Big\} g(\epsilon_{it}) d\epsilon
+\end{align}
+
+From \citet{arcidiaconomiller} and \citet{hotzmiller}, if $\epsilon$ follows a Type I extreme value distribution, then for any arbitrary choice $j$ the ex ante value function can be written as a function of the conditional value function:\footnote{Would be worth understanding the derivation of this better.}
+\begin{align} \label{eq:hm}
+\bar{V}_m(k_{it},\omega_{mt}) = v_m(j_{it},k_{it},\omega_{mt}) + \gamma - \ln\big(p_m(j_{it}|k_{it},\omega_{mt})\big).
+\end{align}
+Note that when $p_m(j_{it}|k_{it},\omega_{mt}) = 1$, the adjustment term equals zero. Therefore, this equation can be interpreted as saying that the ex ante utility of being in state $(k_{it},\omega_{mt})$ can be written as the conditional value of choosing arbitrary land use $j$ and a term that adjusts for the fact that $j$ may not the optimal choice when in land use $j$  $\big(\gamma - \ln\big(p_m(j_{it}|x_{it},\omega_{mt})\big)$ \citep{arcidiaconoellickson}. This relationship will be useful for eliminating $\bar{V}$ from the estimating equation.
+
+Finally, we follow \citet{scott2013} and \citet{kalouptsidi2020} in defining ``expectational errors.'' Expectational errors will be useful in disposing of expectations over $\bar{V}$, allowing us to write $\Exp \bar{V}$ as the sum of $V$ and its expectational errors. \citet{kalouptsidi2020} define expectational errors for any function $h(z,\omega)$ and any realization $\omega^*$ as:
+\begin{align}
+e^h(z',\omega,\omega^*) \equiv \Exp_{\omega'|\omega} \big[ h(z',\omega')|\omega\big] - h(z',\omega^*)
+\end{align} 
+Therefore, $e^h$ describes the difference between the expected and realized values $h(\cdot)$ due to realization of $\omega'$. Further, given some action $a$, they define:
+\begin{align}
+e^h(a, z, \omega, \omega^*) \equiv \sum_{x'} e^h(z',\omega,\omega^*) F(z'|a,x,w),
+\end{align} 
+the mean expectational error over the agent-determined state variable $z'$ given action $a$, initial states $z$ and $\omega$, and a realization $\omega^*$.
+
+\subsection{ECCP Equations}
+
+Using the tools from the last section, we can derive an equation to estimate the structural parameters of landowners' dynamic land use decision. First, we can difference equation~\ref{eq:condval} across two arbitarily chosen land uses $j$ and $a$:
+\begin{align*}
+v_m(j_{it}, k_{it},\omega_{mt}) - v_m(a_{it}, k_{it},\omega_{mt})  &= \pi_m(j_{it},k_{it},\omega_{mt}) - \pi_m(a_{it},k_{it},\omega_{mt}) \big) \\
+	& + \beta \Big\{ \Exp\big[\bar{V}_{mt+1}(k_{it+1}(j_{it}),\omega_{mt+1}) | \omega_{mt}] \\ \nonumber
+	& -  \Exp\big[\bar{V}_{mt+1}(k_{it+1}(a_{it}),\omega_{mt+1}) | \omega_{mt}] \Big\} \nonumber
+\end{align*}
+Using the \citet{hotzmiller} inversion, which writes differences in conditional value functions in terms of conditional choice probabilities, we can rewrite the left-hand side of the equation as:
+\begin{align} \label{eq:subhm}
+\ln\bigg(\frac{p_m(j_{it}|k_{it},\omega_{mt})}{p_m(a_{it}|k_{it},\omega_{mt})}\bigg) &= \big(\pi(j_{it},x_{it},w_{mt}) - \pi(a_{it},x_{it},w_{mt})\big) \\
+	& + \beta \Big\{ \Exp\big[\bar{V}_{t+1}(x_{it+1},\omega_{mt+1}) | j_{it}, x_{it}, \omega_{mt})] \nonumber\\ 
+	& -  \Exp\big[\bar{V}_{t+1}(x_{it+1},\omega_{mt+1}) | a_{it}, x_{it}, \omega_{mt})] \Big\} \nonumber
+\end{align} 
+Using expectational errors to eliminate the expecation, this can now be rewritten as:
+\begin{align}  \label{eq:subexperr}
+\ln\bigg(\frac{p_m(j_{it}|k_{it},\omega_{mt})}{p_m(a_{it}|k_{it},\omega_{mt})}\bigg) &= \big(\pi(j_{it},x_{it},w_{mt}) - \pi(a_{it},x_{it},w_{mt})\big) \\
+	& + \beta \Big\{\bar{V}_{mt+1}(k_{it+1}(j_{it}),\omega_{mt+1}) -  \bar{V}_{mt+1}(k_{it+1}(a_{it}),\omega_{mt+1})\Big\} \nonumber \\ 
+	& + \beta \Big\{e^V(k_{it+1}(j_{it}),\omega_{mt},\omega_{mt+1}) -  e^V(k_{it+1}(a_{it}),\omega_{mt},\omega_{mt+1})\Big\} \nonumber
+\end{align}
+Using equation~\ref{eq:hm}, we can write the difference in ex ante value functions in equation~\ref{eq:subexperr} in terms of conditional value functions and conditional choice probabilities with respect to some arbitrary choice $l$:
+\begin{align}  \label{eq:diffexante}
+\bar{V}_{mt+1}(k_{it+1}(j_{it}),\omega_{mt+1})& -  \bar{V}_{mt+1}(k_{it+1}(a_{it}),\omega_{mt+1}) = \\ \nonumber
+& v_m(l_{it+1},j_{it},\omega_{mt+1}) - v_m(l_{it+1},a_{it},\omega_{mt+1})\\ 
+& - \ln\big(p_m(l_{it+1}|j_{it},\omega_{mt+1})\big) + \ln\big(p_m(l_{it+1}|a_{it},\omega_{mt+1})\big) \nonumber
+\end{align}
+Due to one-period finite dependence, continuation values within $v_m(l_{it+1},j_{it},\omega_{mt+1})$ and $v_m(l_{it+1},a_{it},\omega_{mt+1})$ are identical; therefore the first-term on the right-hand side of equation~\ref{eq:diffexante} can be written as a difference in next period profits:
+\begin{align}  \label{eq:subcondval}
+\bar{V}_{mt+1}(k_{it+1}(j_{it}),\omega_{mt+1})& -  \bar{V}_{mt+1}(k_{it+1}(a_{it}),\omega_{mt+1}) = \\ \nonumber
+& \pi_m(l_{it+1},j_{it},\omega_{mt+1}) - \pi_m(l_{it+1},a_{it},\omega_{mt+1})\\ 
+& - \ln\big(p_m(l_{it+1}|j_{it},\omega_{mt+1})\big) + \ln\big(p_m(l_{it+1}|a_{it},\omega_{mt+1})\big) \nonumber
+\end{align}
+Now, substituting equation~\ref{eq:subcondval} into equation~\ref{eq:subexperr}, and setting $l = j$:
+\begin{align} 
+\ln\bigg(\frac{p_m(j_{it}|k_{it},\omega_{mt})}{p_m(a_{it}|k_{it},\omega_{mt})}\bigg) + & \beta\ln\bigg(\frac{p_m(j_{it}|j_{it},\omega_{mt+1})}{p_m(j_{it}|a_{it},\omega_{mt+1})}\bigg) \\
+ &=\big(\pi_m(j_{it},k_{it},\omega_{mt}) - \pi_m(a_{it},k_{it},\omega_{mt})\big)  \nonumber \\
+	& + \beta \big(\pi_m(j_{it},j_{it},\omega_{mt}) - \pi_m(j_{it},a_{it},\omega_{mt})\big) \nonumber \\ 
+	& + \beta \Big\{e^V(k_{it+1}(j_{it}),\omega_{mt},\omega_{mt+1}) -  e^V(k_{it+1}(a_{it}),\omega_{mt},\omega_{mt+1})\Big\} \nonumber
+\end{align}
+Finally, we can use the definition of $\pi_m(\cdot)$, as well as the specifications of rents and conversion costs to arrive at the estimating equation:
+\begin{align}
+Y_{jmt}(k) &= (\eta^0_{jk} - \eta^0_{ak}) + \sum_{\bar{q} = 2}^6 \mathbbm{1}(q_{m} = \bar{q}) \Big(\eta^{\bar{q}}_{jk} - \eta^{\bar{q}}_{ak} \Big) \\
+	& + (\theta^0_{jk} P_{jct} - \theta^0_{ak} P_{act}) + \sum_{\bar{q} = 2}^6 \mathbbm{1}(q_{m} = \bar{q}) \Big(\theta^{\bar{q}}_{jk}P_{jct} - \theta^{\bar{q}}_{ak} P_{act}\Big) \nonumber \\ \nonumber
+	& + \beta \Big\{(\eta^0_{jj} - \eta^0_{ja}) + \sum_{\bar{q} = 2}^6 \mathbbm{1}(q_{m} = \bar{q}) \Big(\eta^{\bar{q}}_{jj} - \eta^{\bar{q}}_{ja} \Big) \\ \nonumber
+	& + (\theta^0_{jj} - \theta^0_{ja}) P_{jct} + \sum_{\bar{q} = 2}^6 \mathbbm{1}(q_{m} = \bar{q}) \Big(\theta^{\bar{q}}_{jj} - \theta^{\bar{q}}_{ja}\Big) P_{jct}\Big)\Big\} + u_{jmt} \nonumber
+\end{align}
+where:
+\begin{align}
+Y_{jmt}(k) &\equiv \ln\bigg(\frac{p_m(j_{it}|k_{it},\omega_{mt})}{p_m(a_{it}|k_{it},\omega_{mt})}\bigg) + \beta\ln\bigg(\frac{p_m(j_{it}|j_{it},\omega_{mt+1})}{p_m(j_{it}|a_{it},\omega_{mt+1})}\bigg) \\
+u_{jmt} &\equiv \Big(\xi(j_{it},k_{it},\omega_{mt}) - \xi(a_{it},k_{it},\omega_{mt})\Big) \\
+& + \beta \Big\{e^V(k_{it+1}(j_{it}),\omega_{mt},\omega_{mt+1}) -  e^V(k_{it+1}(a_{it}),\omega_{mt},\omega_{mt+1})\Big\} + u_{jmt} \nonumber 
+\end{align}
+
+%
+%\subsection{Identification}
+%
+%\subsection{Estimation}
+%
+%The dependent variable $Y_{jit}$ in equation~\ref{eq:estim} is a function of conditional choice probabilities $p_j(x_{it},\omega_{mt})$, which---while not directly observed---can be estimated in a first-stage. Specifically, in order to construct $Y_{jit}$, we estimate:
+%\begin{align} \label{eq:ccp_firststage}
+%p_j\left(x_{it}(k_{it}),\omega_{mt}\right) =  F\left(\gamma^j_0 + \gamma^j_1 (P^j_{ct} - P^k_{ct}) + \gamma^j_2 LCC_{i} + \theta^j_3 (P^j_{ct} - P^k_{ct}) \times LCC_{i} + \delta_c + \mu_t \right)
+%\end{align}
+%where  $F(\cdot)$ is the cumulative distribution function of a logistic distribution. Estimates of equation~\ref{eq:ccp_firststage} measure landowner responses to change in land use returns without taking into account dynamic behavior. Thus they are both necessary inputs in constructing the dependent variable for our dynamic discrete choice estimator, and they provide a basis of comparison for estimates from the dynamic discrete choice estimator. Based on our estimate of equation~\ref{eq:ccp_firststage}, we predict conditional choice probabilities for current period choices $j$ and $a$, and next-period choices of $J$ conditional on choosing $j$ and $a$ in the present period. We uses these conditional choice probabilities to calculate 
+%
+
+
+\bibliographystyle{aer}
+\bibliography{bibliography}
+
+
+\end{document}

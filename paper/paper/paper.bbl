@@ -1,0 +1,36 @@
+\ifx\undefined\bysame
+\newcommand{\bysame}{\leavevmode\hbox to\leftmargin{\hrulefill\,\,}}
+\fi
+\begin{thebibliography}{xx}
+
+\harvarditem[Arcidiacono and Ellickson]{Arcidiacono and
+  Ellickson}{2011}{arcidiaconoellickson}
+{\bf Arcidiacono, Peter and Paul~B Ellickson}, ``Practical methods for
+  estimation of dynamic discrete choice models,'' {\it Annu. Rev. Econ.}, 2011,
+  {\it 3} (1), 363--394.
+
+\harvarditem[Arcidiacono and Miller]{Arcidiacono and
+  Miller}{2011}{arcidiaconomiller}
+{\bf \bysame{} and Robert~A Miller}, ``Conditional choice probability
+  estimation of dynamic discrete choice models with unobserved heterogeneity,''
+  {\it Econometrica}, 2011, {\it 79} (6), 1823--1867.
+
+\harvarditem[Hotz and Miller]{Hotz and Miller}{1993}{hotzmiller}
+{\bf Hotz, V~Joseph and Robert~A Miller}, ``Conditional choice probabilities
+  and the estimation of dynamic models,'' {\it The Review of Economic Studies},
+  1993, {\it 60} (3), 497--529.
+
+\harvarditem[Kalouptsidi et al.]{Kalouptsidi, Scott and
+  Souza-Rodrigues}{2020}{kalouptsidi2020}
+{\bf Kalouptsidi, Myrto, Paul~T Scott, and Eduardo Souza-Rodrigues}, ``Linear
+  IV regression estimators for structural dynamic discrete choice models,''
+  {\it Journal of Econometrics}, 2020.
+
+\harvarditem[Lubowski et al.]{Lubowski, Plantinga and
+  Stavins}{2006}{lubowski2006}
+{\bf Lubowski, Ruben~N, Andrew~J Plantinga, and Robert~N Stavins}, ``Land-use
+  change and carbon sinks: econometric estimation of the carbon sequestration
+  supply function,'' {\it Journal of Environmental Economics and Management},
+  2006, {\it 51} (2), 135--152.
+
+\end{thebibliography}
