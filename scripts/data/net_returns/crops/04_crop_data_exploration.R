@@ -76,26 +76,48 @@ fips_codes <- mutate_all(fips_codes, .funs=tolower) # change to lowercase
 rm(new_crop_returns)
 crop_returns <- read_csv("processing/net_returns/crop_returns.csv")
 new_crop_returns <- left_join(x = crop_returns, y = fips_codes, by = "county_fips") # join crop returns data to state IDs
-new_crop_returns <- new_crop_returns[, c("county_fips", "state_fips", "frr", "crop", "year", "price", "cost", "yield", "acres", "ID")] # trim columns
-df = subset(new_crop_returns, select = -c(crop, price, cost, yield, county_fips, state_fips, frr)) # trim to only year, ID, and acres
-df1 <- df %>% # count rows with acres data in same year and ID group
+new_crop_returns <- new_crop_returns[, c("year","acres", "ID")] # trim columns
+
+# data with crop acres per year
+
+df1 <- new_crop_returns %>% # count rows with acres data in same year and ID group
   group_by(ID, year) %>%
   summarise_each(funs(sum(!is.na(.))))
 new_counties <- left_join(x = counties, y = df1, by = "ID") # join acres data to geographic state IDs
+new_counties$has_acres <- ifelse(new_counties$acres < 1,0,1) # create a factor for counties with and without acres
 
-# loop through years to map counties with acres data
+# data with crop acres for all years
+
+df2 <- new_crop_returns[, c("acres", "ID")]
+df3 <- df2 %>% # count rows with acres data in same year and ID group
+  group_by(ID) %>%
+  summarise_each(funs(sum(!is.na(.))))
+new_counties1 <- left_join(x = counties, y = df3, by = "ID") # join acres data to geographic state IDs
+new_counties1$has_acres <- ifelse(new_counties1$acres < 1,0,1) # create a factor for counties with and without acres
+
+# map counties with any acres data
+
+ggplot(data = world) + # map US counties
+  geom_sf() + geom_sf(data=subset(new_counties1, !is.na(has_acres)), aes(fill = factor(has_acres))) + # fill with number of acres
+  scale_fill_discrete(name = "Has acres-planted data", labels = c("None", "Some")) + # change legend labels and colors
+  ggtitle(sprintf("Counties with crop acres-planted data in any year")) + # set color scale and title
+  coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE) # set coordinates to continental U.S.
+
+ggsave("results/initial_descriptive/net_returns/crops/maps/map_acres.png", width = 18, height = 10, dpi=96) # save map
+
+# loop through years to map counties with acres data by year
 
 rm(j)
 for(j in year) {
   df_subset <- new_counties[new_counties$year == j,] # subset data by each year
   
   ggplot(data = world) + # map US counties
-    geom_sf() +
-    geom_sf(data = df_subset, aes(fill = acres)) + # fill with number of acres
-    scale_fill_viridis_c() + ggtitle(sprintf("Counties with acres data in %s", toString(j))) + # set color scale and title
+    geom_sf() + geom_sf(data=subset(df_subset, !is.na(has_acres)), aes(fill = factor(has_acres))) + # fill with number of acres
+    scale_fill_discrete(name = "Has acres-planted data", labels = c("None", "Some")) + # change legend labels and colors
+    ggtitle(sprintf("Counties with crop acres-planted data in %s", toString(j))) + # set color scale and title
     coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE) # set coordinates to continental U.S.
   
-  ggsave(sprintf("results/initial_descriptive/net_returns/crops/maps/map_%s_acres.png", toString(j)), width = 20, height = 12, dpi=96) # save map
+  ggsave(sprintf("results/initial_descriptive/net_returns/crops/maps/map_%s_acres.png", toString(j)), width = 18, height = 10, dpi=96) # save map
 }
 
 # loop through crops and years to map each
@@ -112,7 +134,7 @@ for(j in year) {
 #       scale_fill_viridis_c() + ggtitle(sprintf("Acres of %s in %s", i, toString(j))) +
 #       coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE)
 #     
-#     ggsave(sprintf("results/initial_descriptive/net_returns/crops/maps/map_%s_%s_acres.png", i, toString(j)), width = 20, height = 12) # save map
+#     ggsave(sprintf("results/initial_descriptive/net_returns/crops/maps/map_%s_%s_acres.png", i, toString(j)), width = 20, height = 12, dpi=96) # save map
 #   }
 # }
 
