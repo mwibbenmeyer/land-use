@@ -63,7 +63,15 @@ for(i in crop) {
 data(fips_codes) # load FIPS county data
 fips_codes$county_fips = paste(fips_codes$state_code, fips_codes$county_code, sep="") # add a 5-digit FIPS code
 fips_codes$county <- removePunctuation(fips_codes$county) # remove punctuation
-fips_codes$county <- sub("District of Columbia", "Washington", fips_codes$county) # handle washington d.c.
+fips_codes$county <- sub("District of Columbia", "Washington", fips_codes$county) # handle washington, d.c.
+fips_codes$county <- sub("LaMoure", "La Moure", fips_codes$county) # handle la moure, sd
+fips_codes$county <- sub("DeKalb", "De Kalb", fips_codes$county) # handle de kalb, mo (and in, il, al, ga, tn)
+fips_codes$county <- sub("LaPorte", "La Porte", fips_codes$county) # handle la porte, in
+fips_codes$county <- sub("DuPage", "Du Page", fips_codes$county) # handle du page, il
+fips_codes$county <- sub("LaSalle", "La Salle", fips_codes$county) # handle la salle, il
+fips_codes$county <- sub("DeWitt", "De Witt", fips_codes$county) # handle de witt, tx
+fips_codes$county <- sub("DeSoto", "De Soto", fips_codes$county) # handle de soto, ms (and fl)
+fips_codes$county <- sub("MiamiDade", "Miami-Dade", fips_codes$county) # handle miami dade, fl
 fips_codes$ID <- paste(fips_codes$state_name, fips_codes$county, sep=",") # append state and county name
 fips_codes$ID <- str_remove(fips_codes$ID, " County") # remove designation that don't appear in geographic ID data
 fips_codes$ID <- str_remove(fips_codes$ID, " Parish")
@@ -77,14 +85,6 @@ rm(new_crop_returns)
 crop_returns <- read_csv("processing/net_returns/crop_returns.csv")
 new_crop_returns <- left_join(x = crop_returns, y = fips_codes, by = "county_fips") # join crop returns data to state IDs
 new_crop_returns <- new_crop_returns[, c("year","acres", "ID")] # trim columns
-
-# data with crop acres per year
-
-df1 <- new_crop_returns %>% # count rows with acres data in same year and ID group
-  group_by(ID, year) %>%
-  summarise_each(funs(sum(!is.na(.))))
-new_counties <- left_join(x = counties, y = df1, by = "ID") # join acres data to geographic state IDs
-new_counties$has_acres <- ifelse(new_counties$acres < 1,0,1) # create a factor for counties with and without acres
 
 # data with crop acres for all years
 
@@ -105,14 +105,22 @@ ggplot(data = world) + # map US counties
 
 ggsave("results/initial_descriptive/net_returns/crops/maps/map_acres.png", width = 18, height = 10, dpi=96) # save map
 
+# data with crop acres per year
+
+df1 <- new_crop_returns %>% # count rows with acres data in same year and ID group
+  group_by(ID, year) %>%
+  summarise_each(funs(sum(!is.na(.))))
+new_counties <- left_join(x = counties, y = df1, by = "ID") # join acres data to geographic state IDs
+new_counties$has_acres <- ifelse(new_counties$acres < 1,0,1) # create a factor for counties with and without acres
+
 # loop through years to map counties with acres data by year
 
 rm(j)
 for(j in year) {
-  df_subset <- new_counties[new_counties$year == j,] # subset data by each year
+  new_counties2 <- new_counties[new_counties$year == j,] # subset data by each year
   
   ggplot(data = world) + # map US counties
-    geom_sf() + geom_sf(data=subset(df_subset, !is.na(has_acres)), aes(fill = factor(has_acres))) + # fill with number of acres
+    geom_sf() + geom_sf(data=subset(new_counties2, !is.na(has_acres)), aes(fill = factor(has_acres))) + # fill with number of acres
     scale_fill_discrete(name = "Has acres-planted data", labels = c("None", "Some")) + # change legend labels and colors
     ggtitle(sprintf("Counties with crop acres-planted data in %s", toString(j))) + # set color scale and title
     coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE) # set coordinates to continental U.S.
