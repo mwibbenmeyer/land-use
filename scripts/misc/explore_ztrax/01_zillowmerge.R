@@ -1,16 +1,34 @@
-setwd("L:/Project-Fire_Perimeter/Raw_Data/Zillow/ZAsmtCurrent/06")
-
-library(readxl)
-library(data.table)
-
+# clear environment and set wd.
+rm(list=ls(all=TRUE)) 
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+setwd("../../../")
+# load or install necessary libraries {
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(beepr,
+               #cowplot,
+               lfe,
+               progress,
+               tictoc,
+               tidyverse,
+               utils,
+               rvest,
+               tidycensus,
+               readxl,
+               tigris,
+               sf,
+               ggplot2,
+               rvest,
+               stringr,
+               cdlTools,
+               pbapply,
+               data.table)
 
 ## These lines set several options
 options(scipen = 999) # Do not print scientific notation
 options(stringsAsFactors = FALSE) ## Do not load strings as factors
 
 
-layoutZAsmt <- read_excel("L:/Project-Fire_Perimeter/Raw_Data/Zillow/ZAsmtCurrent/LayoutAsmtHistory.xlsx", sheet = 1)
-
+layoutZAsmt <- read_excel("../Raw_Data/ztrax/historical/LayoutAsmtHistory.xlsx", sheet = 1)
 
 col_namesMain <- layoutZAsmt[layoutZAsmt$TableName == 'utMain', 'FieldName']
 col_namesBldg <- layoutZAsmt[layoutZAsmt$TableName == 'utBuilding', 'FieldName']
@@ -20,7 +38,7 @@ col_namesMain2 <- col_namesMain[c(1:5,22:30,34,39,40,69:71,78,79,82,83,84),]
 #####################################################################
 # Pull address, geographic, lot size, and tax data from main table
 
-base <- fread("Main.txt",
+base <- fread(unz("ZAsmt/Main.txt",
               select= c(1:5,22:30,34,39,40,69:71,78,79,82,83,84),
               sep = '|',
               header = FALSE,
