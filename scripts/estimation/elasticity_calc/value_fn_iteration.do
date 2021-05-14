@@ -5,11 +5,13 @@ cd F:/Projects/land-use/
 /*** GET COUNTY RENTS ***/
 
 /* Dummy rents */
+
+qui {
 set obs 5
 gen k = _n
 
 /* Set prices in $1000s USD because otherwise exp(vcond) gets too big for Stata*/
-gen P_1 = .080 /* Crops */
+gen P_1 = .2 /* Crops */
 gen P_2 = .012 /* Pasture */
 gen P_3 = .017 /* Forest */
 gen P_4 = 4 /* Urban */
@@ -71,14 +73,15 @@ gen k = _n
 gen v = 0 
 gen vnext = v
 
-
 merge 1:1 k using `returns', nogen
 
 /* Set coefficients and constants */
 gen theta_0 = 0.2
 gen theta_q1 = 0.05 /*Use appropriate theta_q for *market* */
-gen beta = 0.95
+gen beta = 0.90
 gen gamma = 0.577216
+
+}
 
 /***************************************************************/
 /*** VALUE FUNCTION ITERATION ***/
@@ -96,8 +99,10 @@ summ diff
 local maxdiff = `r(max)'
 
 /*Iterate until convergence*/
-while abs(`maxdiff') > 0.00001 {
+local iter = 1
+qui while abs(`maxdiff') > 0.00000001 {
 
+	local iter = `iter' + 1
 	replace v = vnext
 
 	forvalues j = 1/5 {
@@ -111,6 +116,7 @@ while abs(`maxdiff') > 0.00001 {
 
 }
 
+di "`iter'"
 
 /*** CALCULATE IMPLIED PROBABILITIES ***/
 
