@@ -29,6 +29,7 @@ setwd('../../../..') # relative paths to move directory to the root project dire
 world <- ne_countries(scale = "medium", returnclass = "sf") # load world data
 class(world)
 counties <- st_as_sf(map("county", plot = FALSE, fill = TRUE)) # load county data
+crop_returns <- read_csv("processing/net_returns/crop_returns.csv") # load crop returns data
 
 ##################################################
 ## plot missing data from crop_returns
@@ -81,33 +82,33 @@ fips_codes <- mutate_all(fips_codes, .funs=tolower) # change to lowercase
 
 # join crop_returns and geographic data
 
-rm(new_crop_returns)
-crop_returns <- read_csv("processing/net_returns/crop_returns.csv")
 new_crop_returns <- left_join(x = crop_returns, y = fips_codes, by = "county_fips") # join crop returns data to state IDs
-new_crop_returns <- new_crop_returns[, c("year","acres", "ID")] # trim columns
+write.csv(new_crop_returns, "processing/net_returns/new_crop_returns.csv") # write csv
+new_crop_returns1 <- new_crop_returns[, c("year","acres", "ID")] # trim columns
 
 # data with crop acres for all years
 
-df2 <- new_crop_returns[, c("acres", "ID")]
+df2 <- new_crop_returns1[, c("acres", "ID")]
 df3 <- df2 %>% # count rows with acres data in same year and ID group
   group_by(ID) %>%
   summarise_each(funs(sum(!is.na(.))))
 new_counties1 <- left_join(x = counties, y = df3, by = "ID") # join acres data to geographic state IDs
 new_counties1$has_acres <- ifelse(new_counties1$acres < 1,0,1) # create a factor for counties with and without acres
+pct <- round(length(which(new_counties1$has_acres == 1))/length(which(new_counties1$has_acres == 1 | new_counties1$has_acres == 0)), 4) # calculate percent of counties with data
 
 # map counties with any acres data
 
 ggplot(data = world) + # map US counties
   geom_sf() + geom_sf(data=subset(new_counties1, !is.na(has_acres)), aes(fill = factor(has_acres))) + # fill with number of acres
   scale_fill_discrete(name = "Has acres-planted data", labels = c("None", "Some")) + # change legend labels and colors
-  ggtitle(sprintf("Counties with crop acres-planted data in any year")) + # set color scale and title
+  ggtitle(sprintf("Counties with crop acres-planted data in any year (%s%%)", toString(pct*100))) + # set color scale and title
   coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE) # set coordinates to continental U.S.
 
 ggsave("results/initial_descriptive/net_returns/crops/maps/map_acres.png", width = 18, height = 10, dpi=96) # save map
 
 # data with crop acres per year
 
-df1 <- new_crop_returns %>% # count rows with acres data in same year and ID group
+df1 <- new_crop_returns1 %>% # count rows with acres data in same year and ID group
   group_by(ID, year) %>%
   summarise_each(funs(sum(!is.na(.))))
 new_counties <- left_join(x = counties, y = df1, by = "ID") # join acres data to geographic state IDs
@@ -118,14 +119,66 @@ new_counties$has_acres <- ifelse(new_counties$acres < 1,0,1) # create a factor f
 rm(j)
 for(j in year) {
   new_counties2 <- new_counties[new_counties$year == j,] # subset data by each year
+  pct <- round(length(which(new_counties2$has_acres == 1))/length(which(new_counties2$has_acres == 1 | new_counties2$has_acres == 0)), 4) # calculate percent of counties with data
   
   ggplot(data = world) + # map US counties
     geom_sf() + geom_sf(data=subset(new_counties2, !is.na(has_acres)), aes(fill = factor(has_acres))) + # fill with number of acres
     scale_fill_discrete(name = "Has acres-planted data", labels = c("None", "Some")) + # change legend labels and colors
-    ggtitle(sprintf("Counties with crop acres-planted data in %s", toString(j))) + # set color scale and title
+    ggtitle(sprintf("Counties with crop acres-planted data in %s (%s%%)", toString(j), toString(pct*100))) + # set color scale and title
     coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE) # set coordinates to continental U.S.
   
   ggsave(sprintf("results/initial_descriptive/net_returns/crops/maps/map_%s_acres.png", toString(j)), width = 18, height = 10, dpi=96) # save map
+}
+
+##################################################
+## map missing data from crop_returns - using census data
+##################################################
+
+new_crop_returns2 <- new_crop_returns[, c("year","acres_c", "ID")] # trim columns
+
+# data with crop acres for all years
+
+df2 <- new_crop_returns2[, c("acres_c", "ID")]
+df3 <- df2 %>% # count rows with acres data in same year and ID group
+  group_by(ID) %>%
+  summarise_each(funs(sum(!is.na(.))))
+new_counties1 <- left_join(x = counties, y = df3, by = "ID") # join acres data to geographic state IDs
+new_counties1$has_acres <- ifelse(new_counties1$acres_c < 1,0,1) # create a factor for counties with and without acres
+pct <- round(length(which(new_counties1$has_acres == 1))/length(which(new_counties1$has_acres == 1 | new_counties1$has_acres == 0)), 4) # calculate percent of counties with data
+
+# map counties with any acres data
+
+ggplot(data = world) + # map US counties
+  geom_sf() + geom_sf(data=subset(new_counties1, !is.na(has_acres)), aes(fill = factor(has_acres))) + # fill with number of acres
+  scale_fill_discrete(name = "Has acres-planted data", labels = c("None", "Some")) + # change legend labels and colors
+  ggtitle(sprintf("Counties with CENSUS crop acres-planted data in any year (%s%%)", toString(pct*100))) + # set color scale and title
+  coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE) # set coordinates to continental U.S.
+
+ggsave("results/initial_descriptive/net_returns/crops/maps/map_acres_census.png", width = 18, height = 10, dpi=96) # save map
+
+# data with crop acres per year
+
+df1 <- new_crop_returns2 %>% # count rows with acres data in same year and ID group
+  group_by(ID, year) %>%
+  summarise_each(funs(sum(!is.na(.))))
+new_counties <- left_join(x = counties, y = df1, by = "ID") # join acres data to geographic state IDs
+new_counties$has_acres <- ifelse(new_counties$acres_c < 1,0,1) # create a factor for counties with and without acres
+
+# loop through years to map counties with acres data by year
+
+year_c = c(2002, 2007, 2012, 2017)
+rm(j)
+for(j in year_c) {
+  new_counties2 <- new_counties[new_counties$year == j,] # subset data by each year
+  pct <- round(length(which(new_counties2$has_acres == 1))/length(which(new_counties2$has_acres == 1 | new_counties2$has_acres == 0)), 4) # calculate percent of counties with data
+  
+  ggplot(data = world) + # map US counties
+    geom_sf() + geom_sf(data=subset(new_counties2, !is.na(has_acres)), aes(fill = factor(has_acres))) + # fill with number of acres
+    scale_fill_discrete(name = "Has acres-planted data", labels = c("None", "Some")) + # change legend labels and colors
+    ggtitle(sprintf("Counties with crop CENSUS acres-planted data in %s (%s%%)", toString(j), toString(pct*100))) + # set color scale and title
+    coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE) # set coordinates to continental U.S.
+  
+  ggsave(sprintf("results/initial_descriptive/net_returns/crops/maps/map_%s_acres_census.png", toString(j)), width = 18, height = 10, dpi=96) # save map
 }
 
 # loop through crops and years to map each

@@ -67,35 +67,67 @@ for(i in cropf) {
   acres$Value = as.numeric(acres$Value) # convert value to numeric
   acres$FIPS = paste(acres$`State ANSI`, acres$`County ANSI`, sep="") # concatenate state and county ANSI codes to create a FIPS code
   names(acres)[names(acres) == "Value"] <- "acres" # rename column
+  
+  acres_c <- paste(i, "acres_c", sep = "_")  # create an acres planted (from census) variable for each crop
+  acres_c <- read_csv(sprintf("processing/net_returns/crops/acres_census/%s.csv", toString(acres_c))) # load acres data
+  acres_c <- mutate_all(acres_c, .funs=tolower) # change all character entries to lowercase
+  acres_c$Year = as.numeric(acres_c$Year) # convert year to numeric
+  acres_c$Value = as.numeric(acres_c$Value) # convert value to numeric
+  acres_c$FIPS = paste(acres_c$`State ANSI`, acres_c$`County ANSI`, sep="") # concatenate state and county ANSI codes to create a FIPS code
+  names(acres_c)[names(acres_c) == "Value"] <- "acres_c" # rename column
 
 # merge with geographic data frame
 
   new_crop_returns <- left_join(x = crop_returns, y = price, by = c("state_fips" = "State ANSI", "year" = "Year", "crop" = "Commodity")) # merge crop data with price
   if("price.y" %in% colnames(new_crop_returns)) {
     new_crop_returns$price <- rowSums(cbind(new_crop_returns$price.x,new_crop_returns$price.y), na.rm=TRUE) # if not the first iteration, bind the two price columns together
-    new_crop_returns <- subset(new_crop_returns, select = c(county_fips, state_fips, frr, crop, year, price, cost, yield, acres)) # trim to only relevant columns
+    new_crop_returns <- subset(new_crop_returns, select = c(county_fips, state_fips, frr, crop, year, price, cost, yield, acres, acres_c)) # trim to only relevant columns
   }
   
   new_crop_returns <- left_join(x = new_crop_returns, y = cost, by = c("frr" = "RegionId", "year" = "Year", "crop" = "Commodity")) # merge crop data with cost
   if("cost.y" %in% colnames(new_crop_returns)) {
     new_crop_returns$cost <- rowSums(cbind(new_crop_returns$cost.x,new_crop_returns$cost.y), na.rm=TRUE) # if not the first iteration, bind the two cost columns together
-    new_crop_returns <- subset(new_crop_returns, select = c(county_fips, state_fips, frr, crop, year, price, cost, yield, acres)) # trim to only relevant columns
+    new_crop_returns <- subset(new_crop_returns, select = c(county_fips, state_fips, frr, crop, year, price, cost, yield, acres, acres_c)) # trim to only relevant columns
   }
 
   new_crop_returns <- left_join(x = new_crop_returns, y = yield, by = c("county_fips" = "FIPS", "year" = "Year", "crop" = "Commodity")) # merge crop data with yield
   if("yield.y" %in% colnames(new_crop_returns)) {
     new_crop_returns$yield <- rowSums(cbind(new_crop_returns$yield.x,new_crop_returns$yield.y), na.rm=TRUE) # if not the first iteration, bind the two yield columns together
-    new_crop_returns <- subset(new_crop_returns, select = c(county_fips, state_fips, frr, crop, year, price, cost, yield, acres)) # trim to only relevant columns
+    new_crop_returns <- subset(new_crop_returns, select = c(county_fips, state_fips, frr, crop, year, price, cost, yield, acres, acres_c)) # trim to only relevant columns
   }
 
   new_crop_returns <- left_join(x = new_crop_returns, y = acres, by = c("county_fips" = "FIPS", "year" = "Year", "crop" = "Commodity")) # merge crop data with acres
   if("acres.y" %in% colnames(new_crop_returns)) {
     new_crop_returns$acres <- rowSums(cbind(new_crop_returns$acres.x,new_crop_returns$acres.y), na.rm=TRUE) # if not the first iteration, bind the two acres columns together
-    new_crop_returns <- subset(new_crop_returns, select = c(county_fips, state_fips, frr, crop, year, price, cost, yield, acres)) # trim to only relevant columns
+    new_crop_returns <- subset(new_crop_returns, select = c(county_fips, state_fips, frr, crop, year, price, cost, yield, acres, acres_c)) # trim to only relevant columns
   }
   
-  crop_returns <- new_crop_returns[, c("county_fips", "state_fips", "frr", "crop", "year", "price", "cost", "yield", "acres")] # trim columns
+  new_crop_returns <- left_join(x = new_crop_returns, y = acres_c, by = c("county_fips" = "FIPS", "year" = "Year", "crop" = "Commodity")) # merge crop data with acres
+  if("acres_c.y" %in% colnames(new_crop_returns)) {
+    new_crop_returns$acres_c <- rowSums(cbind(new_crop_returns$acres_c.x,new_crop_returns$acres_c.y), na.rm=TRUE) # if not the first iteration, bind the two acres columns together
+    new_crop_returns <- subset(new_crop_returns, select = c(county_fips, state_fips, frr, crop, year, price, cost, yield, acres, acres_c)) # trim to only relevant columns
+  }
+  
+  crop_returns <- new_crop_returns[, c("county_fips", "state_fips", "frr", "crop", "year", "price", "cost", "yield", "acres", "acres_c")] # trim columns
 
 }
+
+# add government payments data
+
+govt_payments <- read_csv("processing/net_returns/crops/government_payments.csv") # load government payments data
+govt_payments <- mutate_all(govt_payments, .funs=tolower) # change all character entries to lowercase
+govt_payments$Year = as.numeric(govt_payments$Year) # convert year to numeric
+govt_payments$Value[govt_payments$Value == "(d)" | govt_payments$Value == "(z)"] <- NA # remove missing values
+govt_payments$Value <- as.numeric(gsub(",", "", govt_payments$Value)) # remove commas
+govt_payments <- govt_payments[!is.na(as.numeric(as.character(govt_payments$Value))),] # remove rows without price values
+names(govt_payments)[names(govt_payments) == "Value"] <- "govt_payments" # rename column
+govt_payments$FIPS = paste(govt_payments$`State ANSI`, govt_payments$`County ANSI`, sep="") # concatenate state and county ANSI codes to create a FIPS code
+
+new_crop_returns <- left_join(x = crop_returns, y = govt_payments, by = c("county_fips" = "FIPS", "year" = "Year")) # merge crop data with acres
+crop_returns <- new_crop_returns[, c("county_fips", "state_fips", "frr", "crop", "year", "price", "cost", "yield", "acres", "acres_c", "govt_payments")] # trim columns
+
+#crop_returns$price <- round(crop_returns$price, 2) # tidy up data by trimming decimals and replacing auto-generated 0s with NAs
+#crop_returns$cost <- round(crop_returns$cost, 2)
+crop_returns[crop_returns == 0] <- NA 
 
 write.csv(crop_returns, "processing/net_returns/crop_returns.csv") # write csv
