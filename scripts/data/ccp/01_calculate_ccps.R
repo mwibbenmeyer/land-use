@@ -55,7 +55,7 @@ smooth_ccps <- function(state,yr,lcc_value,initial,final) {
   #Subset to a single initial-final use pair and by county-lcc-year. Will have one record for each county in state
   df_sub <- df[stateAbbrev == state & year == yr & lcc == lcc_value & initial_use == initial & final_use == final]
   
-  #Import county shapefile using tidycensus
+  #Import county shapefile using tidycensus - b19013_001 is arbitrarily chosen
   counties <- get_acs(state = state, geography = "county", year = 2010, variables = "B19013_001", geometry = TRUE)
   #Merge with conversion data frame, add NA records for missing counties
   df_sub <- merge(df_sub, counties, by.x = 'fips', by.y = 'GEOID', all.y = TRUE)
