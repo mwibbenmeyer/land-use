@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/W32TeX) (preloaded format=pdflatex 2020.11.3)  10 MAY 2021 10:36
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/W32TeX) (preloaded format=pdflatex 2020.11.3)  26 MAY 2021 11:14
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -515,7 +515,7 @@ LaTeX Warning: No \author given.
 [1
 
 {c:/texlive/2020/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-LaTeX Font Info:    Trying to load font information for U+bbm on input line 76.
+LaTeX Font Info:    Trying to load font information for U+bbm on input line 97.
 
 
 (c:/texlive/2020/texmf-dist/tex/latex/bbm-macros/ubbm.fd
@@ -523,10 +523,10 @@ File: ubbm.fd 1999/03/15 V 1.2 Font definition for bbm font - TH
 ) [2]
 
 Package natbib Warning: Citation `scott2013' on page 3 undefined on input line 
-110.
+105.
 
 [3]
-Overfull \hbox (38.54413pt too wide) in paragraph at lines 145--147
+Overfull \hbox (38.54413pt too wide) in paragraph at lines 140--142
 \OT1/cmr/m/n/10.95 Due to one-period fi-nite de-pen-dence, con-tin-u-a-tion val
 -ues within $\OML/cmm/m/it/10.95 v[]\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 l[]
 ; j[]; ![]\OT1/cmr/m/n/10.95 )$ and $\OML/cmm/m/it/10.95 v[]\OT1/cmr/m/n/10.95 
@@ -544,13 +544,13 @@ Package rerunfilecheck Info: File `paper.out' has not changed.
 (rerunfilecheck)             Checksum: A45F024B347B3DFC77E5ACA1412EC1BE;285.
  ) 
 Here is how much of TeX's memory you used:
- 9283 strings out of 479485
- 137019 string characters out of 5875916
- 578959 words of memory out of 5000000
- 26049 multiletter control sequences out of 15000+600000
+ 9290 strings out of 479485
+ 137142 string characters out of 5875916
+ 577001 words of memory out of 5000000
+ 26054 multiletter control sequences out of 15000+600000
  547541 words of font info for 78 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 66i,15n,73p,980b,357s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 66i,12n,73p,1045b,353s stack positions out of 5000i,500n,10000p,200000b,80000s
 pdfTeX warning (dest): name{Hfootnote.1} has been referenced but does not exi
 st, replaced by a fixed one
 
@@ -569,10 +569,10 @@ ts/type1/public/amsfonts/cm/cmsy10.pfb><c:/texlive/2020/texmf-dist/fonts/type1/
 public/amsfonts/cm/cmsy6.pfb><c:/texlive/2020/texmf-dist/fonts/type1/public/ams
 fonts/cm/cmsy8.pfb><c:/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/c
 mti10.pfb>
-Output written on paper.pdf (5 pages, 189498 bytes).
+Output written on paper.pdf (5 pages, 187859 bytes).
 PDF statistics:
- 169 PDF objects out of 1000 (max. 8388607)
- 144 compressed objects within 2 object streams
- 36 named destinations out of 1000 (max. 500000)
+ 183 PDF objects out of 1000 (max. 8388607)
+ 158 compressed objects within 2 object streams
+ 38 named destinations out of 1000 (max. 500000)
  33 words of extra memory for PDF output out of 10000 (max. 10000000)
 

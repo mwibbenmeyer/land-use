@@ -59,26 +59,21 @@ Landowners' profits in each period depend on parcel and market-level state varia
 \begin{align}
 \Pi(j_{it},{\bf s}_{imt}) = \bar{\pi}_m(j_{it},k_{it},w_{mt}) + \xi(j_{it},k_{it},\omega_{mt}) + \epsilon_{jimt}.
 \end{align}
-Therefore, landowner profits are the sum of $\bar{\pi}$, a function of observed variables, $\xi$, a function that depends also on unobserved market-level variables, and the  disturbance term $\epsilon_{jimt}$, which we assume follows a Type I extreme value distribution. We define $\pi$ such that $\pi \equiv \bar{\pi} + \xi$, and $\Pi = \pi + \epsilon$.
+Therefore, landowner profits are the sum of $\bar{\pi}$, a function of observed variables, $\xi$, a function that depends also on unobserved market-level variables, and the disturbance term $\epsilon_{jimt}$, which we assume follows a Type I extreme value distribution. We define $\pi$ such that $\pi \equiv \bar{\pi} + \xi$, and $\Pi = \pi + \epsilon$.
 
-Consistent with our data and previous literature, we assume that urban use is an absorbing state; owners of land in non-urban uses who develop their land receive a sales price equal to the net present value of urban rents from land perpetuity. \textcolor{red}{Note: This may not be necessary.} We denote urban use as $J$ and specify the observable portion of landowner profits as:
-\begin{align} \label{eq:pidefn}
-\bar{\pi}_m(j_{it},x_{it},w_{mt}) = \left\{\begin{array}{ll} 
-	R_{m}(j_{it},k_{it}, w_{mt}) - C_{mkj} & j\neq J \\
-	\frac{R_{m}(j_{it},k_i{it}, w_{mt})}{1-r} - C_{mkj} & j = J
-	\end{array}\right.
+We specify land use returns as the sum of net returns to land use $j$ in market $m$ and costs of converting from land use $k$ to land use $j$ in market $m$:
+\begin{align}
+\bar{\pi}_m(j_{it},x_{it}) = R_{m}(j_{it}) - C_{m}(j_{it},k_{it}).
 \end{align}
-where $C_{kJ}$ represents the cost of converting land into urban use, and $r$ is the interest rate.
-
-For land uses $j \neq J$, we specify $R_{j}(w_{mt},q_{i})$ according to:
+We specify $R_{j}(j_{it})$ according to:
 \begin{align} \label{eq:rentspec}
-R_{m}(j_{it},k_{it}, w_{mt}) = \theta^0 P_{jct} + \sum_{\bar{q} = 2}^6 \theta^{\bar{q}} (\mathbbm{1}(q_{m} = \bar{q}) \times P_{jct} )
+R_{m}(j_{it}) = \theta_{0j} P_{jc(m)t} + \theta_{q(m)j}P_{jc(m)t}
 \end{align}
-where $P_{jct}$ represents the measured return to land use $j$ within county $c$ at time $t$, and $q_{m}$ represents the land condition class, a measure of land quality, of parcels in market $m$. Again following \citet{lubowski2006}, we specify conversion costs as: 
+where $P_{jc(m)t}$ represents the measured return to land use $j$ within county $c$ at time $t$, and $q(i)$ represents the land condition class, a measure of land quality, of parcels in market $m$. A few features of this specification are of note. First, unlike \citet{scott2014} but similar to \citet{lubowski2006}, it allows landowners to respond differently to changes in returns for varying land uses. Unlike \citet{lubowski2006} however, we do not estimate separate $\theta_{0j}$ separately for all years, but rather we estimate a single parameters for all the years in our panel. Finally, similar to \citet{lubowski2006}, it allows responsiveness to average returns to vary by land quality. Our land use data are observed at the county-level, preventing us from constructing county-level returns; however, since we observe parcel-level land quality, allowing responsiveness to returns to vary by land quality provides a coarse method for heterogeneity in returns across parcels. We specify conversion costs as: 
 \begin{align} \label{eq:costspec}
-C_{kjt}(q_i) = \eta^0_{kjt} + \sum_{\bar{q} = 2}^6 \eta^{\bar{q}}_{jk} \mathbbm{1}(q_{m} = \bar{q}) 
+C_{m}(j_{it},k_{it})  = \eta^0_{kjq(m)}
 \end{align}
-where conversion costs are allowed to vary with parcel quality.
+where $\eta^0_{kjq(m)} = 0$ when $j\neq k$. As for land use returns, conversion costs are allowed to vary by land quality in addition to varying by land conversion type.
 
 In each period the landowner chooses whether to convert their land into an alternative use based on the profits they would receive from doing so, and the expected implications for profits in future periods. This decision problem can be described recursively using the Bellman equation:
 \begin{align}
@@ -156,11 +151,10 @@ Now, substituting equation~\ref{eq:subcondval} into equation~\ref{eq:subexperr},
 	& + \beta \big(\pi_m(j_{it},j_{it},\omega_{mt}) - \pi_m(j_{it},a_{it},\omega_{mt})\big) \nonumber \\ 
 	& + \beta \Big\{e^V(k_{it+1}(j_{it}),\omega_{mt},\omega_{mt+1}) -  e^V(k_{it+1}(a_{it}),\omega_{mt},\omega_{mt+1})\Big\} \nonumber
 \end{align}
-Finally, we can use the definition of $\pi_m(\cdot)$, as well as the specifications of rents and conversion costs to arrive at the estimating equation:
+Finally, following \citet{araujo2021}, we can use the definition of $\pi_m(\cdot)$, as well as the specifications of rents and conversion costs to arrive at the estimating equation:
 \begin{align}
-Y_{jmt}(k) &= (\eta^0_{jk} - \eta^0_{ak}) + \sum_{\bar{q} = 2}^6 \mathbbm{1}(q_{m} = \bar{q}) \Big(\eta^{\bar{q}}_{jk} - \eta^{\bar{q}}_{ak} \Big) \\
-	& + \theta^0(P_{jct} - P_{act}) +   \sum_{\bar{q} = 2}^6 \mathbbm{1}(q_{m} = \bar{q}) \theta^{\bar{q}} \Big(P_{jct} - P_{act}\Big) \nonumber \\ \nonumber
-	& + \beta \Big\{(\eta^0_{jj} - \eta^0_{ja}) + \sum_{\bar{q} = 2}^6 \mathbbm{1}(q_{m} = \bar{q}) \Big(\eta^{\bar{q}}_{jj} - \eta^{\bar{q}}_{ja} \Big) \Big\} + u_{jmt} \nonumber
+Y_{jmt}(k) &= (1 - \beta) \eta_{jkq(m)} + \big(\theta_{0j}P_{jc(m)t} - \theta_{0k}P_{kc(m)t}\big) \\
+&+ \big(\theta_{q(m)j}P_{jc(m)t} - \theta_{q(m)k}P_{kc(m)t}\big) + u_{jmt} \nonumber
 \end{align}
 where:
 \begin{align}
