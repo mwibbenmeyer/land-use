@@ -3,6 +3,11 @@
 \fi
 \begin{thebibliography}{xx}
 
+\harvarditem[Araujo et al.]{Araujo, Costa and Sant'Anna}{2021}{araujo2021}
+{\bf Araujo, Rafael, Francisco Costa, and Marcello Sant'Anna}, ``Efficient
+  forestation in the Brazilian Amazon: Evidence from a dynamic model,'' 2021.
+\newblock Working paper.
+
 \harvarditem[Arcidiacono and Ellickson]{Arcidiacono and
   Ellickson}{2011}{arcidiaconoellickson}
 {\bf Arcidiacono, Peter and Paul~B Ellickson}, ``Practical methods for
@@ -32,5 +37,9 @@
   change and carbon sinks: econometric estimation of the carbon sequestration
   supply function,'' {\it Journal of Environmental Economics and Management},
   2006, {\it 51} (2), 135--152.
+
+\harvarditem[Scott]{Scott}{2014}{scott2014}
+{\bf Scott, Paul}, ``Dynamic discrete choice estimation of agricultural land
+  use,'' 2014.
 
 \end{thebibliography}
