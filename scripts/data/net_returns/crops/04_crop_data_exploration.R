@@ -155,7 +155,7 @@ ggplot(data = world) + # map US counties
   ggtitle(sprintf("Counties with CENSUS crop acres-planted data in any year (%s%%)", toString(pct*100))) + # set color scale and title
   coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE) # set coordinates to continental U.S.
 
-ggsave("results/initial_descriptive/net_returns/crops/maps/map_acres_census.png", width = 18, height = 10, dpi=96) # save map
+ggsave("results/initial_descriptives/net_returns/crops/maps/map_acres_census.png", width = 18, height = 10, dpi=96) # save map
 
 # data with crop acres per year
 
@@ -179,7 +179,7 @@ for(j in year_c) {
     ggtitle(sprintf("Counties with crop CENSUS acres-planted data in %s (%s%%)", toString(j), toString(pct*100))) + # set color scale and title
     coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE) # set coordinates to continental U.S.
   
-  ggsave(sprintf("results/initial_descriptive/net_returns/crops/maps/map_%s_acres_census.png", toString(j)), width = 18, height = 10, dpi=96) # save map
+  ggsave(sprintf("results/initial_descriptives/net_returns/crops/maps/map_%s_acres_census.png", toString(j)), width = 18, height = 10, dpi=96) # save map
 }
 
 
@@ -188,8 +188,8 @@ for(j in year_c) {
 ##################################################
 
 census_survey <- new_crop_returns[, c("year","acres", "acres_c", "ID")] # trim columns for comparison of census and survey data
-census_survey_acres <- left_join(x = counties, y = new_crop_returns1, by = "ID") # join
-census_survey_acres$pct_diff <- (census_survey_acres$census-census_survey_acres$survey)/census_survey_acres$survey*100 # calculate percent difference
+census_survey_acres <- left_join(x = counties, y = new_crop_returns, by = "ID") # join
+census_survey_acres$pct_diff <- (census_survey_acres$acres_c-census_survey_acres$acres)/census_survey_acres$acres*100 # calculate percent difference
 
 # data comparing crop acres per year
 
@@ -199,15 +199,15 @@ for(j in year_c) {
   census_survey_acres1 <- census_survey_acres[census_survey_acres$year == j,] # subset data by each year
 
   ggplot(data = world) + # map US counties
-    geom_sf() + geom_sf(data=subset(census_survey_acres1, !is.na(pct_diff)), aes(fill = pct_diff)) + # fill with number of acres
-    scale_fill_viridis_c(name = "% difference between census and survey") + # change legend labels and colors
-    ggtitle(sprintf("Percent different of census and survey acres-planted data in %s", toString(j))) + # set color scale and title
+    geom_sf(data=counties, aes(geometry=geom)) + geom_sf(data=subset(census_survey_acres1, !is.na(pct_diff)), aes(fill = pct_diff)) + # fill with number of acres
+    scale_fill_viridis_c(name = "(census-survey acres)/survey acres") + # change legend labels and colors
+    ggtitle(sprintf("Percent change from survey to census acres-planted data in %s", toString(j))) + # set color scale and title
     coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE) # set coordinates to continental U.S.
   
-  ggsave(sprintf("results/initial_descriptive/net_returns/crops/maps/map_%s_acres_census_survey.png", toString(j)), width = 18, height = 10, dpi=96) # save map
+  ggsave(sprintf("results/initial_descriptives/net_returns/crops/maps/map_%s_acres_census_survey.png", toString(j)), width = 18, height = 10, dpi=96) # save map
 }
 
-
+getwd()
 # loop through crops and years to map each
 #
 # rm(i)
