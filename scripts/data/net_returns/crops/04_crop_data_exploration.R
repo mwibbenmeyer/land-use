@@ -79,6 +79,7 @@ fips_codes$ID <- str_remove(fips_codes$ID, " Parish")
 fips_codes$ID <- str_remove(fips_codes$ID, " District")
 fips_codes$ID <- str_remove(fips_codes$ID, " City")
 fips_codes <- mutate_all(fips_codes, .funs=tolower) # change to lowercase
+write.csv(fips_codes, "processing/fips_codes.csv") # write csv
 
 # join crop_returns and geographic data
 
@@ -180,6 +181,32 @@ for(j in year_c) {
   
   ggsave(sprintf("results/initial_descriptive/net_returns/crops/maps/map_%s_acres_census.png", toString(j)), width = 18, height = 10, dpi=96) # save map
 }
+
+
+##################################################
+## % differnce in survey and census data
+##################################################
+
+census_survey <- new_crop_returns[, c("year","acres", "acres_c", "ID")] # trim columns for comparison of census and survey data
+census_survey_acres <- left_join(x = counties, y = new_crop_returns1, by = "ID") # join
+census_survey_acres$pct_diff <- (census_survey_acres$census-census_survey_acres$survey)/census_survey_acres$survey*100 # calculate percent difference
+
+# data comparing crop acres per year
+
+year_c = c(2002, 2007, 2012, 2017)
+rm(j)
+for(j in year_c) {
+  census_survey_acres1 <- census_survey_acres[census_survey_acres$year == j,] # subset data by each year
+
+  ggplot(data = world) + # map US counties
+    geom_sf() + geom_sf(data=subset(census_survey_acres1, !is.na(pct_diff)), aes(fill = pct_diff)) + # fill with number of acres
+    scale_fill_viridis_c(name = "% difference between census and survey") + # change legend labels and colors
+    ggtitle(sprintf("Percent different of census and survey acres-planted data in %s", toString(j))) + # set color scale and title
+    coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE) # set coordinates to continental U.S.
+  
+  ggsave(sprintf("results/initial_descriptive/net_returns/crops/maps/map_%s_acres_census_survey.png", toString(j)), width = 18, height = 10, dpi=96) # save map
+}
+
 
 # loop through crops and years to map each
 #
