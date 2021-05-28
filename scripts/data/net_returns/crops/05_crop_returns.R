@@ -71,7 +71,7 @@ new_crop_returns <- new_crop_returns[, c("county_fips", "state_fips", "frr", "cr
 
 frr_total_acres <- new_crop_returns[, c("frr", "year", "acres")] # trim
 frr_total_acres <- aggregate( . ~ frr + year , data = frr_total_acres, sum) # aggregate acres of all crops for frr and year
-names(frr_total_acres)[names(frr_total_acres) == "acres"] <- "frr_acres"
+names(frr_total_acres)[names(frr_total_acres) == "acres"] <- "frr_acres" # rename column
 frr_state_acres <- new_crop_returns[, c("frr", "year", "crop", "acres")] # trim
 frr_state_acres <- aggregate( . ~ frr + year + crop, data = frr_state_acres, sum) # aggregate acres of all crops for frr and year
 frr_state_acres <- left_join(x = frr_state_acres, y = frr_total_acres, by = c("frr", "year")) # merge
@@ -87,5 +87,13 @@ new_crop_returns$weight <- rowSums(cbind(new_crop_returns$weight, new_crop_retur
 new_crop_returns = subset(new_crop_returns, select = -c(frr_weight,new_weight)) # remove extra columns
 new_crop_returns[new_crop_returns == 0.0000000000] <- NA # add back in NAs
 
+# calculate weighted returns
+
+new_crop_returns$weighted_av <- new_crop_returns$returns*new_crop_returns$weight # calculate weighted returns
+new_crop_returns2 <- new_crop_returns[, c("county_fips", "year", "weighted_av")] # trim to aggregate
+new_crop_returns2 <- aggregate( . ~ county_fips + year , data = new_crop_returns2, sum) # aggregate weighted returns over counties and years
+names(new_crop_returns2)[names(new_crop_returns2) == "weighted_av"] <- "weighted_returns" # rename column
+new_crop_returns <- left_join(x = new_crop_returns, y = new_crop_returns2, by = c("county_fips", "year")) # merge crop data frame with weights
+new_crop_returns = subset(new_crop_returns, select = -c(weighted_av)) # remove extra columns
 
 
