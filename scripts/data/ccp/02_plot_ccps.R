@@ -13,11 +13,13 @@ pacman::p_load(tidyverse,
                rnaturalearthdata,
                tidycensus,
                ggplot2,
-             #  foreign,
-               haven#,
-              # lwgeom
+               foreign,
+               haven,
+               lwgeom
                )
 theme_set(theme_bw())
+install.packages("NCmisc")
+library(NCmisc)
 
 list.functions.in.file(rstudioapi::getSourceEditorContext()$path, alphabetic = TRUE)
 
@@ -32,10 +34,7 @@ counties <- st_as_sf(map("county", plot = FALSE, fill = TRUE)) # load county dat
 
 #Load CCPs data
 result <- read.csv("processing/ccps.csv") # load CCP data
-result$fips <- toString(result$fips)
-if (nchar(result$fips) == 4){
-  paste0("0", result$fips)
-}
+result$fips <- str_pad(result$fips, 5, pad = "0") # retain leading zeros in FIPS codes
 
 
 #Combine results and geographic data to plot
@@ -43,13 +42,17 @@ if (nchar(result$fips) == 4){
 fips_codes <- read_csv("processing/fips_codes.csv") # load fips / geographic data
 ccps <- left_join(x = result, y = fips_codes, by = c("fips" = "county_fips")) # join crop returns data to state IDs
 ccps <- merge(counties, ccps, by = "ID") # join by geo ID
-ccps$ccp_weights <- cut(ccps$weighted_ccp, breaks=c(-1, 0, 0.999999999, Inf)) # cut the data into levels
+ccps$ccp_weights <- cut(ccps$weighted_ccp, breaks=c(0, 0.0000000001, 0.999999999, Inf)) # cut the data into levels
 levels(ccps$ccp_weights) = c("0","between 0 and 1","1") # create a factor for counties with and without acres
 
 #Iterate and create graphs
 
+years <- c(2002, 2005, 2007, 2012)
+lcc_values <- c("1_2", "3_4", "5_6", "7_8")
+initial_uses <- c("Crop", "Forest", "Pasture", "Range", "Urban", "CRP")
+final_uses <- c("Crop", "Forest", "Pasture", "Range", "Urban", "CRP")
+  
 rm(i, j, k, l)
-
 for(i in years){
   for(j in lcc_values){
     for(k in initial_uses){
@@ -63,7 +66,7 @@ for(i in years){
         
         #Plot results
         ggplot(data = world) + # map US counties
-          geom_sf(data=counties, aes(geometry=geom)) + geom_sf(data=ccps1, aes(fill=ccp_weights, geometry=geom)) + # fill ccp weights
+          geom_sf(data=counties, aes(geometry=geom)) + geom_sf(data=ccps1, aes(fill=ccp_weights, geometry=geometry)) + # fill ccp weights
           scale_fill_manual(values=c("0" = "#184d47", "between 0 and 1" = "#96bb7c", "1" = "#fad586")) + # set manual color scale
           ggtitle(sprintf("All states in %s with LCC %s from %s to %s", toString(i), j, k, l)) + # change title
           coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE) # set coordinates to continental U.S.
@@ -73,21 +76,3 @@ for(i in years){
     }
   }
 }
-  
-# Plot results ------------
-
-# ggplot(data = world) + # map US counties
-#   geom_sf() + geom_sf(data=ccps, aes(fill=ccp_weights, geometry=geom)) + # fill with number of acres
-#   scale_fill_manual(values=c("0" = "#ffc996", "between 0 and 1" = "#ff8474", "1" = "#9f5f80")) +
-#   #scale_color_manual(values = c("0" = "#999999", "between 0 and 1" = "#E69F00", "1" = "#33F6FF")) +
-#   #scale_fill_discrete(name = "Has acres-planted data") + # change legend labels and colors
-#   ggtitle("Counties with CENSUS crop acres-planted data in any year (%s%%)") + # set color scale and title
-#   coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE) # set coordinates to continental U.S.
-# 
-# ggsave("results/initial_descriptives/combined/maps_ccp/ccp_2002_factor.png", width = 18, height = 10, dpi=96) # save map
-
-
- # ggplot(data = world) + # map US counties
- #   geom_sf() + geom_sf(data = ccps, aes(fill = weighted_ccp, geometry=geom)) +
- #   scale_fill_viridis_c() + ggtitle("All states in 2002 with LCC 7_8 from crop to crop") +
- #   coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE)
