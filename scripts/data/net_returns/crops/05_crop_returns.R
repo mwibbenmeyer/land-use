@@ -57,14 +57,35 @@ for(i in cropf) {
   }
 }
 
-# calculate weights
+# calculate weights from states where possible
 
 total_acres <- aggregate(state_acres$state_acres, by=list(state_fips=state_acres$state_fips, year=state_acres$year), FUN=sum) # aggregate and sum acres data by state and year
 names(total_acres)[names(total_acres) == "x"] <- "total_acres" # rename column
 state_acres <- left_join(x = state_acres, y = total_acres, by = c("state_fips", "year")) # merge state totals data with crop specific data
-state_acres$weight <- state_acres$state_acres/state_acres1$total_acres # calculate a weighted average
-
+state_acres$weight <- state_acres$state_acres/state_acres$total_acres # calculate weights
 new_crop_returns <- left_join(x = new_crop_returns, y = state_acres, by = c("state_fips", "year", "crop")) # merge crop data frame with weights
-new_crop_returns$weighted_av <- new_crop_returns$acres*new_crop_returns$weight # calculated weighted average
+new_crop_returns[new_crop_returns == 0.0000000000] <- NA # remove weights for counties with none
+new_crop_returns <- new_crop_returns[, c("county_fips", "state_fips", "frr", "crop", "year", "price", "cost", "yield", "acres", "acres_c", "govt_payments", "state", "state_name", "county", "ID", "returns", "weight")] # trim columns
+
+# add weights from FRR where no state weighting data exists
+
+frr_total_acres <- new_crop_returns[, c("frr", "year", "acres")] # trim
+frr_total_acres <- aggregate( . ~ frr + year , data = frr_total_acres, sum) # aggregate acres of all crops for frr and year
+names(frr_total_acres)[names(frr_total_acres) == "acres"] <- "frr_acres"
+frr_state_acres <- new_crop_returns[, c("frr", "year", "crop", "acres")] # trim
+frr_state_acres <- aggregate( . ~ frr + year + crop, data = frr_state_acres, sum) # aggregate acres of all crops for frr and year
+frr_state_acres <- left_join(x = frr_state_acres, y = frr_total_acres, by = c("frr", "year")) # merge
+frr_state_acres$frr_weight <- frr_state_acres$acres/frr_state_acres$frr_acres # calculate weights
+frr_state_acres <- frr_state_acres[, c("frr", "year", "crop", "frr_weight")] # trim
+
+new_crop_returns <- left_join(x = new_crop_returns, y = frr_state_acres, by = c("frr", "year", "crop")) # merge crop data frame with weights
+new_crop_returns1 <- new_crop_returns[is.na(new_crop_returns$weight),] # subset to missing weight values
+new_crop_returns1$new_weight <- new_crop_returns1$frr_weight # add frr_weight to missing state weight
+new_crop_returns1 <- new_crop_returns1[, c("county_fips", "year", "crop", "new_weight")] # trim
+new_crop_returns <- left_join(x = new_crop_returns, y = new_crop_returns1, by = c("county_fips", "year", "crop")) # merge crop data frame with frr weights
+new_crop_returns$weight <- rowSums(cbind(new_crop_returns$weight, new_crop_returns$new_weight), na.rm=TRUE) # bind
+new_crop_returns = subset(new_crop_returns, select = -c(frr_weight,new_weight)) # remove extra columns
+new_crop_returns[new_crop_returns == 0.0000000000] <- NA # add back in NAs
+
 
 
