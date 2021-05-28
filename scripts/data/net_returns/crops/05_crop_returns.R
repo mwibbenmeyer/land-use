@@ -8,7 +8,9 @@
 
 ## Load/install packages
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse)
+pacman::p_load(tidyverse,
+               data.table,
+               haven)
 
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) # sets directory to the current directory
 setwd('../../../..') # relative paths to move directory to the root project directory
@@ -19,7 +21,65 @@ new_crop_returns <- read_csv("processing/net_returns/new_crop_returns.csv") # lo
 ## returns equation
 ##################################################
 
+# calculate distance dependent weighting of crop yields
+
+#Function to measure distances between counties
+# measure_dists <- function(shp) {
+#   
+#   county_centroid <- st_centroid(shp)
+#   dists <- st_distance(county_centroid)
+#   
+#   return(dists)
+#   
+# }
+# 
+# # function to calculate smoothed yields
+# 
+# smooth_yields <- function(state,yr,lcc_value,initial,final) {
+#   
+#   #Subset to a single initial-final use pair and by county-lcc-year. Will have one record for each county in state
+#   df_sub <- df[stateAbbrev == state & year == yr & lcc == lcc_value & initial_use == initial & final_use == final]
+#   
+#   #Import county shapefile using tidycensus - b19013_001 is arbitrarily chosen
+#   counties <- get_acs(state = state, geography = "county", year = 2010, variables = "B19013_001", geometry = TRUE)
+#   #Merge with conversion data frame, add NA records for missing counties
+#   df_sub <- merge(df_sub, counties, by.x = 'fips', by.y = 'GEOID', all.y = TRUE)
+#   df_sub <- df_sub[is.na(final_use_acres), ':=' (final_use_acres = 0,
+#                                                  total_acres = 0,
+#                                                  year = yr,
+#                                                  initial_use = initial,
+#                                                  final_use = final), ]
+#   
+#   #Create weighting matrix based on distances among counties
+#   dists <- measure_dists(counties) #Distances among county centroids
+#   weights <- apply(dists, c(1,2), function(x) (1+1*x/1000)^(-2)) #Weights based on Scott (2014)
+#   
+#   #Calculate smoothed CCPs using weighting matrix
+#   df_sub$final_use_acres.w <- df_sub$final_use_acres %*% weights
+#   df_sub$total_acres.w <- df_sub$total_acres %*% weights
+#   df_sub <- df_sub[ , weighted_ccp := final_use_acres.w/total_acres.w] %>%
+#     .[ , c('fips','year','lcc','initial_use','final_use','weighted_ccp')]
+#   
+#   return(df_sub)
+# }
+
+# load NRI acres planted data to calculate government payments per acre
+
+govt_acres <- read_dta("processing_output/pointpanel_estimation_unb.dta") %>% as.data.table() # load NRI data
+govt_acres <- govt_acres[, c("fips", "year", "acresk")] # trim to relevant columns
+govt_acres <- aggregate( . ~ fips + year , data = govt_acres, sum) # sum for total acres planted per county
+new_crop_returns3 <- new_crop_returns[, c("county_fips", "year", "govt_payments")] # trim
+new_crop_returns3 <- aggregate( . ~ county_fips + year , data = new_crop_returns3, sum) # sum for total government payments per county
+new_crop_returns3 <- left_join(x = new_crop_returns3, y = govt_acres, by = c("county_fips" = "fips", "year")) # merge acres and payments data
+new_crop_returns3$payments_acres <- new_crop_returns3$govt_payments/new_crop_returns3$acresk # calculate govt payments per acre of planted crops
+new_crop_returns3 <- new_crop_returns3[, c("county_fips", "year", "payments_acres")] # trim to relevant columns
+new_crop_returns <- left_join(x = new_crop_returns, y = new_crop_returns3, by = c("county_fips", "year")) # merge with main data
+
+
 new_crop_returns$returns <- (new_crop_returns$price - new_crop_returns$cost)*new_crop_returns$yield # calculate returns
+new_crop_returns$actual_returns <- pmax(new_crop_returns$payments_acres, new_crop_returns$returns, na.rm = TRUE) # find the returns value from the price vs. govt payments
+
+
 
 ##################################################
 ## weighted average of acres planted for each crop in a farm resource region/state for a given year
@@ -65,7 +125,7 @@ state_acres <- left_join(x = state_acres, y = total_acres, by = c("state_fips", 
 state_acres$weight <- state_acres$state_acres/state_acres$total_acres # calculate weights
 new_crop_returns <- left_join(x = new_crop_returns, y = state_acres, by = c("state_fips", "year", "crop")) # merge crop data frame with weights
 new_crop_returns[new_crop_returns == 0.0000000000] <- NA # remove weights for counties with none
-new_crop_returns <- new_crop_returns[, c("county_fips", "state_fips", "frr", "crop", "year", "price", "cost", "yield", "acres", "acres_c", "govt_payments", "state", "state_name", "county", "ID", "returns", "weight")] # trim columns
+new_crop_returns <- new_crop_returns[, c("county_fips", "state_fips", "frr", "crop", "year", "price", "cost", "yield", "acres", "acres_c", "govt_payments", "state", "state_name", "county", "ID", "returns", "payments_acres", "weight")] # trim columns
 
 # add weights from FRR where no state weighting data exists
 
