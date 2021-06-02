@@ -20,7 +20,7 @@ setwd("../../../")
 `%ni%` <- Negate(`%in%`)
 options(tigris_use_cache = TRUE) #Tell tidycensus to cache shapefiles for future sessions
 
-census_api_key("7acead4fef8dc8abc2e3181bd361db4a2df9caa7", overwrite = TRUE, install = TRUE) # set API key
+#census_api_key("", overwrite = TRUE, install = TRUE) # set API key
 
 #Function to measure distances between counties
 measure_dists <- function(shp) {
@@ -72,6 +72,7 @@ smooth_ccps <- function(state,yr,lcc_value,initial,final) {
   df_sub$total_acres.w <- df_sub$total_acres %*% weights
   df_sub <- df_sub[ , weighted_ccp := final_use_acres.w/total_acres.w] %>%
                 .[ , c('fips','year','lcc','initial_use','final_use','weighted_ccp')]
+  df_sub$lcc[is.na(df_sub$lcc)] <- lcc_value
   
   return(df_sub)
 }

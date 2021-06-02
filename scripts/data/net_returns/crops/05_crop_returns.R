@@ -35,7 +35,7 @@ new_crop_returns <- read_csv("processing/net_returns/new_crop_returns.csv") # lo
 # 
 # # function to calculate smoothed yields
 # 
-# smooth_yields <- function(state,yr,lcc_value,initial,final) {
+# smooth_yields <- function(state,yr,lcc_value,initial,final) { #FRR, yr, crop
 #   
 #   #Subset to a single initial-final use pair and by county-lcc-year. Will have one record for each county in state
 #   df_sub <- df[stateAbbrev == state & year == yr & lcc == lcc_value & initial_use == initial & final_use == final]
@@ -51,7 +51,7 @@ new_crop_returns <- read_csv("processing/net_returns/new_crop_returns.csv") # lo
 #                                                  final_use = final), ]
 #   
 #   #Create weighting matrix based on distances among counties
-#   dists <- measure_dists(counties) #Distances among county centroids
+#   dists <- measure_dists(counties) #Distances among county centroids #intersect the map with counties with FRR county list
 #   weights <- apply(dists, c(1,2), function(x) (1+1*x/1000)^(-2)) #Weights based on Scott (2014)
 #   
 #   #Calculate smoothed CCPs using weighting matrix
@@ -149,11 +149,13 @@ new_crop_returns[new_crop_returns == 0.0000000000] <- NA # add back in NAs
 
 # calculate weighted returns
 
-new_crop_returns$weighted_av <- new_crop_returns$returns*new_crop_returns$weight # calculate weighted returns
+new_crop_returns$weighted_av <- new_crop_returns$actual_returns*new_crop_returns$weight # calculate weighted returns
 new_crop_returns2 <- new_crop_returns[, c("county_fips", "year", "weighted_av")] # trim to aggregate
 new_crop_returns2 <- aggregate( . ~ county_fips + year , data = new_crop_returns2, sum) # aggregate weighted returns over counties and years
 names(new_crop_returns2)[names(new_crop_returns2) == "weighted_av"] <- "weighted_returns" # rename column
 new_crop_returns <- left_join(x = new_crop_returns, y = new_crop_returns2, by = c("county_fips", "year")) # merge crop data frame with weights
 new_crop_returns = subset(new_crop_returns, select = -c(weighted_av)) # remove extra columns
+
+write.csv(new_crop_returns, "processing/final_crop_returns.csv") # write csv
 
 

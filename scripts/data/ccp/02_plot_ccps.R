@@ -18,10 +18,6 @@ pacman::p_load(tidyverse,
                lwgeom
                )
 theme_set(theme_bw())
-install.packages("NCmisc")
-library(NCmisc)
-
-list.functions.in.file(rstudioapi::getSourceEditorContext()$path, alphabetic = TRUE)
 
 # Set working directory to land-use 
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
@@ -30,20 +26,18 @@ setwd("../../../")
 world <- ne_countries(scale = "medium", returnclass = "sf") # load world data
 class(world)
 counties <- st_as_sf(map("county", plot = FALSE, fill = TRUE)) # load county data
-#counties <- as_tibble(counties)
 
 #Load CCPs data
-result <- read.csv("processing/ccps.csv") # load CCP data
+result <- read.csv("processing/ccps.csv") # load CCP data 
 result$fips <- str_pad(result$fips, 5, pad = "0") # retain leading zeros in FIPS codes
-
 
 #Combine results and geographic data to plot
 
 fips_codes <- read_csv("processing/fips_codes.csv") # load fips / geographic data
 ccps <- left_join(x = result, y = fips_codes, by = c("fips" = "county_fips")) # join crop returns data to state IDs
 ccps <- merge(counties, ccps, by = "ID") # join by geo ID
-ccps$ccp_weights <- cut(ccps$weighted_ccp, breaks=c(0, 0.0000000001, 0.999999999, Inf)) # cut the data into levels
-levels(ccps$ccp_weights) = c("0","between 0 and 1","1") # create a factor for counties with and without acres
+ccps$ccp_weights <- cut((ccps$weighted_ccp), breaks=c(-1, 0.0000000001, 0.99999999999, 1000000000000)) # cut the data into levels
+levels(ccps$ccp_weights) = c("0", "between 0 and 1", "1") # create a factor for counties with and without acres
 
 #Iterate and create graphs
 
