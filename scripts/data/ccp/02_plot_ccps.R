@@ -41,7 +41,7 @@ levels(ccps$ccp_weights) = c("0", "between 0 and 1", "1") # create a factor for 
 
 #Iterate and create graphs
 
-years <- c(2002, 2005, 2007, 2012)
+years <- c(2002, 2007, 2012)
 lcc_values <- c("1_2", "3_4", "5_6", "7_8")
 initial_uses <- c("Crop", "Forest", "Pasture", "Range", "Urban", "CRP")
 final_uses <- c("Crop", "Forest", "Pasture", "Range", "Urban", "CRP")
