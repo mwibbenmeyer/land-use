@@ -15,30 +15,38 @@ pacman::p_load(tidyverse,
                ggplot2,
                foreign,
                haven,
-               lwgeom
+               lwgeom,
+               RColorBrewer
                )
 theme_set(theme_bw())
 
-# Set working directory to land-use 
+# Set working directory to land-use
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 setwd("../../../")
 
+#Load CCPs and world data
+result <- read.csv("processing/ccps.csv") # load CCP data 
+result$fips <- str_pad(result$fips, 5, pad = "0") # retain leading zeros in FIPS codes
 world <- ne_countries(scale = "medium", returnclass = "sf") # load world data
 class(world)
 counties <- st_as_sf(map("county", plot = FALSE, fill = TRUE)) # load county data
 
-#Load CCPs data
-result <- read.csv("processing/ccps.csv") # load CCP data 
-result$fips <- str_pad(result$fips, 5, pad = "0") # retain leading zeros in FIPS codes
-
 #Combine results and geographic data to plot
-
 fips_codes <- read_csv("processing/fips_codes.csv") # load fips / geographic data
 ccps <- left_join(x = result, y = fips_codes, by = c("fips" = "county_fips")) # join crop returns data to state IDs
 ccps <- merge(counties, ccps, by = "ID") # join by geo ID
-ccps$ccp_weights <- cut((ccps$weighted_ccp), breaks=c(-1, 0.0000000001, 0.99999999999, 1000000000000)) # cut the data into levels
-levels(ccps$ccp_weights) = c("0", "between 0 and 1", "1") # create a factor for counties with and without acres
 
+#Split into discrete and continuous values
+cont <- ccps[!(ccps$weighted_ccp == 1 | is.nan(ccps$weighted_ccp)) ,] # separate continuous values
+#cont$ccp_weights <- cut(cont$weighted_ccp, 9)
+cont$ccp_weights <- cut((cont$weighted_ccp), breaks=c(0, 0.111, 0.222, 0.333, 0.444, 0.556, 0.667, 0.778, 0.889, 1)) # cut the data into levels
+levels(cont$ccp_weights) = c("(0, 0.111)", "(0.111, 0.222)", "(0.222, 0.333)", "(0.333, 0.444)", "(0.444, 0.556)", "(0.556, 0.667)", "(0.667, 0.778)", "(0.778, 0.889)", "(0.889, 1)") # create a factor for counties with and without acres
+
+disc <- ccps[ccps$weighted_ccp == 1 | is.nan(ccps$weighted_ccp),] # separate discrete values
+disc$ccp_weights <- as.character(disc$weighted_ccp)
+new_ccps <- rbind(cont, disc) # bind values back together
+#myScale <- c(brewer.pal(9, "Greens"), "#B8B8B8", "#ffa500") # make scale with RColorBrewer
+#print(myScale)
 #Iterate and create graphs
 
 years <- c(2002, 2007, 2012)
@@ -53,7 +61,7 @@ for(i in years){
       for(l in final_uses){
         
         #Subset data by each combination
-        ccps1 <- ccps[ccps$year %in% i,] # subset data by each year
+        ccps1 <- new_ccps[new_ccps$year %in% i,] # subset data by each year
         ccps1 <- ccps1[ccps1$lcc %in% j,] # subset data by lcc values
         ccps1 <- ccps1[ccps1$initial_use %in% k,] # subset data by initial use
         ccps1 <- ccps1[ccps1$final_use %in% l,] # subset data by final use
@@ -61,7 +69,7 @@ for(i in years){
         #Plot results
         ggplot(data = world) + # map US counties
           geom_sf(data=counties, aes(geometry=geom)) + geom_sf(data=ccps1, aes(fill=ccp_weights, geometry=geometry)) + # fill ccp weights
-          scale_fill_manual(values=c("0" = "#184d47", "between 0 and 1" = "#96bb7c", "1" = "#fad586")) + # set manual color scale
+          scale_fill_manual("CCP", values=c("(0, 0.111)" = "#F7FCF5", "(0.111, 0.222)" = "#E5F5E0", "(0.222, 0.333)" = "#C7E9C0", "(0.333, 0.444)" = "#A1D99B", "(0.444, 0.556)" = "#74C476", "(0.556, 0.667)" = "#41AB5D", "(0.667, 0.778)" = "#238B45", "(0.778, 0.889)" = "#006D2C", "(0.889, 1)" = "#00441B", "1" = "#ffa500", "NaN" = "#B8B8B8")) +# set manual color scale
           ggtitle(sprintf("All states in %s with LCC %s from %s to %s", toString(i), j, k, l)) + # change title
           coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE) # set coordinates to continental U.S.
         
