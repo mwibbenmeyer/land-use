@@ -39,7 +39,9 @@ measure_dists <- function(shp) {
 # Import data -------------------------------------------------------------
 
 points <- read_dta("processing_output/pointpanel_estimation_unb.dta") %>% as.data.table()
-frr_data <- read_excel("processing/net_returns/crops/FRR_FIPS.xls")
+frr_data <- read_excel("processing/net_returns/crops/FRR_FIPS.xls") %>%
+  rename(., resource_region = 'ERS resource region')
+
 
 #Collapse points data set to county-year-lcc-land use conversion level data set
 df <- points[ , total_acres := sum(acresk) , by = c('fips','year','lcc','initial_use')] %>% #Total acres in initial use in county-lcc-year
@@ -60,11 +62,9 @@ df1$initial_use <- sapply(strsplit(as.character(df1$transition),'_'), "[", 1) # 
 df1$final_use <- sapply(strsplit(as.character(df1$transition),'_'), "[", 2)
 df1$transition <- NULL
 df1 <- as.data.table(df1)
-df2 <- left_join(df1, frr_data, by = c("fips" = "County FIPS"))
-df2 <- df2[,-c("State", "stateAbbrev")]
-names(df2)[names(df2) == "ERS resource region"] <- "resource_region"
-df2 <- as.data.table(df2)
-
+df2 <- left_join(df1, frr_data, by = c("fips" = "resource_region")) %>%
+  select(-c(State, stateAbbrev)) %>%
+  as.data.table()
 
 # Function to calculate smoothed conditional choice probabilities across states ---------
 
@@ -97,13 +97,7 @@ smooth_ccps_state <- function(state,yr,lcc_value,initial,final) {
   return(df_sub)
 }
 
-###### Function to calculate smoothed conditional choice probabilities across FRR ---------
-frr = 60
-state = "AL"
-yr = 2002
-lcc_value = "1_2"
-initial = "Crop"
-final = "Other"
+# Function to calculate smoothed conditional choice probabilities across FRR ---------
 
 smooth_ccps_frr <- function(frr,yr,lcc_value,initial,final) {
   
@@ -112,15 +106,13 @@ smooth_ccps_frr <- function(frr,yr,lcc_value,initial,final) {
   
   #Import county shapefile using tidycensus - b19013_001 is arbitrarily chosen
   counties1 <- get_acs(geography = "county", year = 2010, variables = "B19013_001", geometry = TRUE)
-  counties2 <- merge(counties1, frr_data, by.x = 'GEOID', by.y = 'County FIPS', all.x = TRUE) #left_join(counties, frr_data, by = c("GEOID" = "ERS resource region"))
-  names(counties2)[names(counties2) == "ERS resource region"] <- "resource_region"
-  counties2 <- counties2[counties2$resource_region == frr,]
-  counties2[['State']] <- NULL
-  counties2[['resource_region']] <- NULL
-  #counties2 <- counties2[,-c("State", "resource_region")]
+  counties2 <- left_join(counties1, frr_data, by = c("GEOID" = "County FIPS")) %>%
+    filter(resource_region == frr) %>%
+    select(-c(State, resource_region))
 
   #Merge with conversion data frame, add NA records for missing counties
-  df_sub <- merge(df_sub, counties2, by.x = 'fips', by.y = 'GEOID', all.y = TRUE) # ???
+  df_sub <- left_join(counties2, df_sub, by = c("GEOID" = "fips")) %>%
+    as.data.table()
   df_sub <- df_sub[is.na(final_use_acres), ':=' (final_use_acres = 0,
                                                  total_acres = 0,
                                                  year = yr,
@@ -135,22 +127,19 @@ smooth_ccps_frr <- function(frr,yr,lcc_value,initial,final) {
   df_sub$final_use_acres.w <- df_sub$final_use_acres %*% weights
   df_sub$total_acres.w <- df_sub$total_acres %*% weights
   df_sub <- df_sub[ , weighted_ccp := final_use_acres.w/total_acres.w] %>%
-    .[ , c('fips','year','lcc','initial_use','final_use','weighted_ccp')]
+    .[ , c('GEOID','year','lcc','initial_use','final_use','weighted_ccp')] %>%
+    rename(., fips = GEOID)
   df_sub$lcc[is.na(df_sub$lcc)] <- lcc_value
   
   return(df_sub)
 }
 
-####
-
 # Run function over states, years, and transitions ------------------------
 
 states <- state.abb[state.abb %ni% c("AK","HI")]
-frrs <- unique(frr_data$'ERS resource region')
-#years <- unique(df1$year)[unique(df1$year) >= 2002]
-years <- 2002
-#lcc_values <- unique(df1$lcc)[unique(df1$lcc)!="0"] #Remove 0 which denotes federal use
-lcc_values <- "1_2"
+frrs <- unique(frr_data$resource_region)
+years <- unique(df1$year)[unique(df1$year) >= 2002]
+lcc_values <- unique(df1$lcc)[unique(df1$lcc)!="0"] #Remove 0 which denotes federal use
 initial_uses <- c("Crop","Forest","Urban","Other")
 final_uses <- c("Crop","Forest","Urban","Other")
 
@@ -164,17 +153,22 @@ result_state <- do.call(rbind, do.call(rbind, do.call(rbind, do.call(rbind, do.c
 
 
 result_frr <- do.call(rbind, do.call(rbind, do.call(rbind, do.call(rbind, do.call(rbind,  #Row bind to unnest results
-                                                                                  lapply(frrs, function(r)
-                                                                                    lapply(years, function(y)
-                                                                                      lapply(lcc_values, function(l)
-                                                                                        lapply(initial_uses, function(i)
-                                                                                          lapply(final_uses, function(f) smooth_ccps_frr(frr = r, yr = y, lcc_value = l, initial = i, final = f)))))))))))
+          lapply(frrs, function(r)
+            lapply(years, function(y)
+              lapply(lcc_values, function(l)
+                lapply(initial_uses, function(i)
+                  lapply(final_uses, function(f) smooth_ccps_frr(frr = r, yr = y, lcc_value = l, initial = i, final = f)))))))))))
 
-#result_state <- left_join(result_state, frr, by = c("fips" = "County FIPS")) # join state smoothed data with FIPS codes
-result_x <- result_state[is.nan(result_state$weighted_ccp),] # trim to NaNs
-result_state <= result_state[!is.nan(result_state$weighted_ccp),]
-result_x <- left_join(result_x, result_frr, by = c("fips", "year", "lcc", "initial_use", "final_use"))
-result <- rbind(result_state, result_x)
-result <- result[!is.nan(result$weighted_ccp),]
+# add FRR smoothing to counties without state smoothing
+result_x <- result_state[is.nan(result_state$weighted_ccp),] %>% # trim to NaNs
+  left_join(., result_frr, by = c("fips", "year", "lcc", "initial_use", "final_use")) %>% # join with cc
+  rename(., weighted_ccp = weighted_ccp.y) %>%
+  select(-c(weighted_ccp.x))
+result_state1 <- result_state[!is.nan(result_state$weighted_ccp),]
+result <- rbind(result_state1, result_x)
+#result1 <- result[is.nan(result$weighted_ccp),]
 
+
+write.csv(result_state, "processing/ccps_state.csv")
+write.csv(result_frr, "processing/ccps_frr.csv")
 write.csv(result, "processing/ccps_new.csv") # write csv
