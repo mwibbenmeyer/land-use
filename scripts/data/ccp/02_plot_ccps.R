@@ -25,7 +25,7 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 setwd("../../../")
 
 #Load CCPs and world data
-result <- read.csv("processing/ccps.csv") # load CCP data 
+result <- read.csv("processing/ccp/ccps.csv") # load CCP data 
 result$fips <- str_pad(result$fips, 5, pad = "0") # retain leading zeros in FIPS codes
 world <- ne_countries(scale = "medium", returnclass = "sf") # load world data
 class(world)
