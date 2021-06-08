@@ -62,7 +62,7 @@ df1$initial_use <- sapply(strsplit(as.character(df1$transition),'_'), "[", 1) # 
 df1$final_use <- sapply(strsplit(as.character(df1$transition),'_'), "[", 2)
 df1$transition <- NULL
 df1 <- as.data.table(df1)
-df2 <- left_join(df1, frr_data, by = c("fips" = "resource_region")) %>%
+df2 <- left_join(df1, frr_data, by = c("fips" = "County FIPS")) %>%
   select(-c(State, stateAbbrev)) %>%
   as.data.table()
 
@@ -160,15 +160,22 @@ result_frr <- do.call(rbind, do.call(rbind, do.call(rbind, do.call(rbind, do.cal
                 lapply(final_uses, function(f) smooth_ccps_frr(frr = r, yr = y, lcc_value = l, initial = i, final = f)))))))))))
 
 # add FRR smoothing to counties without state smoothing
-result_x <- result_state[is.nan(result_state$weighted_ccp),] %>% # trim to NaNs from state smoothing
+result_frr1 <- result_state[is.na(result_state$weighted_ccp),] %>% # trim to NaNs from state smoothing - NAs after loading data
   left_join(., result_frr, by = c("fips", "year", "lcc", "initial_use", "final_use")) %>% # join with new frr smoothed data
   rename(., weighted_ccp = weighted_ccp.y) %>%
-  select(-c(weighted_ccp.x))
-result_state1 <- result_state[!is.nan(result_state$weighted_ccp),]
-result <- rbind(result_state1, result_x) # bind results together
-#result1 <- result[is.nan(result$weighted_ccp),]
+  select(-c(weighted_ccp.x)) %>%
+  add_column(data_source = "FRR") %>% # add indicator variable for data from FRR smoothing
+  mutate(data_source = replace(data_source, is.na(weighted_ccp), "NA")) # add indicator for data with NAs
+df3 <- df2 %>%
+  filter(year >= 2002) # trim original data to years since 2002
+result_observed <- result_state %>%
+  right_join(., df3, by = c("fips", "year", "lcc", "initial_use", "final_use")) %>% # trim state smoothing to intitial data observed
+  select(-c(total_acres, final_use_acres, resource_region)) %>%
+  add_column(data_source = "Own") %>% # indicator variable for observed data
+  filter(!is.na(weighted_ccp))
+result_state1 <- anti_join(result_state, result_observed, by= c("fips", "year", "lcc", "initial_use", "final_use")) %>%
+  .[!is.na(result_state1$weighted_ccp),] %>%
+  add_column(data_source = "State") # indicator variable for data from state smoothing
+result <- rbind(result_state1, result_observed, result_frr1) # bind results together
 
-
-write.csv(result_state, "processing/ccps_state.csv")
-write.csv(result_frr, "processing/ccps_frr.csv")
-write.csv(result, "processing/ccps.csv") # write csv
+write.csv(result, "processing/ccp/ccps.csv") # write csv
