@@ -44,10 +44,10 @@ frr_data <- read_excel("processing/net_returns/crops/FRR_FIPS.xls") %>%
 
 
 #Collapse points data set to county-year-lcc-land use conversion level data set
-df <- points[ , total_acres := sum(acresk) , by = c('fips','year','lcc','initial_use')] %>% #Total acres in initial use in county-lcc-year
-  .[ , final_use_acres := sum(acresk), by = c('fips','year','lcc','initial_use','final_use')] %>% #Total acres in final use
+df <- points[ , initial_acres := sum(acresk) , by = c('fips','year','lcc','initial_use')] %>% #Total acres in initial use in county-lcc-year
+  .[ , final_acres := sum(acresk), by = c('fips','year','lcc','initial_use','final_use')] %>% #Total acres in final use
   .[ , lapply(.SD, mean, na.rm = TRUE), #Collapse by county-lcc-year-initial use-final-use
-     .SDcols = c('total_acres','final_use_acres'), by = c('fips','year','lcc','initial_use','final_use')] %>%
+     .SDcols = c('initial_acres','final_acres'), by = c('fips','year','lcc','initial_use','final_use')] %>%
   merge(., points[ , .(stateAbbrev = first(stateAbbrev)), by = 'fips'], by = "fips") #Merge state abbreviation back in
 
 #Group some variables
@@ -66,36 +66,58 @@ df2 <- left_join(df1, frr_data, by = c("fips" = "County FIPS")) %>%
   select(-c(State, stateAbbrev)) %>%
   as.data.table()
 
-# Function to calculate smoothed conditional choice probabilities across states ---------
+# Function to calculate smoothed conditional choice probabilities within states ---------
 
 smooth_ccps_state <- function(state,yr,lcc_value,initial,final) {
+  
+  state = "OR"
+  year = 2002
+  lcc_value = "3_4"
+  initial = "Crop"
+  final = "Forest"
   
   #Subset to a single initial-final use pair and by county-lcc-year. Will have one record for each county in state
   df_sub <- df1[stateAbbrev == state & year == yr & lcc == lcc_value & initial_use == initial & final_use == final]
   
+  #Calculate initial acres in each fips (even those with no transition to final use)
+  df_initial <- df1[stateAbbrev == state & year == yr & lcc == lcc_value & initial_use == initial, 
+                    .(initial_acres = mean(initial_acres)),
+                    fips]
+  
   #Import county shapefile using tidycensus - b19013_001 is arbitrarily chosen
-  counties <- get_acs(state = state, geography = "county", year = 2010, variables = "B19013_001", geometry = TRUE)
+  counties <- get_acs(state = state, geography = "county", year = 2010, variables = "B19013_001", geometry = TRUE) %>%
+                select(-c("variable","estimate","moe"))
   #Merge with conversion data frame, add NA records for missing counties
   df_sub <- merge(df_sub, counties, by.x = 'fips', by.y = 'GEOID', all.y = TRUE)
-  df_sub <- df_sub[is.na(final_use_acres), ':=' (final_use_acres = 0,
-                                                 total_acres = 0,
-                                                 year = yr,
-                                                 initial_use = initial,
-                                                 final_use = final), ]
+  #Merge with conversion data frame, add NA records for counties with no initial acres
+  df_sub <- merge(df_sub[,"initial_acres" := NULL], df_initial, by = 'fips', all.x = TRUE)
+  #Replace NA values from merged missing counties
+  df_sub <- df_sub[is.na(final_acres), ':=' (final_acres = 0,
+                                               year = yr,
+                                               stateAbbrev = state,
+                                               lcc = lcc_value,
+                                               initial_use = initial,
+                                               final_use = final), ]
+  df_sub <- df_sub[is.na(initial_acres), ':=' (initial_acres = 0)]
+  
   
   #Create weighting matrix based on distances among counties
   dists <- measure_dists(counties) #Distances among county centroids
   weights <- apply(dists, c(1,2), function(x) (1+1*x/1000)^(-2)) #Weights based on Scott (2014)
   
   #Calculate smoothed CCPs using weighting matrix
-  df_sub$final_use_acres.w <- df_sub$final_use_acres %*% weights
-  df_sub$total_acres.w <- df_sub$total_acres %*% weights
-  df_sub <- df_sub[ , weighted_ccp := final_use_acres.w/total_acres.w] %>%
+  df_sub$final_acres.w <- df_sub$final_acres %*% weights
+  df_sub$initial_acres.w <- df_sub$initial_acres %*% weights
+  df_sub <- df_sub[ , weighted_ccp := final_acres.w/initial_acres.w]  %>%
     .[ , c('fips','year','lcc','initial_use','final_use','weighted_ccp')]
-  df_sub$lcc[is.na(df_sub$lcc)] <- lcc_value
   
   return(df_sub)
 }
+
+
+shp <- merge(df_sub %>% as_tibble(), counties, by.x = "fips", by.y = "GEOID")
+ggplot() + geom_sf(data = shp, aes(geometry = geometry, fill = weighted_ccp))
+
 
 # Function to calculate smoothed conditional choice probabilities across FRR ---------
 
