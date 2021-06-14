@@ -16,8 +16,7 @@ pacman::p_load(tidyverse,
                foreign,
                haven,
                lwgeom,
-               RColorBrewer
-               )
+               RColorBrewer)
 theme_set(theme_bw())
 
 # Set working directory to land-use

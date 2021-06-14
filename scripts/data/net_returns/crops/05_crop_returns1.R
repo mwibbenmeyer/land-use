@@ -12,7 +12,9 @@ pacman::p_load(tidyverse,
                data.table,
                haven,
                dplyr,
-               data.table)
+               data.table,
+               readxl,
+               zoo)
 
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) # sets directory to the current directory
 setwd('../../../..') # relative paths to move directory to the root project directory
@@ -69,27 +71,26 @@ smooth_yields <- function(farm_resource_region, yr, crp) { #FRR, yr, crop
   
   #Calculate smoothed CCPs using weighting matrix
   df_sub$yield.w <- df_sub$yield %*% weights
+  #df_sub$total_acres.w <- df_sub$total_acres %*% weights
   df_sub <- df_sub[ , weighted_yield := yield.w] %>%
     .[ , c('GEOID','year','crop','weighted_yield')] %>%
     rename(., county_fips = GEOID)
-  df_sub <- as.data.frame(df_sub)
+  #df_sub$lcc[is.na(df_sub$lcc)] <- lcc_value
   
   return(df_sub)
 }
 
 # Run function over FRR, years, and crops ------------------------
 
-#frrs <- unique(frr_data$frr)
-frrs <- c(70,60,80)
-#years <- unique(new_crop_returns$year)
-years <- c(2002,2003,2004,2005)
-#crops <- c("corn", "sorghum", "soybeans", "winter wheat", "durum wheat", "spring wheat", "barley", "oats", "rice", "upland cotton", "pima cotton") # list of crops
-crops <- c("corn", "sorghum", "soybeans")
+frrs <- unique(frr_data$frr)
+years <- unique(new_crop_returns$year)
+crops <- c("corn", "sorghum", "soybeans", "winter wheat", "durum wheat", "spring wheat", "barley", "oats", "rice", "upland cotton", "pima cotton") # list of crops
 
 yields <- do.call(rbind, do.call(rbind, do.call(rbind, do.call(rbind, do.call(rbind,  #Row bind to unnest results
                                                                                   lapply(frrs, function(r)
                                                                                     lapply(years, function(y)
                                                                                       lapply(crops, function(c) smooth_yields(farm_resource_region = r, yr = y, crp = c)))))))))
+
 
 # load NRI acres planted data to calculate government payments per acre
 
@@ -101,8 +102,33 @@ new_crop_returns3 <- new_crop_returns[, c("county_fips", "year", "govt_payments"
 new_crop_returns3 <- aggregate( . ~ county_fips + year , data = new_crop_returns3, sum) %>% # sum for total government payments per county
   left_join(., govt_acres, by = c("county_fips" = "fips", "year")) %>% # merge acres and payments data
   add_column(payments_acres = .$govt_payments/.$acresk) %>% # calculate govt payments per acre of planted crops
-  .[, c("county_fips", "year", "payments_acres")]# trim to relevant columns
-new_crop_returns <- left_join(x = new_crop_returns, y = new_crop_returns3, by = c("county_fips", "year")) %>% # merge with main data
+  .[, c("county_fips", "year", "payments_acres")] # trim to relevant columns
+
+# linearly interpolate govt payments/acre for years outside census
+
+county_fips <- na.omit(data.frame(county_fips = unique(new_crop_returns3[,c("county_fips")])))
+new_crop_returns4 <- data.frame(county_fips = rep(county_fips$county_fips, each = 19)) # 19 years of data
+years = c(2002:2020) # list of years
+new_crop_returns4$year <- rep(years, times = 2990) # repeat sequence of years for each crop in each FIPS code
+new_crop_returns4 <- left_join(x = new_crop_returns4, y = new_crop_returns3, by = c("county_fips", "year")) # join complete year dataframe to census year dataframe
+
+#fitmodel = new_crop_returns4 %>% group_by(county_fips) %>% do(model = lm(payments_acres ~ year, data = new_crop_returns4))
+left_join_NA <- function(x, y, ...) {
+  left_join(x = x, y = y, by = ...) %>% 
+    mutate_each(funs(replace(., which(is.na(.)), 1)))
+}
+
+new_crop_returns5
+
+
+#new_crop_returns4$pred1 <- predict(lm(payments_acres ~ poly(year, 2), data=new_crop_returns4))
+  
+
+new_crop_returns4 <- new_crop_returns4 %>%
+  group_by(county_fips) %>%
+  mutate(payment_acres = na.approx(payments_acres, na.rm = FALSE)) # linear interpolation
+
+new_crop_returns <- left_join(x = new_crop_returns, y = new_crop_returns3, by = c("county_fips", "year")) # %>% # merge with main data
   add_column(returns = (.$price - .$cost)*.$yield) %>% # calculate returns
   add_column(actual_returns = pmax(.$payments_acres, .$returns, na.rm = TRUE)) # find the returns value from the price vs. govt payments
 
