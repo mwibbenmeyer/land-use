@@ -37,19 +37,25 @@ ccps <- left_join(x = result, y = fips_codes, by = c("fips" = "county_fips")) # 
 ccps <- merge(counties, ccps, by = "ID") # join by geo ID
 
 #Split into discrete and continuous values
-cont <- ccps[!(ccps$weighted_ccp == 1 | is.nan(ccps$weighted_ccp)) ,] # separate continuous values
-cont$ccp_weights <- cut((cont$weighted_ccp), breaks=c(0, 0.111, 0.222, 0.333, 0.444, 0.556, 0.667, 0.778, 0.889, 1)) # cut the data into levels
+cont <- ccps[!(ccps$weighted_ccp >= 1 | is.na(ccps$weighted_ccp)) ,] # separate continuous values
+cont$ccp_weights <- cut((cont$weighted_ccp), breaks=c(-1, 0.111, 0.222, 0.333, 0.444, 0.556, 0.667, 0.778, 0.889, 1)) # cut the data into levels
 levels(cont$ccp_weights) = c("(0, 0.111)", "(0.111, 0.222)", "(0.222, 0.333)", "(0.333, 0.444)", "(0.444, 0.556)", "(0.556, 0.667)", "(0.667, 0.778)", "(0.778, 0.889)", "(0.889, 0.999)") # create new scale
 
-disc <- ccps[ccps$weighted_ccp == 1 | is.nan(ccps$weighted_ccp),] # separate discrete values
-disc$ccp_weights <- as.character(disc$weighted_ccp)
+disc <- ccps[ccps$weighted_ccp >= 1 | is.na(ccps$weighted_ccp),] # separate discrete values
+#disc$ccp_weights <- as.character(is.na(disc$weighted_ccp))
+disc$ccp_weights[is.na(disc$weighted_ccp)] <- NA
+disc$ccp_weights[disc$weighted_ccp >= 1] <- "1 or greater"
 new_ccps <- rbind(cont, disc) # bind values back together
 
 #Iterate and create graphs
 years <- c(2002, 2007, 2012)
+#years <- 2002
 lcc_values <- c("1_2", "3_4", "5_6", "7_8")
+#lcc_values <- "3_4"
 initial_uses <- c("Crop", "Forest", "Urban", "Other")
+#initial_uses <- "Crop"
 final_uses <- c("Crop", "Forest", "Urban", "Other")
+#final_uses <- "Forest"
   
 rm(i, j, k, l)
 for(i in years){
@@ -66,7 +72,7 @@ for(i in years){
         #Plot results
         ggplot(data = world) + # map US counties
           geom_sf(data=counties, aes(geometry=geom)) + geom_sf(data=ccps1, aes(fill=ccp_weights, geometry=geometry)) + # fill ccp weights
-          scale_fill_manual("CCP", values=c("(0, 0.111)" = "#91d885", "(0.111, 0.222)" = "#7fc374", "(0.222, 0.333)" = "#6eae64", "(0.333, 0.444)" = "#5c9954", "(0.444, 0.556)" = "#4c8544", "(0.556, 0.667)" = "#3b7235", "(0.667, 0.778)" = "#2b5f26", "(0.778, 0.889)" = "#1b4d18", "(0.889, 0.999)" = "#093b09", "1" = "#d29b00", "NaN" = "#B8B8B8")) + # set manual color scale
+          scale_fill_manual("CCP", values=c("(0, 0.111)" = "#91d885", "(0.111, 0.222)" = "#7fc374", "(0.222, 0.333)" = "#6eae64", "(0.333, 0.444)" = "#5c9954", "(0.444, 0.556)" = "#4c8544", "(0.556, 0.667)" = "#3b7235", "(0.667, 0.778)" = "#2b5f26", "(0.778, 0.889)" = "#1b4d18", "(0.889, 0.999)" = "#093b09", "1 or greater" = "#d29b00", "NA" = "#B8B8B8")) + # set manual color scale
           ggtitle(sprintf("All states in %s with LCC %s from %s to %s", toString(i), j, k, l)) + # change title
           coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE) # set coordinates to continental U.S.
         
