@@ -69,11 +69,11 @@ df2 <- left_join(df1, frr_data, by = c("fips" = "County FIPS")) %>%
 
 smooth_ccps_state <- function(state,yr,lcc_value,initial,final) {
 
-  # state = "CA"
-  # yr = 2002
-  # lcc_value = "3_4"
-  # initial = "Other"
-  # final = "Other"
+  state = "AZ"
+  yr = 2002
+  lcc_value = "3_4"
+  initial = "Other"
+  final = "Other"
 
   #Subset to a single initial-final use pair and by county-lcc-year. Will have one record for each county in state
   df_sub <- df1[stateAbbrev == state & year == yr & lcc == lcc_value & initial_use == initial & final_use == final]
