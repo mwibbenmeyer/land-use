@@ -1,0 +1,21 @@
+\documentclass{article}[11pt]
+
+\usepackage[letterpaper, margin=1.25in]{geometry}
+\usepackage{booktabs}
+\usepackage[singlelinecheck=false]{caption}\usepackage{amsmath}
+\usepackage{array}
+\usepackage{threeparttable}
+
+\setlength\heavyrulewidth{0.25ex}
+
+\newcommand\T{\rule{0pt}{2.6ex}}       % Top strut for tables
+\newcommand\doubleT{\rule{0pt}{3.6ex}}       % Extra top strut for tables
+\newcommand\B{\rule[-1.2ex]{0pt}{0pt}} % Bottom strut for tables
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}m{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}m{#1}}
+
+\begin{document} \centering
+
+\input{table}
+
+\end{document}
