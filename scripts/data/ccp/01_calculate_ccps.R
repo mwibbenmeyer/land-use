@@ -50,13 +50,12 @@ df <- points[ , initial_acres := sum(acresk) , by = c('fips','year','lcc','initi
   merge(., points[ , .(stateAbbrev = first(stateAbbrev)), by = 'fips'], by = "fips") #Merge state abbreviation back in
 
 #Group some variables
-# df$old_initial_use <- df$initial_use # store old uses
-# df$old_final_use <- df$final_use
 df$initial_use[df$initial_use == "Pasture" | df$initial_use == "Range" | df$initial_use == "CRP"] <- "Other" # group together uncommon uses
 df$final_use[df$final_use == "Pasture" | df$final_use == "Range" | df$final_use == "CRP"] <- "Other"
+df <- df[ , initial_acres := sum(initial_acres), by = list(fips, year, lcc, initial_use)]
 df$transition <- paste(df$initial_use, df$final_use, sep="_") # concatenate initial and final uses to create transition class
-df1 <- df[, c("initial_use","final_use"):=NULL] %>% # aggregate total acres and final use acres for other land uses
-  .[, .(initial_acres = sum(initial_acres), final_acres = sum(final_acres)), by = list(fips, year, lcc, transition, stateAbbrev)]
+df1 <- df[, c("initial_use","final_use"):=NULL] #%>% # aggregate total acres and final use acres for other land uses
+df1 <- df1[, .(final_acres = sum(final_acres)), by = list(fips, year, lcc, transition, initial_acres, stateAbbrev)]
 df1$initial_use <- sapply(strsplit(as.character(df1$transition),'_'), "[", 1) # split concatenated transition
 df1$final_use <- sapply(strsplit(as.character(df1$transition),'_'), "[", 2) 
 df1[,transition:=NULL]
@@ -68,8 +67,8 @@ df2 <- left_join(df1, frr_data, by = c("fips" = "County FIPS")) %>%
 # Function to calculate smoothed conditional choice probabilities within states ---------
 
 smooth_ccps_state <- function(state,yr,lcc_value,initial,final) {
-# 
-  # state = "CA"
+
+  # state = "AZ"
   # yr = 2002
   # lcc_value = "3_4"
   # initial = "Other"
@@ -113,10 +112,8 @@ smooth_ccps_state <- function(state,yr,lcc_value,initial,final) {
   return(df_sub)
 }
 
-
 # shp <- merge(df_sub %>% as_tibble(), counties, by.x = "fips", by.y = "GEOID")
 # ggplot() + geom_sf(data = shp, aes(geometry = geometry, fill = weighted_ccp))
-
 
 # Function to calculate smoothed conditional choice probabilities across FRR ---------
 
@@ -201,41 +198,27 @@ result_frr <- do.call(rbind, do.call(rbind, do.call(rbind, do.call(rbind, do.cal
 
 # Add original and smoothed CCPs together and label the data source ------------
 
-result_own <- mutate(df2, weighted_ccp = final_acres/initial_acres) %>% # calculate CCP for given values
-  add_column(data_source = "Own") %>%
-  filter(year >= 2002) %>%
-  select(-c(initial_acres, final_acres, resource_region))
-result_state1 <- anti_join(result_state, result_own, by= c("fips", "year", "lcc", "initial_use", "final_use"))# %>%
-  #.[!is.nan(result_state1$weighted_ccp),] %>%
-  #add_column(data_source = "State") # indicator variable for data from state smoothing
-result_frr1 <- result_state1[is.nan(result_state1$weighted_ccp),] %>% # trim to NaNs from state smoothing - NAs after loading data
+result_frr1 <- result_state[is.nan(result_state$weighted_ccp),] %>% # trim to NaNs from state smoothing - NAs after loading data
   left_join(., result_frr, by = c("fips", "year", "lcc", "initial_use", "final_use")) %>% # join with new frr smoothed data
   rename(., weighted_ccp = weighted_ccp.y) %>%
   select(-c(weighted_ccp.x)) %>%
-  add_column(data_source = "FRR") %>% # add indicator variable for data from FRR smoothing
-  mutate(data_source = replace(data_source, is.na(weighted_ccp), "NA")) # add indicator for data with NAs
+  add_column(data_source = "FRR") #%>% # add indicator variable for data from FRR smoothing
+  #mutate(data_source = replace(data_source, is.na(weighted_ccp), "NA")) # add indicator for data with NAs
+df3 <- df2 %>%
+  filter(year >= 2002) # trim original data to years since 2002
+result_own <- result_state %>%
+  right_join(., df3, by = c("fips", "year", "lcc", "initial_use", "final_use")) %>% # trim state smoothing to intitial data observed
+  select(-c(initial_acres, final_acres, resource_region)) %>%
+  add_column(data_source = "Own") %>% # indicator variable for observed data
+  filter(!is.na(weighted_ccp))
+result_state1 <- anti_join(result_state, result_own, by= c("fips", "year", "lcc", "initial_use", "final_use"))
 result_state1 <- result_state1[!is.nan(result_state1$weighted_ccp),] %>%
   add_column(data_source = "State") # indicator variable for data from state smoothing
-#df3 <- df2 %>%
-#  filter(year >= 2002) # trim original data to years since 2002
-# result_observed <- result_state %>%
-#   right_join(., df3, by = c("fips", "year", "lcc", "initial_use", "final_use")) %>% # trim state smoothing to intitial data observed
-#   select(-c(initial_acres, final_acres, resource_region)) %>%
-#   add_column(data_source = "Own") %>% # indicator variable for observed data
-#   filter(!is.na(weighted_ccp))
-# result_state1 <- anti_join(result_state, result_observed, by= c("fips", "year", "lcc", "initial_use", "final_use")) %>%
-#   .[!is.nan(result_state1$weighted_ccp),] %>%
-#   add_column(data_source = "State") # indicator variable for data from state smoothing
+
 result <- rbind(result_own, result_state1, result_frr1) # bind results together
 
-# counties <- get_acs(geography = "county", year = 2010, variables = "B19013_001", geometry = TRUE) %>%
-#   select(-c("variable","estimate","moe"))
-# result1 <- result[result$year == 2002 & result$lcc == "3_4" & initial_use == "Other" & final_use == "Other",]
-# shp <- merge(result1 %>% as_tibble(), counties, by.x = "fips", by.y = "GEOID")
-# ggplot() + geom_sf(data = shp, aes(geometry = geometry, fill = weighted_ccp))
-# ggsave("results/initial_descriptives/combined/map.png", width = 15, height = 8.33, dpi=96) # save map
+# write csv's
 
-# nrow(result[result$data_source == "FRR",])
 write.csv(result_state, "processing/ccp/ccps_state.csv") # write csv
 write.csv(result_frr, "processing/ccp/ccps_frr.csv") # write csv
 write.csv(result, "processing/ccp/ccps.csv") # write csv

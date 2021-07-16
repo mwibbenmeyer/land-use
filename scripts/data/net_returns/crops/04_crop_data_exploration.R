@@ -9,6 +9,8 @@
 library(tidyverse)
 library("ggplot2")
 theme_set(theme_bw())
+install.packages("usmap")
+library(usmap)
 install.packages("sf")
 library("sf")
 install.packages("rnaturalearth")
@@ -29,7 +31,14 @@ setwd('../../../..') # relative paths to move directory to the root project dire
 world <- ne_countries(scale = "medium", returnclass = "sf") # load world data
 class(world)
 counties <- st_as_sf(map("county", plot = FALSE, fill = TRUE)) # load county data
-crop_returns <- read_csv("processing/net_returns/crop_returns.csv") # load crop returns data
+crop_returns <- read_csv("processing/net_returns/crop_returns.csv") %>% # load crop returns data
+  rename(., fips = county_fips)
+
+corn_2002 <- crop_returns[crop_returns$crop == "corn" & crop_returns$year == "2002",]
+ploty <- plot_usmap(data = corn_2002, values = "acres", regions = "counties", exclude = c("AK","HI")) +
+  scale_fill_viridis_c(label = scales::comma) +
+  labs(title = "Corn in 2002", fill = "Acres")
+ggsave("results/initial_descriptives/net_returns/crops/maps/experiment.jpg")
 
 ##################################################
 ## plot missing data from crop_returns
@@ -51,7 +60,7 @@ for(i in crop) {
       geom_bar(stat="identity") + ggtitle(sprintf("Data for crop %s in year %s", i, toString(j))) +
       xlab("Returns data") + ylab("Portion of total counties with data") + ylim(0,1)
     
-    ggsave(sprintf("results/initial_descriptive/net_returns/crops/plots/%s_%s.png", i, toString(j)))
+    ggsave(sprintf("results/initial_descriptives/net_returns/crops/plots/%s_%s.png", i, toString(j)))
   }
 }
   
@@ -128,7 +137,7 @@ for(j in year) {
     ggtitle(sprintf("Counties with crop acres-planted data in %s (%s%%)", toString(j), toString(pct*100))) + # set color scale and title
     coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE) # set coordinates to continental U.S.
   
-  ggsave(sprintf("results/initial_descriptive/net_returns/crops/maps/map_%s_acres.png", toString(j)), width = 18, height = 10, dpi=96) # save map
+  ggsave(sprintf("results/initial_descriptives/net_returns/crops/maps/map_%s_acres.png", toString(j)), width = 18, height = 10, dpi=96) # save map
 }
 
 ##################################################
@@ -207,7 +216,7 @@ for(j in year_c) {
   ggsave(sprintf("results/initial_descriptives/net_returns/crops/maps/map_%s_acres_census_survey.png", toString(j)), width = 18, height = 10, dpi=96) # save map
 }
 
-getwd()
+
 # loop through crops and years to map each
 #
 # rm(i)
@@ -222,7 +231,7 @@ getwd()
 #       scale_fill_viridis_c() + ggtitle(sprintf("Acres of %s in %s", i, toString(j))) +
 #       coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE)
 #     
-#     ggsave(sprintf("results/initial_descriptive/net_returns/crops/maps/map_%s_%s_acres.png", i, toString(j)), width = 20, height = 12, dpi=96) # save map
+#     ggsave(sprintf("results/initial_descriptives/net_returns/crops/maps/map_%s_%s_acres.png", i, toString(j)), width = 20, height = 12, dpi=96) # save map
 #   }
 # }
 
