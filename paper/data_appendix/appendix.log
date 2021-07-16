@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/W32TeX) (preloaded format=pdflatex 2020.11.3)  10 MAR 2021 14:42
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/W32TeX) (preloaded format=pdflatex 2020.11.3)  15 JUL 2021 17:21
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -404,7 +404,8 @@ Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
 \Gm@layouthoffset=\dimen176
 \Gm@layoutvoffset=\dimen177
 \Gm@dimlist=\toks31
-) (./appendix.aux)
+)
+No file appendix.aux.
 \openout1 = `appendix.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 41.
@@ -423,7 +424,6 @@ LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 41.
 LaTeX Font Info:    ... okay on input line 41.
 LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 41.
 LaTeX Font Info:    ... okay on input line 41.
-
 (c:/texlive/2020/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count288
@@ -465,8 +465,6 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 LaTeX Info: Redefining \ref on input line 41.
 LaTeX Info: Redefining \pageref on input line 41.
 LaTeX Info: Redefining \nameref on input line 41.
-
-(./appendix.out) (./appendix.out)
 \@outlinefile=\write3
 \openout3 = `appendix.out'.
 
@@ -519,37 +517,106 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 
 LaTeX Warning: No \author given.
 
-[1
 
-{c:/texlive/2020/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2]
-(./appendix.bbl) 
+Package natbib Warning: Citation `scott2014' on page 1 undefined on input line 
+54.
+
+
+Package natbib Warning: Citation `scott2014' on page 1 undefined on input line 
+64.
+
+LaTeX Font Info:    Trying to load font information for U+bbm on input line 64.
+
+(c:/texlive/2020/texmf-dist/tex/latex/bbm-macros/ubbm.fd
+File: ubbm.fd 1999/03/15 V 1.2 Font definition for bbm font - TH
+) [1
+
+{c:/texlive/2020/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
+
+Package natbib Warning: Citation `mihiarlewis' on page 2 undefined on input lin
+e 79.
+
+
+Package natbib Warning: Citation `mihiar2017' on page 2 undefined on input line
+ 79.
+
+
+Package natbib Warning: Citation `mihiarlewis' on page 2 undefined on input lin
+e 79.
+
+
+Package natbib Warning: Citation `lubowski2006' on page 2 undefined on input li
+ne 86.
+
+
+Package natbib Warning: Citation `mihiarlewis' on page 2 undefined on input lin
+e 86.
+
+[2] (./appendix.bbl [3])
+
+Package lastpage Warning: Rerun to get the references right on input line 113.
+
+
 AED: lastpage setting LastPage
-[3] (./appendix.aux)
-Package rerunfilecheck Info: File `appendix.out' has not changed.
-(rerunfilecheck)             Checksum: C68A39DA52532F82DD8B52EF0A8AFDCB;452.
+[4]
+
+Package natbib Warning: There were undefined citations.
+
+(./appendix.aux
+
+Package natbib Warning: Citation(s) may have changed.
+(natbib)                Rerun to get citations correct.
+
+)
+
+Package rerunfilecheck Warning: File `appendix.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `appendix.out':
+(rerunfilecheck)             Before: <no file>
+(rerunfilecheck)             After:  C68A39DA52532F82DD8B52EF0A8AFDCB;452.
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
  ) 
 Here is how much of TeX's memory you used:
- 8898 strings out of 479485
- 132626 string characters out of 5875916
- 556882 words of memory out of 5000000
- 25693 multiletter control sequences out of 15000+600000
- 545643 words of font info for 69 fonts, out of 8000000 for 9000
+ 8914 strings out of 479485
+ 133120 string characters out of 5875916
+ 559462 words of memory out of 5000000
+ 25702 multiletter control sequences out of 15000+600000
+ 546611 words of font info for 75 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 66i,10n,73p,1179b,342s stack positions out of 5000i,500n,10000p,200000b,80000s
-pdfTeX warning (dest): name{Hfootnote.1} has been referenced but does not exi
+ 66i,12n,73p,1245b,451s stack positions out of 5000i,500n,10000p,200000b,80000s
+pdfTeX warning (dest): name{Hfootnote.2} has been referenced but does not exi
 st, replaced by a fixed one
 
-<c:/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb><c:/texli
-ve/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><c:/texlive/2020/t
-exmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/texlive/2020/texmf-dist/
-fonts/type1/public/amsfonts/cm/cmr12.pfb><c:/texlive/2020/texmf-dist/fonts/type
-1/public/amsfonts/cm/cmr6.pfb><c:/texlive/2020/texmf-dist/fonts/type1/public/am
-sfonts/cm/cmr8.pfb><c:/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/c
-mr9.pfb><c:/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb>
-Output written on appendix.pdf (3 pages, 107805 bytes).
+pdfTeX warning (dest): name{Hfootnote.1} has been referenced but does not exist
+, replaced by a fixed one
+
+ <c:/Users/Matt/.texlive2020/texmf-var/fonts/pk/ljfour/public/bbm/bbm9.600pk><c
+:/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb><c:/texlive
+/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><c:/texlive/2020/tex
+mf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb><c:/texlive/2020/texmf-dist/fo
+nts/type1/public/amsfonts/cmextra/cmex9.pfb><c:/texlive/2020/texmf-dist/fonts/t
+ype1/public/amsfonts/cm/cmmi10.pfb><c:/texlive/2020/texmf-dist/fonts/type1/publ
+ic/amsfonts/cm/cmmi5.pfb><c:/texlive/2020/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmmi6.pfb><c:/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8
+.pfb><c:/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb><c:/t
+exlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/texlive/202
+0/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb><c:/texlive/2020/texmf-di
+st/fonts/type1/public/amsfonts/cm/cmr6.pfb><c:/texlive/2020/texmf-dist/fonts/ty
+pe1/public/amsfonts/cm/cmr8.pfb><c:/texlive/2020/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmr9.pfb><c:/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm
+/cmsy10.pfb><c:/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pf
+b><c:/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb><c:/texl
+ive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb><c:/texlive/2020/t
+exmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb><c:/texlive/2020/texmf-dist
+/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
+Output written on appendix.pdf (4 pages, 200457 bytes).
 PDF statistics:
- 103 PDF objects out of 1000 (max. 8388607)
- 89 compressed objects within 1 object stream
- 17 named destinations out of 1000 (max. 500000)
- 57 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 133 PDF objects out of 1000 (max. 8388607)
+ 104 compressed objects within 2 object streams
+ 21 named destinations out of 1000 (max. 500000)
+ 1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
