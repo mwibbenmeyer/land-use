@@ -30,7 +30,25 @@ new_crop_returns <- read_csv("processing/net_returns/new_crop_returns.csv") %>% 
   filter(., year <= 2012) %>% # trim to years 2002-2012
   as.data.table()
 frr_data <- read_excel("processing/net_returns/crops/FRR_FIPS.xls") %>% # load farm resource region to FIPS data
-  rename(., frr = 'ERS resource region') # renmae column
+  rename(., frr = 'ERS resource region') # rename column
+
+###
+cost_df <- new_crop_returns[!is.na(new_crop_returns$cost),]
+price <- new_crop_returns[!is.na(new_crop_returns$price),]
+price_and_cost <- cost_df[!is.na(cost_df$price),]
+price_and_cost_acres <- price_and_cost[!is.na(price_and_cost$acres),]
+acres <- new_crop_returns[!is.na(new_crop_returns$acres),]
+cost <- data.frame(table(new_crop_returns$cost))
+new_crop_returns$delta <- (new_crop_returns$price - new_crop_returns$cost)
+oats_boi <- new_crop_returns %>%
+  filter(crop == "oats")
+mean(oats_boi[["delta"]], na.rm = TRUE)
+mean(new_crop_returns[["payment_acres"]], na.rm = TRUE)
+
+total_acres <-price_and_cost_acres %>%
+  filter(year == 2012) %>%
+  summarize(total_acres = sum(acres))
+###
 
 ##################################################
 ## returns equation
@@ -93,10 +111,12 @@ yields <- do.call(rbind, do.call(rbind, do.call(rbind,  # row bind to unnest res
 
 yields1 <- yields %>% # retain original yield data
   filter(yield>0) %>%
-  select(., -weighted_yield)
+  select(., -weighted_yield) %>%
+  add_column(smoothed = "no") # add indicator of original data
 yields2 <- anti_join(yields, yields1, by = c("county_fips", "crop", "year")) %>% # fill in remaining yields with smoothed values
   mutate(yield = weighted_yield) %>%
-  select(., -weighted_yield)
+  select(., -weighted_yield) %>%
+  add_column(smoothed = "yes") # add indicator of smoothed data
 yields3 <- rbind(yields1, yields2) # bind original yields and smoothed yields
 new_crop_returns <- merge(new_crop_returns, yields3, by=c('county_fips','state_fips','frr','crop','year','price','cost','acres','acres_c','govt_payments','state','state_code','state_name','county_code','county','ID'), all.x = TRUE) %>%
   rename(., yield = yield.y) %>% # add new yields to original dataframe
@@ -106,35 +126,49 @@ new_crop_returns <- merge(new_crop_returns, yields3, by=c('county_fips','state_f
 
 govt_acres <- read_dta("processing_output/pointpanel_estimation_unb.dta") %>% # load NRI data
   as.data.table() %>%
-  .[, c("fips", "year", "acresk")] %>% # trim to relevant columns
-  group_by(., fips, year) %>% summarise(acresk = sum(acresk)) # sum for total acres planted per county per year
+  filter(initial_use == "Crop") %>%
+  .[, c("fips", "year", "acresk")] # trim to relevant columns
+govt_acres1 <- govt_acres[, .(acresk = sum(acresk)), by = list(fips, year)] # aggregate to sum acres
+govt_acres1$acres_nri <- govt_acres1$acresk*1000
+govt_acres1 <- select(govt_acres1, -acresk)
+  #group_by(., fips, year) %>% summarise(acresk = sum(acresk)) # sum for total acres planted per county per year
 new_crop_returns1 <- new_crop_returns[, c("county_fips", "year", "govt_payments")] # trim
-new_crop_returns1 <- aggregate( . ~ county_fips + year , data = new_crop_returns1, sum) %>% # sum for total government payments per county
-  left_join(., govt_acres, by = c("county_fips" = "fips", "year")) %>% # merge acres and payments data
-  add_column(payments_acres = .$govt_payments/.$acresk) %>% # calculate govt payments per acre of planted crops
+new_crop_returns1 <- aggregate( . ~ county_fips + year , data = new_crop_returns1, mean) %>% # average for total government payments per county
+  left_join(., govt_acres1, by = c("county_fips" = "fips", "year")) #%>% # merge acres and payments data
+  add_column(payments_acres = .$govt_payments/.$acres) %>% # calculate govt payments per acre of planted crops
   .[, c("county_fips", "year", "payments_acres")] # trim to relevant columns
+  
+########## plot map of gov returns
+names(new_crop_returns1)[names(new_crop_returns1) == "county_fips"] <- "fips"
+plot_usmap(data = new_crop_returns1, values = "acres_nri", color = "grey40", size=0.2, regions = "counties", exclude = c("AK","HI")) +
+  scale_fill_viridis_c(label = scales::dollar_format()) +
+  labs(title = "Mean crop returns without government payments for 2002-2012", fill = "Returns/acre ($)")
+ggsave("results/initial_descriptives/net_returns/crops/crop_gov_payments.jpg") # save map
 
+  
+  
 # linearly interpolate govt payments/acre for years outside census -------------
 
 # create data frame with all years
 county_fips <- na.omit(data.frame(county_fips = unique(new_crop_returns[,c("county_fips")])))
 new_crop_returns2 <- data.frame(county_fips = rep(county_fips$county_fips, each = 11)) # 11 years of data
 years = c(2002:2012) # list of years
-new_crop_returns2$year <- rep(years, times = 3112) # repeat sequence of years for each crop in each FIPS code
+new_crop_returns2$year <- rep(years, times = 3113) # repeat sequence of years for each crop in each FIPS code
 new_crop_returns2 <- left_join(x = new_crop_returns2, y = new_crop_returns1, by = c("county_fips", "year")) # join complete year dataframe to census year dataframe
 
 # create and join interpolated data
 new_crop_returns2 <- new_crop_returns2 %>%
   group_by(county_fips) %>%
   mutate(payment_acres = na.approx(payments_acres, na.rm = FALSE)) # linear interpolation
-new_crop_returns <- left_join(x = new_crop_returns, y = new_crop_returns2, by = c("county_fips", "year")) #%>% # merge with main data
+new_crop_returns <- left_join(x = new_crop_returns, y = new_crop_returns2, by = c("county_fips", "year")) %>% # merge with main data
+  select(-c(payments_acres))
 
 # calculate crop returns per acre  ---------------------------------------------
 
 new_crop_returns$return = (new_crop_returns$price - new_crop_returns$cost)*new_crop_returns$yield # (price - cost)*yield = returns/acre
-new_crop_returns$returns <- rowSums(cbind(new_crop_returns$return, new_crop_returns$payment_acres), na.rm=TRUE) # add government payments/acre
-new_crop_returns = subset(new_crop_returns, select = -c(payments_acres,return))
-
+new_crop_returns$returns_gov <- rowSums(cbind(new_crop_returns$return, new_crop_returns$payment_acres), na.rm=TRUE) # add government payments/acre
+#new_crop_returns = subset(new_crop_returns, select = -c(payments_acres,return))
+#new_crop_returns$returns_gov
 
 ##################################################
 ## weighted average of acres planted for each crop in a farm resource region/state for a given year
@@ -180,7 +214,7 @@ state_acres <- left_join(x = state_acres, y = total_acres, by = c("state_fips", 
 state_acres$weight <- state_acres$state_acres/state_acres$total_acres # calculate weights
 new_crop_returns <- left_join(x = new_crop_returns, y = state_acres, by = c("state_fips", "year", "crop")) # merge crop data frame with weights
 new_crop_returns[new_crop_returns == 0.0000000000] <- NA # remove weights for counties with none
-new_crop_returns <- new_crop_returns[, c("county_fips", "state_fips", "frr", "crop", "year", "price", "cost", "yield", "acres", "acres_c", "govt_payments", "state", "state_name", "county", "ID", "returns", "payment_acres", "weight")] # trim columns
+new_crop_returns <- new_crop_returns[, c("county_fips", "state_fips", "frr", "crop", "year", "price", "cost", "yield", "acres", "acres_c", "govt_payments", "state", "state_name", "county", "ID", "return", "payment_acres", "weight")] # trim columns
 
 # add weights from FRR where no state weighting data exists --------------------
 
@@ -206,13 +240,14 @@ new_crop_returns[new_crop_returns == 0.0000000000] <- NA # add back in NAs
 
 # calculate acres weighted returns ---------------------------------------------
 
-new_crop_returns$weighted_av <- new_crop_returns$returns*new_crop_returns$weight # calculate weighted returns
+new_crop_returns$weighted_av <- new_crop_returns$return*new_crop_returns$weight # calculate weighted returns
 new_crop_returns4 <- new_crop_returns[, c("county_fips", "year", "weighted_av")] # trim to aggregate
 new_crop_returns4 <- aggregate( . ~ county_fips + year , data = new_crop_returns4, sum) # aggregate weighted returns over counties and years
 names(new_crop_returns4)[names(new_crop_returns4) == "weighted_av"] <- "weighted_returns" # rename column
 new_crop_returns <- left_join(x = new_crop_returns, y = new_crop_returns4, by = c("county_fips", "year")) # merge crop data frame with weights
 new_crop_returns = subset(new_crop_returns, select = -c(weighted_av)) # remove extra columns
+new_crop_returns$returns_gov <- new_crop_returns$returns+new
 
-write.csv(new_crop_returns, "processing/final_crop_returns.csv") # write csv
+write.csv(new_crop_returns, "processing/net_returns/final_crop_returns.csv") # write csv
 
 

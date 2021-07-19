@@ -23,9 +23,13 @@ setwd('../../../..') # relative paths to move directory to the root project dire
 crop_returns <- read_excel("processing/net_returns/crops/FRR_FIPS.xls") # load country code (FIPS) and farm resource region (FRR) data
 crop_returns <- data.frame(county_fips = rep(crop_returns$`County FIPS`, each = 209), state_fips = rep(crop_returns$`State`, each = 209), frr = as.character(rep(crop_returns$`ERS resource region`, each = 209))) # 11 crops x 19 years of data = 209 rows of each county
 crop = c("corn", "sorghum", "soybeans", "winter wheat", "durum wheat", "spring wheat", "barley", "oats", "rice", "upland cotton", "pima cotton") # list of crops
-crop_returns$crop <- rep(crop, each = 19, times = 3112) # repeat crops 19 times for each FIPS code
+crop_returns$crop <- rep(crop, each = 19, times = 3113) # repeat crops 19 times for each FIPS code
 year = c(2002:2020) # list of years
-crop_returns$year <- rep(year, times = 34232) # repeat sequence of years for each crop in each FIPS code
+crop_returns$year <- rep(year, times = 34243) # repeat sequence of years for each crop in each FIPS code
+ag_regions <- read_excel("processing/net_returns/crops/AG_FIPS.xlsx") %>% # load FIPS and agricultural data for rice
+  rename(., ag_regions = "Ag region")
+crop_returns <- left_join(crop_returns, ag_regions, by = c("county_fips" = "County FIPS", "state_fips" = "State")) # join data frame with rice agricultural regions
+crop_returns$region <- ifelse(crop_returns$crop == "rice", crop_returns$ag_regions, ifelse(crop_returns != "rice", crop_returns$frr, crop_returns$ag_regions)) # make a column to help join rice regions and FRR for costs
 
 ##################################################
 ## join new data frame with crop price, cost, yield, and acres data
@@ -81,34 +85,34 @@ for(i in cropf) {
   new_crop_returns <- left_join(x = crop_returns, y = price, by = c("state_fips" = "State ANSI", "year" = "Year", "crop" = "Commodity")) # merge crop data with price
   if("price.y" %in% colnames(new_crop_returns)) {
     new_crop_returns$price <- rowSums(cbind(new_crop_returns$price.x,new_crop_returns$price.y), na.rm=TRUE) # if not the first iteration, bind the two price columns together
-    new_crop_returns <- subset(new_crop_returns, select = c(county_fips, state_fips, frr, crop, year, price, cost, yield, acres, acres_c)) # trim to only relevant columns
+    new_crop_returns <- subset(new_crop_returns, select = c(county_fips, state_fips, frr, region, crop, year, price, cost, yield, acres, acres_c)) # trim to only relevant columns
   }
   
-  new_crop_returns <- left_join(x = new_crop_returns, y = cost, by = c("frr" = "RegionId", "year" = "Year", "crop" = "Commodity")) # merge crop data with cost
+  new_crop_returns <- left_join(x = new_crop_returns, y = cost, by = c("region" = "RegionId", "year" = "Year", "crop" = "Commodity")) # merge crop data with cost
   if("cost.y" %in% colnames(new_crop_returns)) {
     new_crop_returns$cost <- rowSums(cbind(new_crop_returns$cost.x,new_crop_returns$cost.y), na.rm=TRUE) # if not the first iteration, bind the two cost columns together
-    new_crop_returns <- subset(new_crop_returns, select = c(county_fips, state_fips, frr, crop, year, price, cost, yield, acres, acres_c)) # trim to only relevant columns
+    new_crop_returns <- subset(new_crop_returns, select = c(county_fips, state_fips, frr, region, crop, year, price, cost, yield, acres, acres_c)) # trim to only relevant columns
   }
 
   new_crop_returns <- left_join(x = new_crop_returns, y = yield, by = c("county_fips" = "FIPS", "year" = "Year", "crop" = "Commodity")) # merge crop data with yield
   if("yield.y" %in% colnames(new_crop_returns)) {
     new_crop_returns$yield <- rowSums(cbind(new_crop_returns$yield.x,new_crop_returns$yield.y), na.rm=TRUE) # if not the first iteration, bind the two yield columns together
-    new_crop_returns <- subset(new_crop_returns, select = c(county_fips, state_fips, frr, crop, year, price, cost, yield, acres, acres_c)) # trim to only relevant columns
+    new_crop_returns <- subset(new_crop_returns, select = c(county_fips, state_fips, frr, region, crop, year, price, cost, yield, acres, acres_c)) # trim to only relevant columns
   }
 
   new_crop_returns <- left_join(x = new_crop_returns, y = acres, by = c("county_fips" = "FIPS", "year" = "Year", "crop" = "Commodity")) # merge crop data with acres
   if("acres.y" %in% colnames(new_crop_returns)) {
     new_crop_returns$acres <- rowSums(cbind(new_crop_returns$acres.x,new_crop_returns$acres.y), na.rm=TRUE) # if not the first iteration, bind the two acres columns together
-    new_crop_returns <- subset(new_crop_returns, select = c(county_fips, state_fips, frr, crop, year, price, cost, yield, acres, acres_c)) # trim to only relevant columns
+    new_crop_returns <- subset(new_crop_returns, select = c(county_fips, state_fips, frr, region, crop, year, price, cost, yield, acres, acres_c)) # trim to only relevant columns
   }
   
   new_crop_returns <- left_join(x = new_crop_returns, y = acres_c, by = c("county_fips" = "FIPS", "year" = "Year", "crop" = "Commodity")) # merge crop data with acres
   if("acres_c.y" %in% colnames(new_crop_returns)) {
     new_crop_returns$acres_c <- rowSums(cbind(new_crop_returns$acres_c.x,new_crop_returns$acres_c.y), na.rm=TRUE) # if not the first iteration, bind the two acres columns together
-    new_crop_returns <- subset(new_crop_returns, select = c(county_fips, state_fips, frr, crop, year, price, cost, yield, acres, acres_c)) # trim to only relevant columns
+    new_crop_returns <- subset(new_crop_returns, select = c(county_fips, state_fips, frr, crop, region, year, price, cost, yield, acres, acres_c)) # trim to only relevant columns
   }
   
-  crop_returns <- new_crop_returns[, c("county_fips", "state_fips", "frr", "crop", "year", "price", "cost", "yield", "acres", "acres_c")] # trim columns
+  crop_returns <- new_crop_returns[, c("county_fips", "state_fips", "frr", "region", "crop", "year", "price", "cost", "yield", "acres", "acres_c")] # trim columns
 
 }
 

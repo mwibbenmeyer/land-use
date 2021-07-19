@@ -18,7 +18,7 @@ setwd('../../../..') # relative paths to move directory to the root project dire
 
 corn <- read_excel("raw_data/net_returns/crops/cost/CornCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
 
-cost <- filter(corn, Item == "Total, costs listed") # select only costs ($/planted acre)
+cost <- filter(corn, Item == "Total, operating costs") # select only operating costs ($/planted acre)
 yield <- filter(corn, Item == "Yield") # select only yield (bushels/planted acre)
 new_value <- select(cost, Value)*(1/select(yield, Value)) # multiply to get new cost ($/bushel)
 cost <- cbind(cost, new_col = new_value) # add new column to data frame
@@ -32,7 +32,7 @@ write.csv(corn_cost, sprintf("%s/corn_cost.csv", dst)) # write csv
 
 sorghum <- read_excel("raw_data/net_returns/crops/cost/SorghumCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
 
-cost <- filter(sorghum, Item == "Total, costs listed") # select only costs ($/planted acre)
+cost <- filter(sorghum, Item == "Total, operating costs") # select only costs ($/planted acre)
 yield <- filter(sorghum, Item == "Yield") # select only yield (bushels/planted acre)
 new_value <- select(cost, Value)*(1/select(yield, Value)) # multiply to get new cost ($/bushel)
 cost <- cbind(cost, new_col = new_value) # add new column to data frame
@@ -44,7 +44,7 @@ write.csv(sorghum_cost, sprintf("%s/sorghum_cost.csv", dst)) # write csv
 
 soybeans <- read_excel("raw_data/net_returns/crops/cost/SoybeansCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
 
-cost <- filter(soybeans, Item == "Total, costs listed") # select only costs ($/planted acre)
+cost <- filter(soybeans, Item == "Total, operating costs") # select only costs ($/planted acre)
 yield <- filter(soybeans, Item == "Yield") # select only yield (bushels/planted acre)
 new_value <- select(cost, Value)*(1/select(yield, Value)) # multiply to get new cost ($/bushel)
 cost <- cbind(cost, new_col = new_value) # add new column to data frame
@@ -57,7 +57,7 @@ write.csv(soybeans_cost, sprintf("%s/soybeans_cost.csv", dst)) # write csv
 
 wheat <- read_excel("raw_data/net_returns/crops/cost/WheatCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
 
-cost <- filter(wheat, Item == "Total, costs listed") # select only costs ($/planted acre)
+cost <- filter(wheat, Item == "Total, operating costs") # select only costs ($/planted acre)
 yield <- filter(wheat, Item == "Yield") # select only yield (bushels/planted acre)
 new_value <- select(cost, Value)*(1/select(yield, Value)) # multiply to get new cost ($/bushel)
 cost <- cbind(cost, new_col = new_value) # add new column to data frame
@@ -76,7 +76,7 @@ write.csv(wheat_cost, sprintf("%s/spring_wheat_cost.csv", dst)) # write csv
 
 barley <- read_excel("raw_data/net_returns/crops/cost/BarleyCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
 
-cost <- filter(barley, Item == "Total, costs listed") # select only costs ($/planted acre)
+cost <- filter(barley, Item == "Total, operating costs") # select only costs ($/planted acre)
 yield <- filter(barley, Item == "Yield") # select only yield (bushels/planted acre)
 new_value <- select(cost, Value)*(1/select(yield, Value)) # multiply to get new cost ($/bushel)
 cost <- cbind(cost, new_col = new_value) # add new column to data frame
@@ -88,7 +88,7 @@ write.csv(barley_cost, sprintf("%s/barley_cost.csv", dst)) # write csv
 
 oats <- read_excel("raw_data/net_returns/crops/cost/OatsCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
 
-cost <- filter(oats, Item == "Total, costs listed") # select only costs ($/planted acre)
+cost <- filter(oats, Item == "Total, operating costs") # select only costs ($/planted acre)
 yield <- filter(oats, Item == "Yield") # select only yield (bushels/planted acre)
 new_value <- select(cost, Value)*(1/select(yield, Value)) # multiply to get new cost ($/bushel)
 cost <- cbind(cost, new_col = new_value) # add new column to data frame
@@ -100,7 +100,7 @@ write.csv(oats_cost, sprintf("%s/oats_cost.csv", dst)) # write csv
 
 rice <- read_excel("raw_data/net_returns/crops/cost/RiceCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
 
-cost <- filter(rice, Item == "Total, costs listed") # select only costs ($/planted acre)
+cost <- filter(rice, Item == "Total, operating costs") # select only costs ($/planted acre)
 yield <- filter(rice, Item == "Yield") # select only yield (bushels/planted acre)
 new_value <- select(cost, Value)*(1/select(yield, Value)) # multiply to get new cost ($/bushel)
 cost <- cbind(cost, new_col = new_value) # add new column to data frame
@@ -112,7 +112,7 @@ write.csv(rice_cost, sprintf("%s/rice_cost.csv", dst)) # write csv
 
 cotton <- read_excel("raw_data/net_returns/crops/cost/CottonCostReturn.xlsx", sheet = "Data Sheet (machine readable)") # load data
 
-cost <- filter(cotton, Item == "Total, costs listed") # select only costs ($/planted acre)
+cost <- filter(cotton, Item == "Total, operating costs") # select only costs ($/planted acre)
 yield <- filter(cotton, Item == "Yield") # select only yield (bushels/planted acre)
 new_value <- select(cost, Value)*(1/select(yield, Value)) # multiply to get new cost ($/bushel)
 cost <- cbind(cost, new_col = new_value) # add new column to data frame
